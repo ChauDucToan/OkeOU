@@ -6,6 +6,7 @@ import argparse
 DB_USER = "okeou"
 DB_HOST = "localhost"
 TARGET_PASS = "okeou"
+DB_NAME = "okedb"
 
 
 def get_db_command():
@@ -61,7 +62,7 @@ def main():
     group.add_argument("-a", "--add", action="store_true", help=f"Create or update {DB_USER}")
     group.add_argument("-r", "--remove", action="store_true", help=f"Remove {DB_USER}")
     group.add_argument("-s", "--show", action="store_true", help="Show all users")
-    group.add_argument("-c", "--create-db", metavar="DB_NAME", help="Create a new database with the given name")
+    parser.add_argument("-c", "--create-db", nargs='?', const=DB_NAME, help="Create a new database with the given name")
 
     args = parser.parse_args()
 
@@ -71,5 +72,6 @@ def main():
         remove_root()
     elif args.show:
         show_user()
-    elif args.create_db:
+
+    if args.create_db:
         create_database(args.create_db)
