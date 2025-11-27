@@ -48,6 +48,12 @@ def show_user():
     run_query("SELECT User, Host FROM mysql.user;")
 
 
+def create_database(db_name):
+    print(f"Creating database '{db_name}'...")
+    run_query(f"CREATE DATABASE IF NOT EXISTS '{db_name}' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+    print(f"Success: Database '{db_name}' ensures to exist.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Manage Database User Script")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -55,6 +61,7 @@ def main():
     group.add_argument("-a", "--add", action="store_true", help=f"Create or update {DB_USER}")
     group.add_argument("-r", "--remove", action="store_true", help=f"Remove {DB_USER}")
     group.add_argument("-s", "--show", action="store_true", help="Show all users")
+    group.add_argument("-c", "--create-db", metavar="DB_NAME", help="Create a new database with the given name")
 
     args = parser.parse_args()
 
@@ -64,7 +71,5 @@ def main():
         remove_root()
     elif args.show:
         show_user()
-
-
-if __name__ == "__main__":
-    main()
+    elif args.create_db:
+        create_database(args.create_db)
