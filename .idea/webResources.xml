@@ -5,7 +5,7 @@
       <entry url="file://$PROJECT_DIR$">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/backend/okeou/static" />
+            <path value="file://$PROJECT_DIR$/backend/static" />
           </resourceRoots>
         </entryData>
       </entry>
