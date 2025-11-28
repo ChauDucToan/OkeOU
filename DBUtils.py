@@ -51,11 +51,11 @@ def show_user():
 
 def create_database(db_name):
     print(f"Creating database '{db_name}'...")
-    run_query(f"CREATE DATABASE IF NOT EXISTS '{db_name}' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+    run_query(f"CREATE DATABASE IF NOT EXISTS `{db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
     print(f"Success: Database '{db_name}' ensures to exist.")
 
 
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage Database User Script")
     group = parser.add_mutually_exclusive_group(required=True)
 
