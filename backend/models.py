@@ -10,7 +10,7 @@ from backend import db
 class BaseModel(db.Model):
     __abstract__ = True
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
 
 # ===========================================================
@@ -52,6 +52,7 @@ class LoyalCustomer(User):
 
 
 class Staff(User):
+    id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     identity_card = Column(String(50), nullable=False)
     working_hour = relationship('WorkingHour', backref='staff', lazy=True)
 
@@ -59,7 +60,7 @@ class Staff(User):
 class StaffWorkingHour(BaseModel):
     working_hour = Column(Integer, nullable=False)
     working_date = Column(DateTime, default=func.now())
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
+    staff_id = Column(Integer, ForeignKey(Staff.id), nullable=False)
 
 
 # ===========================================================
@@ -169,3 +170,7 @@ class Product(BaseModel):
 
     def __str__(self):
         return self.name
+
+# ===========================================================
+#   Payments
+# ===========================================================
