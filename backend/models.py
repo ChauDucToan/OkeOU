@@ -109,7 +109,7 @@ class Room(BaseModel):
     name = Column(String(80), nullable=False)
     capacity = Column(Integer, nullable=False)
     status = Column(Enum(RoomStatus), default=RoomStatus.AVAILABLE)
-    room_type = Column(Integer, ForeignKey(RoomType.id), nullable=False)
+    room_type_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
     devices = relationship('RoomDevice', backref='room', lazy=True)
 
     def __str__(self):
