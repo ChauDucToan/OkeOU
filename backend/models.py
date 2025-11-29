@@ -55,19 +55,19 @@ class LoyalCustomer(User):
 
 class CustomerCardUsage(BaseModel):
     loyal_customer_id = Column(Integer, ForeignKey(LoyalCustomer.id), nullable=False)
-    usage_date = Column(DateTime, default=datetime.now())
+    usage_date = Column(DateTime, default=datetime.now)
     amount = Column(Integer, nullable=False)
 
 
 class Staff(User):
     id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     identity_card = Column(String(50), nullable=False)
-    working_hour = relationship('WorkingHour', backref='staff', lazy=True)
+    working_hour = relationship('StaffWorkingHour', backref='staff', lazy=True)
 
 
 class StaffWorkingHour(BaseModel):
     working_hour = Column(Integer, nullable=False)
-    working_date = Column(DateTime, default=datetime.now())
+    working_date = Column(DateTime, default=datetime.now)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=False)
     bonus = Column(Float, default=0.0)
 
@@ -84,7 +84,7 @@ class ApplicationStatus(GenericEnum):
 class Application(BaseModel):
     applicationDetails = Column(JSON, nullable=False)
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING)
-    submit_date = Column(DateTime, default=datetime.now())
+    submit_date = Column(DateTime, default=datetime.now)
 
     def __str__(self):
         return self.applicationDetails
@@ -124,13 +124,13 @@ class Device(BaseModel):
 class RoomDevice(BaseModel):
     device_id = Column(Integer, ForeignKey(Device.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
-    install_date = Column(DateTime, default=datetime.now())
+    install_date = Column(DateTime, default=datetime.now)
 
 
 class DeviceMaintenance(BaseModel):
     device_id = Column(Integer, ForeignKey(Device.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
-    maintained_date = Column(DateTime, default=datetime.now())
+    maintained_date = Column(DateTime, default=datetime.now)
     maintained_price = Column(Integer, nullable=False)
 
 
@@ -143,8 +143,9 @@ class SessionStatus(GenericEnum):
 
 
 class Booking(BaseModel):
-    booking_date = Column(DateTime, default=datetime.now())
+    booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
+    scheduled_end_time = Column(DateTime, nullable=False)
     head_count = Column(Integer, nullable=False)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
@@ -157,7 +158,7 @@ class Booking(BaseModel):
 # To be extendable, session can be use in order table in case the customer
 # want to eat some food
 class Session(BaseModel):
-    start_time = Column(DateTime, default=datetime.now())
+    start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime)
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
@@ -185,7 +186,7 @@ class Product(BaseModel):
     description = Column(String(200))
     price = Column(Integer, nullable=False)
     category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
-    created_date = Column(DateTime, default=datetime.now())
+    created_date = Column(DateTime, default=datetime.now)
     image = Column(String(100))
 
     def __str__(self):
@@ -205,7 +206,7 @@ class Order(BaseModel):
     details = relationship('OrderDetails', backref='order', lazy=True)
 
 
-class OrderDetail(BaseModel):
+class OrderDetails(BaseModel):
     order_id = Column(Integer, ForeignKey(Order.id), nullable=False)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
     amount = Column(Integer, nullable=False)
@@ -218,12 +219,12 @@ class OrderDetail(BaseModel):
 class PaymentMethod(GenericEnum):
     CASH = 1
     TRANSFER = 2
-    CARD = "CARD"
+    CARD = 3
 
 
 class Bill(BaseModel):
-    session_id = Column(Integer, ForeignKey('sessions.id'), nullable=False, unique=True)
-    staff_id = Column(Integer, ForeignKey('staffs.id'), nullable=True)  # Ai thu ngân
+    session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
+    staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)  # Ai thu ngân
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)
