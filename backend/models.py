@@ -28,9 +28,9 @@ class User(BaseModel, UserMixin):
     name = Column(String(80), nullable=False)
     avatar = Column(String(100))
     username = Column(String(50), nullable=False, unique=True)
-    password = Column(String(50), nullable=False)
-    phones = relationship('UserPhone', back_populates='user', lazy=True)
-    emails = relationship('UserEmail', back_populates='user', lazy=True)
+    password = Column(String(128), nullable=False)
+    phones = relationship('UserPhone', backref='user', lazy=True)
+    emails = relationship('UserEmail', backref='user', lazy=True)
     role = Column(Enum(UserRole), default=UserRole.USER)
     active = Column(Boolean, default=True)
 
@@ -102,7 +102,7 @@ class RoomStatus(GenericEnum):
 
 class RoomType(BaseModel):
     name = Column(String(80), nullable=False)
-    price = Column(String(50), nullable=False)
+    hourly_price = Column(Integer, nullable=False)
 
 
 class Room(BaseModel):
@@ -143,22 +143,23 @@ class SessionStatus(GenericEnum):
 
 
 class Booking(BaseModel):
-    booking_date = Column(DateTime)
-    scheduled_date = Column(DateTime)
-    deposit_amount = Column(Integer, nullable=False)
-    expiry_date = Column(DateTime)
+    booking_date = Column(DateTime, default=datetime.now())
+    scheduled_start_time = Column(DateTime, nullable=False)
+    head_count = Column(Integer, nullable=False)
+    deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
 
+# If the user want to transfer room then set the SessionStatus.FINISHED
+# and create new session
+#
+# To be extendable, session can be use in order table in case the customer
+# want to eat some food
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now())
     end_time = Column(DateTime)
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
-
-
-class UserRoomSession(BaseModel):
-    session_id = Column(Integer, ForeignKey(Session.id), nullable=False)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
@@ -166,6 +167,11 @@ class UserRoomSession(BaseModel):
 # ===========================================================
 #   Other Services (Food)
 # ===========================================================
+class OrderStatus(GenericEnum):
+    PENDING = 1
+    SERVED = 2
+
+
 class Category(BaseModel):
     name = Column(String(80), nullable=False)
     products = relationship('Product', backref='category', lazy=True)
@@ -189,34 +195,40 @@ class Product(BaseModel):
 class ProductContainer(BaseModel):
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
     amount = Column(Integer, nullable=False)
+    unit = Column(String, nullable=False)
     active = Column(Boolean, default=True)
+
+
+class Order(BaseModel):
+    session_id = Column(Integer, ForeignKey(Session.id), nullable=False)
+    status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
+    details = relationship('OrderDetails', backref='order', lazy=True)
+
+
+class OrderDetail(BaseModel):
+    order_id = Column(Integer, ForeignKey(Order.id), nullable=False)
+    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
+    amount = Column(Integer, nullable=False)
+    price_at_time = Column(Integer, nullable=False)
 
 
 # ===========================================================
 #   Payments
 # ===========================================================
-class PaymentStatus(GenericEnum):
-    SUCCESS = 1
-    PENDING = 2
-    FAILED = 3
-
-
 class PaymentMethod(GenericEnum):
     CASH = 1
     TRANSFER = 2
+    CARD = "CARD"
 
 
-class Payment(BaseModel):
-    amount = Column(Integer, nullable=False)
-    created_date = Column(DateTime, default=datetime.now())
-    status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
-    method = Column(Enum(PaymentMethod), nullable=False)
-    relationship("PaymentMethod", backref='payment', lazy=True)
+class Bill(BaseModel):
+    session_id = Column(Integer, ForeignKey('sessions.id'), nullable=False, unique=True)
+    staff_id = Column(Integer, ForeignKey('staffs.id'), nullable=True)  # Ai thu ngân
 
+    total_room_fee = Column(Float, default=0.0)
+    total_service_fee = Column(Float, default=0.0)
+    discount_amount = Column(Float, default=0.0)
+    vat_amount = Column(Float, default=0.0)
 
-class PaymentDetails(BaseModel):
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    payment_id = Column(Integer, ForeignKey(Payment.id), nullable=False)
-    user_session_id = Column(Integer, ForeignKey(UserRoomSession.id), nullable=False)
-    discount_session = Column(Float, nullable=False, default=0.0)
-    discount_product = Column(Float, nullable=False, default=0.0)
+    payment_method = Column(Enum(PaymentMethod), default=PaymentMethod.CASH)
+    payment_date = Column(DateTime, default=datetime.now)
