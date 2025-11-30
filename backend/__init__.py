@@ -16,9 +16,11 @@ database_url = os.environ.get("DATABASE_URI")
 
 if secret_key is None:
     print("Lỗi: Không tìm thấy CLOUDINARY_SECRET_KEY")
+    exit(1)
 
 if database_url is None:
     print("Lỗi: Không tìm thấy DATABASE_URL")
+    exit(1)
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"{database_url}"
