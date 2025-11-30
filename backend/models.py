@@ -49,8 +49,9 @@ class UserPhone(BaseModel):
 
 
 class LoyalCustomer(User):
-    id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
+    id = Column(Integer, ForeignKey(User.id), primary_key=True)
     customer_points = Column(Integer, default=0)
+    card_usages = relationship('CustomerCardUsage', backref='loyal_customer', lazy=True)
 
 
 class CustomerCardUsage(BaseModel):
@@ -60,9 +61,9 @@ class CustomerCardUsage(BaseModel):
 
 
 class Staff(User):
-    id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
+    id = Column(Integer, ForeignKey(User.id), primary_key=True)
     identity_card = Column(String(50), nullable=False)
-    working_hour = relationship('StaffWorkingHour', backref='staff', lazy=True)
+    working_history = relationship('StaffWorkingHour', backref='staff', lazy=True)
 
 
 class StaffWorkingHour(BaseModel):
@@ -183,34 +184,30 @@ class Category(BaseModel):
 
 class Product(BaseModel):
     name = Column(String(80), nullable=False)
-    description = Column(String(200))
+    description = Column(String(255))
     price = Column(Integer, nullable=False)
     category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
     created_date = Column(DateTime, default=datetime.now)
     image = Column(String(100))
+    amount = Column(Integer, nullable=False)
+    unit = Column(String, nullable=False)
+    active = Column(Boolean, default=True)
 
     def __str__(self):
         return self.name
 
 
-class ProductContainer(BaseModel):
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    amount = Column(Integer, nullable=False)
-    unit = Column(String, nullable=False)
-    active = Column(Boolean, default=True)
+product_order = db.Table('product_order',
+                         Column('product_id', Integer, ForeignKey(Product.id), primary_key=True),
+                         Column('order_id', Integer, ForeignKey('order.id'), primary_key=True),
+                         Column('amount', Integer, nullable=False),
+                         Column('price_at_time', Integer, nullable=False))
 
 
 class Order(BaseModel):
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
-    details = relationship('OrderDetails', backref='order', lazy=True)
-
-
-class OrderDetails(BaseModel):
-    order_id = Column(Integer, ForeignKey(Order.id), nullable=False)
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    amount = Column(Integer, nullable=False)
-    price_at_time = Column(Integer, nullable=False)
+    details = relationship('Product', secondary='product_order', lazy=True)
 
 
 # ===========================================================
@@ -224,7 +221,7 @@ class PaymentMethod(GenericEnum):
 
 class Bill(BaseModel):
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
-    staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)  # Ai thu ngân
+    staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)
