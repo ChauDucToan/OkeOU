@@ -1,10 +1,10 @@
 from flask_login import UserMixin
-from sqlalchemy import Enum, Column, String, JSON, Integer, DateTime, ForeignKey, Float, Boolean
+from sqlalchemy import Enum, Column, String, JSON, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
 from enum import Enum as GenericEnum
 from datetime import datetime
 from sqlalchemy.orm import relationship
 
-from backend import db
+from backend import db, app
 
 
 class BaseModel(db.Model):
@@ -21,8 +21,6 @@ class UserRole(GenericEnum):
     ADMIN = 2
     STAFF = 3
     CUSTOMER = 4
-    LOYAL_CUSTOMER = 5
-
 
 class User(BaseModel, UserMixin):
     name = Column(String(80), nullable=False)
@@ -51,7 +49,7 @@ class UserPhone(BaseModel):
 class LoyalCustomer(User):
     id = Column(Integer, ForeignKey(User.id), primary_key=True)
     customer_points = Column(Integer, default=0)
-    card_usages = relationship('CustomerCardUsage', backref='loyal_customer', lazy=True)
+    card_usages = relationship('CustomerCardUsage', lazy=True)
 
 
 class CustomerCardUsage(BaseModel):
@@ -110,7 +108,7 @@ class Room(BaseModel):
     name = Column(String(80), nullable=False)
     capacity = Column(Integer, nullable=False)
     status = Column(Enum(RoomStatus), default=RoomStatus.AVAILABLE)
-    room_type_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
+    room_type = Column(Integer, ForeignKey(RoomType.id), nullable=False)
     devices = relationship('RoomDevice', backref='room', lazy=True)
 
     def __str__(self):
@@ -146,8 +144,8 @@ class SessionStatus(GenericEnum):
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
-    scheduled_end_time = Column(DateTime, nullable=False)
-    head_count = Column(Integer, nullable=False)
+    scheduled_end_time = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'), nullable=False)
+    head_count = Column(Integer, CheckConstraint('head_count > 0 and head_count <= 15'), default=1, nullable=False)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
@@ -160,7 +158,7 @@ class Booking(BaseModel):
 # want to eat some food
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
-    end_time = Column(DateTime)
+    end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
@@ -190,7 +188,7 @@ class Product(BaseModel):
     created_date = Column(DateTime, default=datetime.now)
     image = Column(String(100))
     amount = Column(Integer, nullable=False)
-    unit = Column(String, nullable=False)
+    unit = Column(String(100), nullable=False)
     active = Column(Boolean, default=True)
 
     def __str__(self):
@@ -230,3 +228,8 @@ class Bill(BaseModel):
 
     payment_method = Column(Enum(PaymentMethod), default=PaymentMethod.CASH)
     payment_date = Column(DateTime, default=datetime.now)
+
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
