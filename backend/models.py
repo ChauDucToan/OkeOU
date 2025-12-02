@@ -80,14 +80,37 @@ class ApplicationStatus(GenericEnum):
     APPROVED = 3
 
 
+class Job(BaseModel):
+    title = Column(String(100), nullable=False)
+    description = Column(String(500), nullable=True)
+    target_quantity = Column(Integer, default=1)
+    hired_quantity = Column(Integer, default=0)
+    salary_range = Column(String(100))
+
+    is_active = Column(Boolean, default=True)
+    created_date = Column(DateTime, default=datetime.now)
+    deadline = Column(DateTime)
+
+    applications = relationship('Application', backref='jobs', lazy=True)
+
+    def __str__(self):
+        return self.title
+
 class Application(BaseModel):
-    applicationDetails = Column(JSON, nullable=False)
+
+    job_id = Column(Integer, ForeignKey(Job.id), nullable=False)
+
+    full_name = Column(String(80), nullable=False)
+    email = Column(String(100), nullable=False)
+    phone = Column(String(20), nullable=False)
+    cv_file = Column(String(200))
+    details = Column(JSON, nullable=True)
+
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING)
     submit_date = Column(DateTime, default=datetime.now)
 
     def __str__(self):
-        return self.applicationDetails
-
+        return f"{self.full_name} - {self.job_posting.title}"
 
 # ===========================================================
 #   Room & Device
