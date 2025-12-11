@@ -104,7 +104,6 @@ class Application(BaseModel):
     email = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=False)
     cv_file = Column(String(200))
-    details = Column(JSON, nullable=True)
 
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING)
     submit_date = Column(DateTime, default=datetime.now)
@@ -228,7 +227,7 @@ class Bill(BaseModel):
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)
     discount_amount = Column(Float, default=0.0)
-    vat_amount = Column(Float, default=0.0)
+    vat_amount = Column(Float, default=0.1)
 
     payment_method = Column(Enum(PaymentMethod), default=PaymentMethod.CASH)
     payment_date = Column(DateTime, default=datetime.now)
