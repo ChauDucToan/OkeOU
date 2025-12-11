@@ -26,7 +26,7 @@ class User(BaseModel, UserMixin):
     name = Column(String(80), nullable=False)
     avatar = Column(String(100))
     username = Column(String(50), nullable=False, unique=True)
-    password = Column(String(128), nullable=False)
+    password = Column(String(64), nullable=False)
     phones = relationship('UserPhone', backref='user', lazy=True)
     emails = relationship('UserEmail', backref='user', lazy=True)
     role = Column(Enum(UserRole), default=UserRole.USER)
@@ -48,7 +48,7 @@ class UserPhone(BaseModel):
 
 class LoyalCustomer(User):
     id = Column(Integer, ForeignKey(User.id), primary_key=True)
-    customer_points = Column(Integer, default=0)
+    customer_points = Column(Integer, default=0, nullable=False)
     card_usages = relationship('CustomerCardUsage', lazy=True)
 
 
@@ -136,25 +136,6 @@ class Room(BaseModel):
 
     def __str__(self):
         return self.name
-
-
-class Device(BaseModel):
-    name = Column(String(80), nullable=False)
-    type = Column(String(80), nullable=False)
-
-
-class RoomDevice(BaseModel):
-    device_id = Column(Integer, ForeignKey(Device.id), nullable=False)
-    room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
-    install_date = Column(DateTime, default=datetime.now)
-
-
-class DeviceMaintenance(BaseModel):
-    device_id = Column(Integer, ForeignKey(Device.id), nullable=False)
-    room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
-    maintained_date = Column(DateTime, default=datetime.now)
-    maintained_price = Column(Integer, nullable=False)
-
 
 # ===========================================================
 #   Booking

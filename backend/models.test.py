@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
-from backend import db, app
-from backend.models import User, Booking, Room, RoomType, Product, Category
 import unittest
 
-class ModelTest(unittest.TestCase):
+from models import User, Category, Product, Room, RoomType, Booking
+from backend import db, app
+
+
+class Test(unittest.TestCase):
+
     def setUp(self):
         self.app_context = app.app_context()
         self.app_context.push()
@@ -14,7 +17,7 @@ class ModelTest(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
-    def test_user_unique_username(self):
+    def test_user(self):
         u1 = User(name="User 1", username="duplicate_user", password="123")
         db.session.add(u1)
         db.session.commit()
@@ -26,23 +29,21 @@ class ModelTest(unittest.TestCase):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print("Found error in user 2: ", repr(e))
+            print(f"Found error: {repr(e)}")
 
-    def test_product_nullable_fields(self):
-        cat = Category(name="Food")
-        db.session.add(cat)
-        db.session.commit()
+    def test_room(self):
+        non_existent_type_id = 9999
 
-        p_fail = Product(name="Coke", category_id=cat.id, unit="can")
-        db.session.add(p_fail)
+        room = Room(name="Ghost Room", capacity=5, room_type=non_existent_type_id)
+        db.session.add(room)
 
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print("Found error at Coke: ", repr(e))
+            print(f"Found error: {repr(e)}")
 
-    def test_booking_end_time_check(self):
+    def test_booking(self):
         user = User(name="Test User", username="booking_user", password="123")
         r_type = RoomType(name="VIP", hourly_price=100)
         db.session.add_all([user, r_type])
@@ -68,19 +69,21 @@ class ModelTest(unittest.TestCase):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print("Found error at booking time: ", repr(e))
+            print(f"Found error: {repr(e)}")
 
-    def test_room_foreign_key(self):
-        non_existent_type_id = 9999
+    def test_product(self):
+        cat = Category(name="Food")
+        db.session.add(cat)
+        db.session.commit()
 
-        room = Room(name="Ghost Room", capacity=5, room_type=non_existent_type_id)
-        db.session.add(room)
+        p_fail = Product(name="Coke", category_id=cat.id, unit="can")
+        db.session.add(p_fail)
 
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print("Found error at non exist id: ", repr(e))
+            print(f"Found error: {repr(e)}")
 
 
 if __name__ == "__main__":
