@@ -1,9 +1,9 @@
 import cloudinary
 
 from sqlalchemy.exc import IntegrityError
-from models import Category, Product, User, Job
+from backend.models import Category, Product, User, Job
 from backend import app, db
-from utils import hash_password
+from backend.utils import hash_password
 
 
 def get_categories():

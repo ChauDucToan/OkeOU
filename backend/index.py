@@ -1,9 +1,8 @@
 from flask import render_template, redirect, request
 from flask_login import logout_user, login_user
 
-import dao
-from backend import app, login
-from models import User
+from backend import app, login, dao
+from backend.models import User
 
 # ===========================================================
 #   Page Redirect
