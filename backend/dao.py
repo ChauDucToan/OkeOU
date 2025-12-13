@@ -1,5 +1,6 @@
 import cloudinary
 
+from sqlalchemy.exc import IntegrityError
 from models import Category, Product, User, Job
 from backend import app, db
 from utils import hash_password
@@ -55,4 +56,8 @@ def add_user(name, username, password, avatar):
         u.avatar = res.get('secure_url')
 
     db.session.add(u)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        raise Exception('Username đã tồn tại!')

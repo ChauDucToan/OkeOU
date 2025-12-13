@@ -1,5 +1,6 @@
 from flask_login import UserMixin
-from sqlalchemy import Enum, Column, String, JSON, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
+from sqlalchemy import Enum, Column, String, JSON, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint, \
+    column
 from enum import Enum as GenericEnum
 from datetime import datetime
 from sqlalchemy.orm import relationship
@@ -22,28 +23,19 @@ class UserRole(GenericEnum):
     STAFF = 3
     CUSTOMER = 4
 
+
 class User(BaseModel, UserMixin):
     name = Column(String(80), nullable=False)
     avatar = Column(String(100))
     username = Column(String(50), nullable=False, unique=True)
     password = Column(String(64), nullable=False)
-    phones = relationship('UserPhone', backref='user', lazy=True)
-    emails = relationship('UserEmail', backref='user', lazy=True)
+    phone = Column(String(16), nullable=False)
+    email = Column(String(128), nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER)
     active = Column(Boolean, default=True)
 
     def __str__(self):
         return self.name
-
-
-class UserEmail(BaseModel):
-    email = Column(String(50), nullable=False, unique=True)
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
-
-
-class UserPhone(BaseModel):
-    phone = Column(String(15), nullable=False)
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
 
 
 class LoyalCustomer(User):
@@ -96,8 +88,8 @@ class Job(BaseModel):
     def __str__(self):
         return self.title
 
-class Application(BaseModel):
 
+class Application(BaseModel):
     job_id = Column(Integer, ForeignKey(Job.id), nullable=False)
 
     full_name = Column(String(80), nullable=False)
@@ -110,6 +102,7 @@ class Application(BaseModel):
 
     def __str__(self):
         return f"{self.full_name} - {self.job_posting.title}"
+
 
 # ===========================================================
 #   Room & Device
@@ -135,6 +128,7 @@ class Room(BaseModel):
 
     def __str__(self):
         return self.name
+
 
 # ===========================================================
 #   Booking
@@ -220,9 +214,17 @@ class PaymentMethod(GenericEnum):
     CARD = 3
 
 
-class Bill(BaseModel):
+class Receipt(BaseModel):
+    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
+
+    created_date = Column(DateTime, default=datetime.now())
+    details = relationship('ReceiptDetails', backref='receipt', lazy=True)
+
+
+class ReceiptDetails(BaseModel):
+    receipt_id = Column(Integer, ForeignKey(Receipt.id), nullable=False)
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)
@@ -230,7 +232,6 @@ class Bill(BaseModel):
     vat_amount = Column(Float, default=0.1)
 
     payment_method = Column(Enum(PaymentMethod), default=PaymentMethod.CASH)
-    payment_date = Column(DateTime, default=datetime.now)
 
 
 if __name__ == '__main__':

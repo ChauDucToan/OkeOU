@@ -1,10 +1,13 @@
-from flask import render_template
+from flask import render_template, redirect, request
+from flask_login import logout_user, login_user
 
 import dao
 from backend import app, login
 from models import User
 
-
+# ===========================================================
+#   Page Redirect
+# ===========================================================
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -16,6 +19,26 @@ def loginView():
 @app.route('/register')
 def registerView():
     return render_template('register.html')
+
+# ===========================================================
+#   Login & Logout & Register
+# ===========================================================
+@app.route('/logout')
+def logout_process():
+    logout_user()
+    return redirect('/login')
+
+@app.route('/login', methods=['POST'])
+def login_process():
+    username = request.form['username']
+    password = request.form['password']
+
+    user = dao.auth_user(username=username, password=password)
+    if user:
+        login_user(user=user)
+
+    next = request.args.get('next')
+    return redirect(next if next else '/')
 
 @login.user_loader
 def load_user(pk):
