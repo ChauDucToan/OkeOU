@@ -1,0 +1,48 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+Trang hồ sơ cá nhân
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row m-4">
+        <div class="col-md-4">
+            <img src="{{ user.avatar }}" alt="{{ user.name }}" width="28" height="28"
+                class="rounded-circle">
+            <button type="button" onclick="" 
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#changeAvatarModal">
+                Đổi ảnh đại diện
+            </button>
+        </div>
+        <div class="col-md-8">
+            <p>Hồ sơ của {{ user.name }}</p>
+            <p>Tên người dùng: {{ user.username }}</p>
+            <p>Email: {{ user.email }}</p>
+            <p>Số điện thoại: {{ user.phone }}</p>
+            <!-- Thêm các thông tin hồ sơ khác tại đây -->
+            <button onclick="">Chỉnh sửa hồ sơ</button>
+        </div>
+    </div>
+</div>
+<div class="modal fade" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true"
+    id="changeAvatarModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Understood</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

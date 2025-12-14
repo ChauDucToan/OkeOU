@@ -1,8 +1,9 @@
 from flask import render_template, redirect, request
-from flask_login import logout_user, login_user
+from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login
 from backend.dao import add_user, auth_user, get_user_by_id
+from backend.models import User
 
 # ===========================================================
 #   Page Redirect
@@ -66,6 +67,21 @@ def register_process():
     except Exception as ex:
         return render_template('register.html', err_msg=str(ex))
 
+# ===========================================================
+#   User Profiles Previews
+# ===========================================================
+@app.route('/profile')
+@login_required
+def profile_preview():
+    user = get_user_by_id(current_user.id)
+    
+    print(user.avatar)
+    print(user.name)
+    print(user.username)
+    print(user.password)
+
+
+    return render_template('profile.html', user=user)
 
 @login.user_loader
 def load_user(pk):

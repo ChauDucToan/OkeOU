@@ -46,7 +46,9 @@ def auth_user(username, password):
                              User.password == password).first()
 
 
-def add_user(name, username, password, email, phoneNumber, avatar):
+def add_user(name, username, password, email, 
+            phoneNumber,
+            avatar = "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
     u = User(name=name,
              username=username.strip(),
              password=hash_password(password),

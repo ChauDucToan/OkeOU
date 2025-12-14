@@ -1,5 +1,5 @@
 <nav>
-    <div class="px-3 py-2 text-bg-dark border-bottom">
+    <div class="px-3 py-2 text-bg-dark border-bottom" data-bs-theme="dark">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                 <a href="/"
@@ -35,11 +35,11 @@
                             role="button"
                             aria-expanded="false">
                             Xin chào!
-                            <img src="https://github.com/mdo.png" alt="mdo" width="28" height="28"
+                            <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" width="28" height="28"
                                  class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Thông tin hồ sơ</a></li>
+                            <li><a class="dropdown-item" href="/profile">Thông tin hồ sơ</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
                         </ul>
