@@ -1,6 +1,5 @@
 from flask_login import UserMixin
-from sqlalchemy import Enum, Column, String, JSON, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint, \
-    column
+from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
 from enum import Enum as GenericEnum
 from datetime import datetime
 from sqlalchemy.orm import relationship
@@ -124,7 +123,6 @@ class Room(BaseModel):
     capacity = Column(Integer, nullable=False)
     status = Column(Enum(RoomStatus), default=RoomStatus.AVAILABLE)
     room_type = Column(Integer, ForeignKey(RoomType.id), nullable=False)
-    devices = relationship('RoomDevice', backref='room', lazy=True)
 
     def __str__(self):
         return self.name

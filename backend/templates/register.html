@@ -10,38 +10,46 @@ Trang đăng ký
 {% block content %}
 <section class="bg-dark align-content-center vh-100">
     <div class="container form-signin w-50">
-        <form class="m-auto row g-3">
+        <form class="m-auto row g-3" method="post" action="/register">
+            {% if err_msg %}
+            <div class="alert alert-danger">{{err_msg}}</div>
+            {% endif %}
             <div class="navbar">
                 <img src="/static/images/logo.png" alt="logo" width="80" height="50">
-                <a href="/" class="text-white-50">< Trở về trang chủ</a>
+                <a href="/" class="text-white-50">Trở về trang chủ</a>
             </div>
             <h1 class="h3 mb-3 fw-normal text-white">Xin vui lòng nhập thông tin để tiếp tục được đăng ký</h1>
             <div class="form-floating col-md-6">
-                <input type="name" class="form-control" id="name"
+                <input type="name" name="name" class="form-control" id="name"
                        placeholder="name@example.com">
                 <label for="name">Name</label>
             </div>
             <div class="form-floating col-md-6">
-                <input type="name" class="form-control" id="username"
-                       placeholder="name@example.com">
+                <input type="name" name="username" class="form-control" id="username"
+                       placeholder="name@example.com" required>
                 <label for="username">Username</label>
             </div>
             <div class="form-floating col-12">
-                <input type="password" class="form-control" id="password"
-                       placeholder="Password">
+                <input type="password" name="password" class="form-control" id="password"
+                       placeholder="Password" required>
                 <label for="password">Password</label>
             </div>
+            <div class="form-floating col-12">
+                <input type="password" name="confirm" class="form-control" id="confirm"
+                       placeholder="Password" required>
+                <label for="confirm">Confirm Password</label>
+            </div>
             <div class="form-floating col-md-6">
-                <input type="email" class="form-control" id="email"
+                <input type="email" name="email" class="form-control" id="email"
                        placeholder="name@example.com">
                 <label for="email">Email</label>
             </div>
             <div class="form-floating col-md-6">
-                <input type="tel" class="form-control" id="phone"
+                <input type="tel" name="phone" class="form-control" id="phone"
                        placeholder="1234567890" pattern="[0-9]{10}">
                 <label for="phone">Phone number</label>
             </div>
-            <button class="btn btn-primary w-100 py-2 my-3" type="submit">Đăng nhập</button>
+            <button class="btn btn-primary w-100 py-2 my-3" type="submit">Đăng ký</button>
             <a class="btn btn-secondary w-100 py-2 m-0" href="/login">Đã có tài khoản? Đăng nhập ngay!</a>0
             <p class="mt-5 mb-3 text-body-secondary text-center">OkeOU © 2025</p>
         </form>

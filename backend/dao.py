@@ -46,10 +46,12 @@ def auth_user(username, password):
                              User.password == password).first()
 
 
-def add_user(name, username, password, avatar):
+def add_user(name, username, password, email, phoneNumber, avatar):
     u = User(name=name,
              username=username.strip(),
-             password=hash_password(password))
+             password=hash_password(password),
+             email=email,
+             phone=phoneNumber)
 
     if avatar:
         res = cloudinary.uploader.upload(avatar)
@@ -58,6 +60,6 @@ def add_user(name, username, password, avatar):
     db.session.add(u)
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as ie:
         db.session.rollback()
-        raise Exception('Username đã tồn tại!')
+        raise Exception(str(ie.orig))

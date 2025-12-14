@@ -1,8 +1,8 @@
 from flask import render_template, redirect, request
 from flask_login import logout_user, login_user
 
-from backend import app, login, dao
-from backend.models import User
+from backend import app, login
+from backend.dao import add_user, auth_user, get_user_by_id
 
 # ===========================================================
 #   Page Redirect
@@ -29,19 +29,47 @@ def logout_process():
 
 @app.route('/login', methods=['POST'])
 def login_process():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form.get('username')
+    password = request.form.get('password')
 
-    user = dao.auth_user(username=username, password=password)
+    user = auth_user(username=username, password=password)
     if user:
         login_user(user=user)
+    else:
+        err_msg = 'Sai tên đăng nhập hoặc mật khẩu!'
+        return render_template('login.html', err_msg=err_msg)
 
     next = request.args.get('next')
     return redirect(next if next else '/')
 
+@app.route('/register', methods=['POST'])
+def register_process():
+    data = request.form
+
+    password = data.get('password')
+    confirm = data.get('confirm')
+    email = data.get('email')
+    phoneNumber = data.get('phone')
+
+    if password != confirm:
+        err_msg = 'Mật khẩu không khớp!'
+        return render_template('register.html', err_msg=err_msg)
+
+    try:
+        add_user(name=data.get('name'), 
+                username=data.get('username'), 
+                password=password, 
+                avatar=request.files.get('avatar'),
+                email=email,
+                phoneNumber=phoneNumber)
+        return redirect('/login')
+    except Exception as ex:
+        return render_template('register.html', err_msg=str(ex))
+
+
 @login.user_loader
 def load_user(pk):
-    return dao.get_user_by_id(pk)
+    return get_user_by_id(pk)
 
 if __name__ == '__main__':
     from backend import admin
