@@ -60,7 +60,6 @@ def register_process():
         add_user(name=data.get('name'), 
                 username=data.get('username'), 
                 password=password, 
-                avatar=request.files.get('avatar'),
                 email=email,
                 phoneNumber=phoneNumber)
         return redirect('/login')
