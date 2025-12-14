@@ -22,7 +22,6 @@ class UserRole(GenericEnum):
     STAFF = 3
     CUSTOMER = 4
 
-
 class User(BaseModel, UserMixin):
     name = Column(String(80), nullable=False)
     avatar = Column(String(100))
@@ -87,8 +86,8 @@ class Job(BaseModel):
     def __str__(self):
         return self.title
 
-
 class Application(BaseModel):
+
     job_id = Column(Integer, ForeignKey(Job.id), nullable=False)
 
     full_name = Column(String(80), nullable=False)
@@ -101,7 +100,6 @@ class Application(BaseModel):
 
     def __str__(self):
         return f"{self.full_name} - {self.job_posting.title}"
-
 
 # ===========================================================
 #   Room & Device
@@ -127,7 +125,6 @@ class Room(BaseModel):
     def __str__(self):
         return self.name
 
-
 # ===========================================================
 #   Booking
 # ===========================================================
@@ -139,12 +136,23 @@ class SessionStatus(GenericEnum):
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
-    scheduled_end_time = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'), nullable=False)
-    head_count = Column(Integer, CheckConstraint('head_count > 0 and head_count <= 15'), default=1, nullable=False)
+    scheduled_end_time = Column(DateTime, nullable=False)
+    head_count = Column(Integer, default=1, nullable=False)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
+    # MySQL khong dung cai rang buoc kia duoc
+    __table_args__ = (
+        CheckConstraint(
+            'scheduled_end_time > scheduled_start_time',
+            name='chk_booking_time_order'
+        ),
+        CheckConstraint(
+            'head_count > 0 AND head_count <= 15',
+            name='chk_booking_head_count'
+        ),
+    )
 
 # If the user want to transfer room then set the SessionStatus.FINISHED
 # and create new session
@@ -153,11 +161,17 @@ class Booking(BaseModel):
 # want to eat some food
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
-    end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
+    end_time = Column(DateTime)
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
+    __table_args__ = (
+        CheckConstraint(
+            'end_time > start_time',
+            name='chk_session_time_order'
+        ),
+    )
 
 # ===========================================================
 #   Other Services (Food)

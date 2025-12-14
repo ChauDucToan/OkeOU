@@ -1,0 +1,329 @@
+{% extends 'layout/base.html' %} {% block title %} Trang Thanh toán {% endblock
+%} {% block content %}
+<div class="container">
+  <input
+    type="hidden"
+    id="currentSessionId"
+    value="{{ bill_detail.session_id }}"
+  />
+  <div class="row vh-100 bg-light">
+    <div class="col-md-4 mb-4" id="invoice-area">
+      <div class="bg-white p-3 border rounded-3 d-flex flex-column min-vh-100">
+        <div
+          class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3"
+        >
+          <h6 class="text-muted mb-0">TÊN KHÁCH HÀNG</h6>
+          <p class="fw-bold mb-0 text-primary">{{bill_detail.customer_name}}</p>
+        </div>
+
+        <div class="table-responsive flex-grow-1">
+          <table class="table table-sm text-end">
+            <thead>
+              <tr class="table-light">
+                <th class="text-start">TÊN HÀNG HÓA</th>
+                <th>SL</th>
+                <th>ĐƠN GIÁ</th>
+                <th>THÀNH TIỀN</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in bill_detail.service_details %}
+              <tr>
+                <td class="text-start">{{s.name}}</td>
+                <td>{{s.amount}}</td>
+                <td>{{s.price}}</td>
+                <td>{{s.total}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pt-2 border-top mt-auto">
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Tổng dịch vụ:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.service_fee}}</p>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Tổng tiền hát:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.room_fee}}</p>
+          </div>
+
+          {% if bill_detail.discount > 0 %}
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Giảm giá KHTT:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.discount}}</p>
+          </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Thuế VAT:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.vat}}</p>
+          </div>
+
+          <div class="d-flex justify-content-between border-top pt-2 mt-2">
+            <h5 class="mb-0 text-dark">TỔNG HÓA ĐƠN:</h5>
+            <h5 class="mb-0 text-danger fw-bolder">
+              {{bill_detail.final_total}}
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="container my-4">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="paidAmount" class="form-label text-muted small"
+                >TIỀN KHÁCH ĐƯA</label
+              >
+              <input
+                type="text"
+                oninput="validateNumberOnly(this)"
+                class="form-control form-control-lg text-end"
+                id="paidAmount"
+              />
+            </div>
+
+            <label class="form-label text-muted small mb-2"
+              >CHỌN TIỀN THEO MỆNH GIÁ</label
+            >
+            <div class="row g-2 mb-4">
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="5000000"
+                >
+                  5.000.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="2000000"
+                >
+                  2.000.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="1000000"
+                >
+                  1.000.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="500000"
+                >
+                  500.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="200000"
+                >
+                  200.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="100000"
+                >
+                  100.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="50000"
+                >
+                  50.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="20000"
+                >
+                  20.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="10000"
+                >
+                  10.000
+                </button>
+              </div>
+            </div>
+
+            <label class="form-label text-muted small mt-4 mb-2"
+              >HÌNH THỨC THANH TOÁN</label
+            >
+            <div class="d-flex flex-wrap gap-2">
+              {% for method in payment_methods %} {% if method.name == "CASH"%}
+              <button class="btn-payment btn btn-primary fw-bold">
+                {{method.name}}
+              </button>
+              {% else %}
+              <button class="btn-payment btn btn-secondary fw-bold">
+                {{method.name}}
+              </button>
+              {% endif %} {% endfor %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="border rounded-3 p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-dark fw-bold">Còn phải thu</span>
+                <h4 class="text-success fw-bolder mb-0">
+                  {{bill_detail.final_total}}
+                </h4>
+              </div>
+
+              <div
+                class="d-flex justify-content-between align-items-center mt-2"
+              >
+                <span class="text-muted">Tiền mặt</span>
+                <span class="text-danger small paid-amount"
+                  ><i class="bi bi-trash"></i
+                ></span>
+              </div>
+            </div>
+
+            <div class="border rounded-3 p-3 bg-light">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-dark fw-bold">Trả lại khách</span>
+                <h3 class="fw-bolder mb-0 change-money">0,00</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary" onclick="window.print()">
+          Xuất hóa đơn
+        </button>
+        {% if current_user.is_authenticated and current_user.role.name ==
+        'STAFF' %}
+        <button class="btn btn-success" onclick="pay()">Thanh toán</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .btn-selected {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+  }
+
+  @media print {
+    /* 1. Ẩn tất cả mọi thứ trên trang web */
+    body * {
+      visibility: hidden;
+    }
+
+    /* 2. Chỉ hiện vùng hóa đơn (invoice-area) và nội dung bên trong nó */
+    #invoice-area,
+    #invoice-area * {
+      visibility: visible;
+    }
+
+    /* 3. Định vị vùng hóa đơn về góc trên cùng bên trái của khổ giấy */
+    #invoice-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%; /* In full khổ giấy */
+      margin: 0;
+      padding: 0;
+      border: none !important; /* Bỏ viền khi in */
+    }
+
+    /* 4. Tinh chỉnh giao diện in */
+    .bg-light {
+      background-color: white !important; /* Bỏ nền xám */
+    }
+
+    /* Bootstrap class hỗ trợ in: Hiện cái cần hiện, Ẩn cái cần ẩn */
+    .d-print-none {
+      display: none !important;
+    }
+    .d-print-block {
+      display: block !important;
+    }
+
+    /* Ẩn các nút bấm hoặc thanh cuộn nếu còn sót */
+    button,
+    .btn {
+      display: none !important;
+    }
+
+    /* Nếu in máy in nhiệt (Bill nhỏ), có thể set width cố định */
+    /* #invoice-area { width: 80mm; } */
+  }
+</style>
+
+<script>
+
+  function validateNumberOnly(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+    }
+  window.onload = () => {
+      const btnPrices = document.querySelectorAll('.btn-price');
+      const btnPayments = document.querySelectorAll('.btn-payment');
+      const paidAmountInput = document.getElementById('paidAmount');
+      const totalAmount = {{bill_detail.final_total}};
+
+      const changeMoney = document.querySelector('.change-money');
+
+      btnPrices.forEach(button => {
+          button.addEventListener('click', function() {
+              btnPrices.forEach(btn => {
+                  btn.classList.remove('btn-selected');
+              });
+
+              this.classList.add('btn-selected');
+
+              const dataValue = parseInt(this.getAttribute('data-value'));
+
+              paidAmountInput.value = dataValue;
+              document.querySelector('.paid-amount').textContent = dataValue;
+
+              const change = dataValue - totalAmount;
+              if (change < 0) {
+                  changeMoney.previousElementSibling.textContent = 'Khách thiếu'
+              } else  {
+                  changeMoney.previousElementSibling.textContent = 'Trả lại khách'
+              }
+
+              changeMoney.textContent = Math.abs(change);
+          });
+      });
+
+    btnPayments.forEach(button => {
+        button.addEventListener('click', function() {
+              btnPayments.forEach(btn => {
+                  btn.classList.remove('btn-primary');
+                  btn.classList.add('btn-secondary');
+              });
+
+              this.classList.remove('btn-secondary');
+              this.classList.add('btn-primary');
+          });
+    });
+  }
+</script>
+{% endblock %}
