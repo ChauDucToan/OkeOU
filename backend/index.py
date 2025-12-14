@@ -3,7 +3,6 @@ from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login
 from backend.dao import add_user, auth_user, get_user_by_id
-from backend.models import User
 
 # ===========================================================
 #   Page Redirect

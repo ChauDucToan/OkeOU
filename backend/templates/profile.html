@@ -5,8 +5,8 @@ Trang hồ sơ cá nhân
 {% endblock %}
 
 {% block content %}
-<div class="container flex-grow-1 d-flex">
-    <div class="row m-4">
+<div class="container flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="row w-100 gx-5">
         <div class="col-md-4 d-flex flex-column align-items-center">
             <img src="{{ user.avatar }}" 
                 alt="{{ user.name }}" 
@@ -20,12 +20,42 @@ Trang hồ sơ cá nhân
             </button>
         </div>
         <div class="col-md-8">
-            <h1>Hồ sơ của {{ user.name }}</h1>
-            <p>Tên người dùng: {{ user.username }}</p>
-            <p>Email: {{ user.email }}</p>
-            <p>Số điện thoại: {{ user.phone }}</p>
-            <!-- Thêm các thông tin hồ sơ khác tại đây -->
-            <button type="button" onclick="" class="btn btn-primary">Chỉnh sửa hồ sơ</button>
+            <h3>Hồ sơ cá nhân</h3>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="name">Tên đầy đủ:</label>
+                </div>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" placeholder="{{ user.name }}" disabled>
+                </div>
+            </div>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="name">Tên người dùng:</label>
+                </div>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" placeholder="{{ user.username }}" disabled>
+                </div>
+            </div>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="name">Email:</label>
+                </div>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" placeholder="{{ user.email }}" disabled>
+                </div>
+            </div>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="name">Số điện thoại:</label>
+                </div>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" placeholder="{{ user.phone }}" disabled>
+                </div>
+            </div>
+            <div class="row">
+                <button type="button" onclick="" class="btn btn-primary">Chỉnh sửa hồ sơ</button>
+            </div>
         </div>
     </div>
 </div>
