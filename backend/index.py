@@ -25,7 +25,7 @@ def registerView():
 @app.route('/logout')
 def logout_process():
     logout_user()
-    return redirect('/login')
+    return redirect('/')
 
 @app.route('/login', methods=['POST'])
 def login_process():
