@@ -1,15 +1,23 @@
+import math
 from flask import render_template, redirect, request
 from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login
+from backend import dao
 from backend.dao import add_user, auth_user, get_user_by_id
+from backend.models import UserRole
 
 # ===========================================================
 #   Page Redirect
 # ===========================================================
 @app.route('/')
 def index():
-    return render_template('index.html')
+    rooms = dao.load_rooms(room_id=request.args.get('room_id'),
+                        kw=request.args.get('kw'),
+                        page=int(request.args.get('page', 1)))
+
+    return render_template('index.html', rooms=rooms,
+                           pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
 
 @app.route('/login')
 def loginView():
@@ -60,6 +68,7 @@ def register_process():
                 username=data.get('username'), 
                 password=password, 
                 email=email,
+                role=UserRole.CUSTOMER,
                 phoneNumber=phoneNumber)
         return redirect('/login')
     except Exception as ex:
