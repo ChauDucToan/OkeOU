@@ -1,5 +1,6 @@
 import cloudinary
 
+import cloudinary.uploader
 from sqlalchemy.exc import IntegrityError
 from backend.models import Category, Product, User, Job
 from backend import app, db
