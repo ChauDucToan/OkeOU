@@ -11,13 +11,16 @@ def count_rooms():
     return Room.query.count()
 
 
-def load_rooms(room_id, kw=None, page=1):
+def load_rooms(room_id, status=None, kw=None, page=1):
     q = Room.query
     if kw:
         q = q.filter(Room.name.contains(kw))
     
     if room_id:
         q = q.filter(Room.id.__eq__(room_id))
+
+    if status:
+        q = q.filter(Room.status.__eq__(status))
 
     if page:
         start = (page - 1) * app.config["PAGE_SIZE"]

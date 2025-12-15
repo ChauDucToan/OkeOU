@@ -96,6 +96,18 @@ def products_preview():
                            categories=categories,
                            pages=math.ceil(dao.count_products() / app.config['PAGE_SIZE']))
 
+# ===========================================================
+#   Rooms Page
+# ===========================================================
+@app.route('/rooms')
+def rooms_preview():
+    rooms = dao.load_rooms(room_id=request.args.get('room_id'),
+                        status=request.args.get('status'),
+                        kw=request.args.get('kw'),
+                        page=int(request.args.get('page', 1)))
+
+    return render_template('rooms.html', rooms=rooms,
+                           pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
 
 @login.user_loader
 def load_user(pk):
