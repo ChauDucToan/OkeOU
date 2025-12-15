@@ -40,8 +40,7 @@ def get_products(kw=None, category_id=None, page=1):
         products = products.filter(Product.name.contains(kw))
 
     if page:
-        page = int(page)
-        page_size = app.config.get("PAGE_SIZE", 10)
+        page_size = app.config["PAGE_SIZE"]
         start = (page - 1) * page_size
         products = products.slice(start, start + page_size)
 
@@ -52,8 +51,16 @@ def get_jobs():
     return Job.query.all()
 
 
-def count_products():
-    return Product.query.count()
+def count_products(kw = None, category_id = None):
+    p = Product.query
+
+    if category_id:
+        p = p.filter(Product.category_id.__eq__(category_id))
+
+    if kw:
+        p = p.filter(Product.name.contains(kw))
+
+    return p.count()
 
 
 def get_user_by_id(user_id):

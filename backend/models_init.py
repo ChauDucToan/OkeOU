@@ -86,7 +86,7 @@ if __name__ == '__main__':
                 "price": 45000,
                 "category_id": cat_food.id,
                 "unit": "Dĩa",
-                "image": "french_fries.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765797610/khoai_tay_chien_nfzfaw.jpg",
                 "description": "Khoai tây chiên giòn rụm kèm tương ớt"
             },
             {
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 "price": 85000,
                 "category_id": cat_food.id,
                 "unit": "Dĩa",
-                "image": "beef_jerky.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765797694/khobo_fqvlfc.jpg",
                 "description": "Bò khô loại 1, vắt chanh chua cay"
             },
             {
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                 "price": 120000,
                 "category_id": cat_food.id,
                 "unit": "Con",
-                "image": "grilled_squid.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765797790/mucnuongmuoiot_lb5umi.jpg",
                 "description": "Mực một nắng nướng muối ớt xanh"
             },
             {
@@ -110,7 +110,7 @@ if __name__ == '__main__':
                 "price": 60000,
                 "category_id": cat_food.id,
                 "unit": "Dĩa",
-                "image": "sausage.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765797905/xucxich_ynbmkm.jpg",
                 "description": "Xúc xích nướng tiêu đen"
             },
             
@@ -119,7 +119,7 @@ if __name__ == '__main__':
                 "price": 150000,
                 "category_id": cat_fruit.id,
                 "unit": "Dĩa",
-                "image": "fruit_platter.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765797962/DiaTraiCay_pa1pgj.png",
                 "description": "Dưa hấu, Ổi, Xoài, Nho, Táo"
             },
             {
@@ -127,7 +127,7 @@ if __name__ == '__main__':
                 "price": 80000,
                 "category_id": cat_fruit.id,
                 "unit": "Dĩa",
-                "image": "small_fruit.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765798169/dianho_lplmzu.png",
                 "description": "Trái cây theo mùa"
             },
 
@@ -136,7 +136,7 @@ if __name__ == '__main__':
                 "price": 25000,
                 "category_id": cat_drink.id,
                 "unit": "Lon",
-                "image": "tiger_crystal.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765798237/biaTiger_ymikib.png",
                 "description": "Bia Tiger Crystal mát lạnh"
             },
             {
@@ -144,7 +144,7 @@ if __name__ == '__main__':
                 "price": 28000,
                 "category_id": cat_drink.id,
                 "unit": "Lon",
-                "image": "ken.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765798500/biaken_kxuufw.png",
                 "description": "Heineken nhập khẩu"
             },
             {
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                 "price": 15000,
                 "category_id": cat_drink.id,
                 "unit": "Lon",
-                "image": "coke.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765798944/coca_lq1rxv.png",
                 "description": "Nước ngọt có ga"
             },
             {
@@ -160,7 +160,7 @@ if __name__ == '__main__':
                 "price": 10000,
                 "category_id": cat_drink.id,
                 "unit": "Chai",
-                "image": "water.jpg",
+                "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765798941/aquafina_uvwfer.png",
                 "description": "Nước tinh khiết 500ml"
             }
         ]

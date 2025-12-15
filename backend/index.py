@@ -79,14 +79,23 @@ def register_process():
 @login_required
 def profile_preview():
     user = get_user_by_id(current_user.id)
-    
-    print(user.avatar)
-    print(user.name)
-    print(user.username)
-    print(user.password)
-
 
     return render_template('profile.html', user=user)
+
+# ===========================================================
+#   Products Page
+# ===========================================================
+@app.route('/products')
+def products_preview():
+    products = dao.get_products(kw=request.args.get('kw'),
+                                category_id=request.args.get('category_id'),
+                                page=int(request.args.get('page', 1)))
+    categories = dao.get_categories()
+
+    return render_template('products.html', products=products,
+                           categories=categories,
+                           pages=math.ceil(dao.count_products() / app.config['PAGE_SIZE']))
+
 
 @login.user_loader
 def load_user(pk):
