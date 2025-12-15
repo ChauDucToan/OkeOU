@@ -5,7 +5,6 @@ from flask_login import current_user, login_required, logout_user, login_user
 from backend import app, login
 from backend import dao
 from backend.dao import add_user, auth_user, get_user_by_id
-from backend.models import UserRole
 
 # ===========================================================
 #   Page Redirect
@@ -68,7 +67,6 @@ def register_process():
                 username=data.get('username'), 
                 password=password, 
                 email=email,
-                role=UserRole.CUSTOMER,
                 phoneNumber=phoneNumber)
         return redirect('/login')
     except Exception as ex:

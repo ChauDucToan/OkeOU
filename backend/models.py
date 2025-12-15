@@ -122,7 +122,10 @@ class Room(BaseModel):
     name = Column(String(80), nullable=False)
     capacity = Column(Integer, nullable=False)
     status = Column(Enum(RoomStatus), default=RoomStatus.AVAILABLE)
+    image = Column(String(100))
     room_type = Column(Integer, ForeignKey(RoomType.id), nullable=False)
+
+    type = relationship('RoomType', backref='rooms', lazy=True)
 
     def __str__(self):
         return self.name

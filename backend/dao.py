@@ -2,7 +2,7 @@ import cloudinary
 
 import cloudinary.uploader
 from sqlalchemy.exc import IntegrityError
-from backend.models import Category, Product, Room, User, Job
+from backend.models import Category, Product, Room, User, Job, UserRole
 from backend import app, db
 from backend.utils import hash_password
 
@@ -73,6 +73,7 @@ def add_user(name, username, password, email,
              username=username.strip(),
              password=hash_password(password),
              email=email,
+             role=UserRole.CUSTOMER,
              phone=phoneNumber)
 
     if avatar:

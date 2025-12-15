@@ -1,3 +1,4 @@
+from email.mime import image
 import random
 
 from backend import app, db
@@ -31,12 +32,21 @@ if __name__ == '__main__':
         db.session.flush()
 
         rooms = []
+        image_urls = [
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765792240/kararoom_peudkz.jpg",
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796772/kararoom5_fvddfy.jpg",
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796771/kararoom4_hdv9a7.jpg",
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796771/kararoom1_frgbt5.jpg",
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796771/kararoom2_ps4j9u.jpg",
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796771/kararoom3_d7o77f.jpg"
+        ]
         for i in range(1, 11):
             room = Room(
                 name=f"Phòng cơ bản {i:02d}",
                 capacity=random.choice([4, 6, 8, 10, 12]),
                 status=RoomStatus.AVAILABLE,
-                room_type=rt_standard.id
+                room_type=rt_standard.id,
+                image=random.choice(image_urls)
             )
             rooms.append(room)
 
@@ -45,7 +55,8 @@ if __name__ == '__main__':
                 name=f"Phòng VIP {i:02d}",
                 capacity=random.choice([6, 10, 12, 14, 15]),
                 status=RoomStatus.AVAILABLE,
-                room_type=rt_vip.id
+                room_type=rt_vip.id,
+                image=random.choice(image_urls)
             )
             rooms.append(room)
 
@@ -54,7 +65,8 @@ if __name__ == '__main__':
                 name=f"Phòng Party {i:02d}",
                 capacity=15,
                 status=RoomStatus.AVAILABLE,
-                room_type=rt_party.id
+                room_type=rt_party.id,
+                image=random.choice(image_urls)
             )
             rooms.append(room)
 
