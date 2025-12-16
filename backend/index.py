@@ -118,6 +118,17 @@ def rooms_preview():
     return render_template('rooms.html', rooms=rooms,
                            pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
 
+# ===========================================================
+#   Payments Page
+# ===========================================================
+@app.route('/payments')
+@login_required
+def payments_preview():
+    payments = dao.get_payments(user_id=current_user.id,
+                                page=int(request.args.get('page', 1)))
+
+    return render_template('payments.html', payments=payments,
+                           pages=math.ceil(dao.count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 @login.user_loader
 def load_user(pk):

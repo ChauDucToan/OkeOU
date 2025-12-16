@@ -22,13 +22,20 @@
                             Orders
                         </a>
                     </li>
+                    {% if current_user.is_authenticated and not current_user.is_customer %}
                     <li class="nav-item">
-                        <a href="/rooms" class="nav-link flex-row {{ 'active' if request.path == '/rooms' else '' }}">
+                        <a href="/payments" class="nav-link flex-row {{ 'active' if request.path == '/payments' else '' }}">
+                            Payments
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a href="/rooms" class="nav-link flex-row {{ 'active' if request.path.startswith('/rooms') else '' }}">
                             Rooms
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/products" class="nav-link flex-row {{ 'active' if request.path == '/products' else '' }}">
+                        <a href="/products" class="nav-link flex-row {{ 'active' if request.path.startswith('/products') else '' }}">
                             Products
                         </a>
                     </li>

@@ -30,7 +30,16 @@ if __name__ == '__main__':
             role=UserRole.ADMIN
         )
 
-        db.session.add_all([default_user, admin_user])
+        staff_user = User(
+            name='staff',
+            username='staff',
+            password=hash_password('okeou'),
+            phone='4545454545',
+            email='staff@ou.edu.vn',
+            role=UserRole.STAFF
+        )
+
+        db.session.add_all([default_user, admin_user, staff_user])
         db.session.commit()
 
         rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)

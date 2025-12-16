@@ -51,14 +51,12 @@ class User(BaseModel, UserMixin):
 
 class LoyalCustomer(User):
     id = Column(Integer, ForeignKey(User.id), primary_key=True)
-    customer_points = Column(Integer, default=0, nullable=False)
     card_usages = relationship('CustomerCardUsage', lazy=True)
 
 
 class CustomerCardUsage(BaseModel):
     loyal_customer_id = Column(Integer, ForeignKey(LoyalCustomer.id), nullable=False)
     usage_date = Column(DateTime, default=datetime.now)
-    amount = Column(Integer, nullable=False)
 
 
 class Staff(User):
@@ -200,22 +198,23 @@ class Product(BaseModel):
     amount = Column(Integer, nullable=False)
     unit = Column(String(100), nullable=False)
     active = Column(Boolean, default=True)
+    orders = relationship('ProductOrder', backref='product', lazy=True)
 
     def __str__(self):
         return self.name
 
 
-product_order = db.Table('product_order',
-                         Column('product_id', Integer, ForeignKey(Product.id), primary_key=True),
-                         Column('order_id', Integer, ForeignKey('order.id'), primary_key=True),
-                         Column('amount', Integer, nullable=False),
-                         Column('price_at_time', Integer, nullable=False))
+class ProductOrder(BaseModel):
+    product_id = Column(Integer, ForeignKey(Product.id), primary_key=True)
+    order_id = Column(Integer, ForeignKey('order.id'), primary_key=True)
+    amount = Column(Integer, nullable=False)
+    price_at_time = Column(Integer, nullable=False)
 
 
 class Order(BaseModel):
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
-    details = relationship('Product', secondary='product_order', lazy=True)
+    details = relationship('ProductOrder', backref='order', lazy=True)
 
 
 # ===========================================================
@@ -228,7 +227,6 @@ class PaymentMethod(GenericEnum):
 
 
 class Receipt(BaseModel):
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
 
@@ -241,8 +239,8 @@ class ReceiptDetails(BaseModel):
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)
-    discount_amount = Column(Float, default=0.0)
-    vat_amount = Column(Float, default=0.1)
+    discount_rate = Column(Float, default=0.0)
+    vat_rate = Column(Float, default=0.1)
 
     payment_method = Column(Enum(PaymentMethod), default=PaymentMethod.CASH)
 
