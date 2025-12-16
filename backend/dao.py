@@ -1,4 +1,3 @@
-import math
 import cloudinary.uploader
 import cloudinary
 
@@ -121,6 +120,16 @@ def add_user(name, username, password, email,
         u.avatar = res.get('secure_url')
 
     db.session.add(u)
+    try:
+        db.session.commit()
+    except IntegrityError as ie:
+        db.session.rollback()
+        raise Exception(str(ie.orig))
+    
+
+def add_loyal_customer(user_id):
+    loyal = LoyalCustomer(id=user_id)
+    db.session.add(loyal)
     try:
         db.session.commit()
     except IntegrityError as ie:
