@@ -8,27 +8,27 @@
                 </a>
                 <ul class="nav nav-pills">
                     <li class="nav-item">
-                        <a href="/" class="nav-link active">
+                        <a href="/" class="nav-link flex-row {{ 'active' if request.path == '/' else '' }}">
                             Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link flex-row">
+                        <a href="#" class="nav-link flex-row {{ 'active' if request.path == '/dashboard' else '' }}">
                             Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link flex-row">
+                        <a href="#" class="nav-link flex-row {{ 'active' if request.path == '/orders' else '' }}">
                             Orders
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/rooms" class="nav-link flex-row">
+                        <a href="/rooms" class="nav-link flex-row {{ 'active' if request.path == '/rooms' else '' }}">
                             Rooms
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/products" class="nav-link flex-row">
+                        <a href="/products" class="nav-link flex-row {{ 'active' if request.path == '/products' else '' }}">
                             Products
                         </a>
                     </li>

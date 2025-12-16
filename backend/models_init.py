@@ -3,7 +3,7 @@ import random
 
 from backend import app, db
 from backend.models import Category, Product, Room, RoomStatus, RoomType, User, UserRole
-from utils import hash_password
+from backend.utils import hash_password
 
 if __name__ == '__main__':
     with app.app_context():
