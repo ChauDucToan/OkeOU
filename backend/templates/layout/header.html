@@ -7,16 +7,13 @@
                     <img width="115" height="75" src="/static/images/logo.png" alt="OkeOU">
                 </a>
                 <ul class="nav nav-pills">
+                    {% if current_user.is_authenticated and not current_user.is_staff %}
                     <li class="nav-item">
                         <a href="/" class="nav-link flex-row {{ 'active' if request.path == '/' else '' }}">
                             Home
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link flex-row {{ 'active' if request.path == '/dashboard' else '' }}">
-                            Dashboard
-                        </a>
-                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a href="#" class="nav-link flex-row {{ 'active' if request.path == '/orders' else '' }}">
                             Orders
