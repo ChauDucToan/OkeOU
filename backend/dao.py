@@ -91,14 +91,6 @@ def get_user_by_id(user_id):
     return User.query.get(user_id)
 
 
-def is_loyal_customer(user_id):
-    user = get_user_by_id(user_id)
-    loyal_user = LoyalCustomer.query.get(user.id)
-    if loyal_user:
-        return True
-    return False
-
-
 def auth_user(username, password):
     password = hash_password(password)
     return User.query.filter(User.username == username.strip(),
