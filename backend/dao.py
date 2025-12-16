@@ -4,7 +4,7 @@ from flask_login import current_user
 
 from datetime import timedelta, datetime
 from sqlalchemy.exc import IntegrityError
-from backend.models import Category, Product, User, Job, Room, RoomStatus, Session, SessionStatus, Order, product_order, \
+from backend.models import Category, Product, User, Job, Room, RoomStatus, Session, SessionStatus, Order, \
     RoomType, LoyalCustomer, CustomerCardUsage, PaymentMethod, Receipt, ReceiptDetails, UserRole
 from backend import app, db
 from backend.utils import hash_password
@@ -17,7 +17,7 @@ def count_rooms():
     return Room.query.count()
 
 
-def load_rooms(room_id, status=None, kw=None, page=1):
+def load_rooms(room_id=None, status=None, kw=None, page=1):
     q = Room.query
     if kw:
         q = q.filter(Room.name.contains(kw))
@@ -278,12 +278,6 @@ def create_receipt(session_id, staff_id, payment_method):
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
-
-def load_rooms(status=None):
-    query = Room.query
-    if status:
-        query = query.filter(Room.status==status)
-    return query.all()
 
 def get_current_session(room_id):
     return Session.query.filter(Session.room_id==room_id,

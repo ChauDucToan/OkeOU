@@ -1,5 +1,5 @@
 import math
-from flask import render_template, session, redirect, request, jsonify, redirect, request
+from flask import render_template, session, jsonify, redirect, request
 from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login
@@ -211,7 +211,7 @@ def pay():
         return jsonify({'status': 400, 'err_msg': str(ex)}), 400
 
 
-@app.route('/rooms/')
+@app.route('/rooms-dashboard/')
 def rooms():
     return render_template('dashboard/rooms_dashboard.html',
                            get_rooms=dao.load_rooms)
