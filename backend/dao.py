@@ -128,24 +128,36 @@ def add_user(name, username, password, email,
     
 
 def add_loyal_customer(user_id):
-    loyal = LoyalCustomer(id=user_id)
-    db.session.add(loyal)
-    try:
-        db.session.commit()
-    except IntegrityError as ie:
-        db.session.rollback()
-        raise Exception(str(ie.orig))
+    loyal = LoyalCustomer.query.get(user_id)
+    if not loyal:
+        now = datetime.now()
+        start_date = datetime(now.year, now.month, 1)
+        counter = count_sessions(user_id=user_id, 
+                                status=SessionStatus.COMPLETED,
+                                start_date=start_date)
+        if counter >= 10:
+            loyal = LoyalCustomer(id=user_id)
+            db.session.add(loyal)
+            try:
+                db.session.commit()
+            except IntegrityError as ie:
+                db.session.rollback()
+                raise Exception(str(ie.orig))
 
 
 # ===========================================================
 #   Sessions dao functions
 # ===========================================================
-def count_sessions(user_id=None, status=None):
+def count_sessions(user_id=None, status=None, start_date=None, end_date=None):
     r = Session.query
     if user_id:
         r = r.filter(Session.user_id == user_id)
     if status:
         r = r.filter(Session.session_status == status)
+    if start_date:
+        r = r.filter(Session.start_time >= start_date)
+    if end_date:
+        r = r.filter(Session.start_time <= end_date)
     return r.count()
 
 
@@ -229,6 +241,7 @@ def get_payments(session_id=None, page=1):
         start = (page - 1) * page_size
         r = r.slice(start, start + page_size)
     return r.all()
+
 
 def create_receipt(session_id, staff_id, payment_method):
     receipt = Receipt(session_id=session_id, staff_id=staff_id)

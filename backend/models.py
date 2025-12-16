@@ -110,7 +110,7 @@ class Application(BaseModel):
     submit_date = Column(DateTime, default=datetime.now)
 
     def __str__(self):
-        return f"{self.full_name} - {self.job_posting.title}"
+        return self.full_name
 
 
 # ===========================================================
