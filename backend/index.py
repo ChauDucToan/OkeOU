@@ -1,26 +1,35 @@
-
+import math
 from flask import render_template, session, redirect, request, jsonify, redirect, request
 from flask_login import current_user, login_required, logout_user, login_user
 
-from backend import dao
 from backend import app, login
+from backend import dao
 from backend.dao import add_user, auth_user, get_user_by_id
 from backend.models import PaymentMethod, UserRole
+
 
 # ===========================================================
 #   Page Redirect
 # ===========================================================
 @app.route('/')
 def index():
-    return render_template('index.html')
+    rooms = dao.load_rooms(room_id=request.args.get('room_id'),
+                           kw=request.args.get('kw'),
+                           page=int(request.args.get('page', 1)))
+
+    return render_template('index.html', rooms=rooms,
+                           pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
+
 
 @app.route('/login')
 def loginView():
     return render_template('login.html')
 
+
 @app.route('/register')
 def registerView():
     return render_template('register.html')
+
 
 # ===========================================================
 #   Login & Logout & Register
@@ -29,6 +38,7 @@ def registerView():
 def logout_process():
     logout_user()
     return redirect('/')
+
 
 @app.route('/login', methods=['POST'])
 def login_process():
@@ -45,6 +55,7 @@ def login_process():
     next = request.args.get('next')
     return redirect(next if next else '/')
 
+
 @app.route('/register', methods=['POST'])
 def register_process():
     data = request.form
@@ -59,14 +70,15 @@ def register_process():
         return render_template('register.html', err_msg=err_msg)
 
     try:
-        add_user(name=data.get('name'), 
-                username=data.get('username'), 
-                password=password,
-                email=email,
-                phoneNumber=phoneNumber)
+        add_user(name=data.get('name'),
+                 username=data.get('username'),
+                 password=password,
+                 email=email,
+                 phoneNumber=phoneNumber)
         return redirect('/login')
     except Exception as ex:
         return render_template('register.html', err_msg=str(ex))
+
 
 # ===========================================================
 #   User Profiles Previews
@@ -76,13 +88,46 @@ def register_process():
 def profile_preview():
     user = get_user_by_id(current_user.id)
 
-    print(user.avatar)
-    print(user.name)
-    print(user.username)
-    print(user.password)
-
 
     return render_template('profile.html', user=user)
+
+
+# ===========================================================
+#   Products Page
+# ===========================================================
+@app.route('/products')
+def products_preview():
+    products = dao.get_products(kw=request.args.get('kw'),
+                                category_id=request.args.get('category_id'),
+                                page=int(request.args.get('page', 1)))
+    categories = dao.get_categories()
+
+    return render_template('products.html', products=products,
+                           categories=categories,
+                           pages=math.ceil(dao.count_products() / app.config['PAGE_SIZE']))
+
+
+# ===========================================================
+#   Rooms Page
+# ===========================================================
+@app.route('/rooms')
+def rooms_preview():
+    rooms = dao.load_rooms(room_id=request.args.get('room_id'),
+                           status=request.args.get('status'),
+                           kw=request.args.get('kw'),
+                           page=int(request.args.get('page', 1)))
+
+    return render_template('rooms.html', rooms=rooms,
+                           pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
+
+# ===========================================================
+#   Payments Page
+# ===========================================================
+@app.route('/payments')
+@login_required
+def payments_preview():
+    return render_template('payments.html',
+                           pages=math.ceil(dao.count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
 @app.route('/api/payment/caculate', methods=['post'])
@@ -184,6 +229,8 @@ def payment_page():
 def load_user(pk):
     return get_user_by_id(pk)
 
+
 if __name__ == '__main__':
     from backend import admin
+
     app.run(debug=True)
