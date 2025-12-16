@@ -15,7 +15,7 @@ def load_rooms(room_id, status=None, kw=None, page=1):
     q = Room.query
     if kw:
         q = q.filter(Room.name.contains(kw))
-    
+
     if room_id:
         q = q.filter(Room.id.__eq__(room_id))
 
@@ -25,7 +25,7 @@ def load_rooms(room_id, status=None, kw=None, page=1):
     if page:
         start = (page - 1) * app.config["PAGE_SIZE"]
         q = q.slice(start, start + app.config["PAGE_SIZE"])
-    
+
     return q.all()
 
 
@@ -54,7 +54,7 @@ def get_jobs():
     return Job.query.all()
 
 
-def count_products(kw = None, category_id = None):
+def count_products(kw=None, category_id=None):
     p = Product.query
 
     if category_id:
@@ -76,9 +76,9 @@ def auth_user(username, password):
                              User.password == password).first()
 
 
-def add_user(name, username, password, email, 
-            phoneNumber,
-            avatar = "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
+def add_user(name, username, password, email,
+             phoneNumber,
+             avatar="https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
     u = User(name=name,
              username=username.strip(),
              password=hash_password(password),

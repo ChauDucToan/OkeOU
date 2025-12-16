@@ -6,25 +6,29 @@ from backend import app, login
 from backend import dao
 from backend.dao import add_user, auth_user, get_user_by_id
 
+
 # ===========================================================
 #   Page Redirect
 # ===========================================================
 @app.route('/')
 def index():
     rooms = dao.load_rooms(room_id=request.args.get('room_id'),
-                        kw=request.args.get('kw'),
-                        page=int(request.args.get('page', 1)))
+                           kw=request.args.get('kw'),
+                           page=int(request.args.get('page', 1)))
 
     return render_template('index.html', rooms=rooms,
                            pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
+
 
 @app.route('/login')
 def loginView():
     return render_template('login.html')
 
+
 @app.route('/register')
 def registerView():
     return render_template('register.html')
+
 
 # ===========================================================
 #   Login & Logout & Register
@@ -33,6 +37,7 @@ def registerView():
 def logout_process():
     logout_user()
     return redirect('/')
+
 
 @app.route('/login', methods=['POST'])
 def login_process():
@@ -49,6 +54,7 @@ def login_process():
     next = request.args.get('next')
     return redirect(next if next else '/')
 
+
 @app.route('/register', methods=['POST'])
 def register_process():
     data = request.form
@@ -63,14 +69,15 @@ def register_process():
         return render_template('register.html', err_msg=err_msg)
 
     try:
-        add_user(name=data.get('name'), 
-                username=data.get('username'), 
-                password=password, 
-                email=email,
-                phoneNumber=phoneNumber)
+        add_user(name=data.get('name'),
+                 username=data.get('username'),
+                 password=password,
+                 email=email,
+                 phoneNumber=phoneNumber)
         return redirect('/login')
     except Exception as ex:
         return render_template('register.html', err_msg=str(ex))
+
 
 # ===========================================================
 #   User Profiles Previews
@@ -81,6 +88,7 @@ def profile_preview():
     user = get_user_by_id(current_user.id)
 
     return render_template('profile.html', user=user)
+
 
 # ===========================================================
 #   Products Page
@@ -96,23 +104,27 @@ def products_preview():
                            categories=categories,
                            pages=math.ceil(dao.count_products() / app.config['PAGE_SIZE']))
 
+
 # ===========================================================
 #   Rooms Page
 # ===========================================================
 @app.route('/rooms')
 def rooms_preview():
     rooms = dao.load_rooms(room_id=request.args.get('room_id'),
-                        status=request.args.get('status'),
-                        kw=request.args.get('kw'),
-                        page=int(request.args.get('page', 1)))
+                           status=request.args.get('status'),
+                           kw=request.args.get('kw'),
+                           page=int(request.args.get('page', 1)))
 
     return render_template('rooms.html', rooms=rooms,
                            pages=math.ceil(dao.count_rooms() / app.config['PAGE_SIZE']))
+
 
 @login.user_loader
 def load_user(pk):
     return get_user_by_id(pk)
 
+
 if __name__ == '__main__':
     from backend import admin
+
     app.run(debug=True)

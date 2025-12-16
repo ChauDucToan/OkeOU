@@ -2,26 +2,35 @@ from email.mime import image
 import random
 
 from backend import app, db
-from backend.models import Category, Product, Room, RoomStatus, RoomType, User
-
+from backend.models import Category, Product, Room, RoomStatus, RoomType, User, UserRole
+from utils import hash_password
 
 if __name__ == '__main__':
     with app.app_context():
         random.seed(27)
 
-        def_name = f'usr{random.random()*10000:.0f}'
-        def_password = f'pwd{random.random()*10000:.0f}'
+        def_name = f'usr{random.random() * 10000:.0f}'
+        def_password = f'pwd{random.random() * 10000:.0f}'
         print(def_name, def_password)
 
         default_user = User(
-            name = def_name,
-            username = def_name,
-            password = def_password,
-            phone = '0123456789',
-            email = 'user@example.com',
+            name=def_name,
+            username=def_name,
+            password=hash_password(def_password),
+            phone='0123456789',
+            email='user@example.com',
         )
 
-        db.session.add(default_user)
+        admin_user = User(
+            name='admin',
+            username='admin',
+            password=hash_password('okeou'),
+            phone='3636363636',
+            email='admin@ou.edu.vn',
+            role=UserRole.ADMIN
+        )
+
+        db.session.add_all([default_user, admin_user])
         db.session.commit()
 
         rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)
@@ -113,7 +122,7 @@ if __name__ == '__main__':
                 "image": "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765797905/xucxich_ynbmkm.jpg",
                 "description": "Xúc xích nướng tiêu đen"
             },
-            
+
             {
                 "name": "Dĩa trái cây thập cẩm Lớn",
                 "price": 150000,
@@ -182,5 +191,3 @@ if __name__ == '__main__':
         db.session.add_all(products)
 
         db.session.commit()
-
-

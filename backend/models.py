@@ -36,6 +36,18 @@ class User(BaseModel, UserMixin):
     def __str__(self):
         return self.name
 
+    @property
+    def is_staff(self):
+        return self.role == UserRole.STAFF
+
+    @property
+    def is_admin(self):
+        return self.role == UserRole.ADMIN
+
+    @property
+    def is_customer(self):
+        return self.role == UserRole.CUSTOMER
+
 
 class LoyalCustomer(User):
     id = Column(Integer, ForeignKey(User.id), primary_key=True)
