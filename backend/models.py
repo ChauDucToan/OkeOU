@@ -67,7 +67,7 @@ class Staff(User):
 
 class StaffWorkingHour(BaseModel):
     login_date = Column(DateTime, default=datetime.now)
-    logout_date = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'))
+    logout_date = Column(DateTime, CheckConstraint('logout_date > login_date'))
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=False)
     bonus = Column(Float, default=0.0)
 

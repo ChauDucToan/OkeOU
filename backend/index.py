@@ -190,7 +190,7 @@ def staff_logincheck():
     if current_user.is_authenticated and current_user.is_staff:
         is_logout = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
                                                   ,StaffWorkingHour.logout_date == None).first()
-        if is_logout.logout_date:
+        if not is_logout:
             check = StaffWorkingHour(staff_id=current_user.id)
 
             db.session.add(check)

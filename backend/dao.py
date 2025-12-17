@@ -3,7 +3,8 @@ import cloudinary
 
 from datetime import timedelta, datetime
 from sqlalchemy.exc import IntegrityError
-from backend.models import Category, CustomerCardUsage, LoyalCustomer, Order, OrderStatus, Product, Receipt, ReceiptDetails, Room, Session, SessionStatus, User, Job, UserRole
+from backend.models import Category, CustomerCardUsage, LoyalCustomer, Order, OrderStatus, Product, Receipt, \
+    ReceiptDetails, Room, Session, SessionStatus, User, Job, UserRole
 from backend import app, db
 from backend.utils import hash_password
 
@@ -32,11 +33,13 @@ def load_rooms(room_id, status=None, kw=None, page=1):
 
     return q.all()
 
+
 def get_room_price(room_id):
     room = Room.query.get(room_id)
     if room:
         return room.type.hourly_price
     return 0
+
 
 # ===========================================================
 #   Categories dao functions
@@ -117,16 +120,16 @@ def add_user(name, username, password, email,
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
-    
+
 
 def add_loyal_customer(user_id):
     loyal = LoyalCustomer.query.get(user_id)
     if not loyal:
         now = datetime.now()
         start_date = datetime(now.year, now.month, 1)
-        counter = count_sessions(user_id=user_id, 
-                                status=SessionStatus.COMPLETED,
-                                start_date=start_date)
+        counter = count_sessions(user_id=user_id,
+                                 status=SessionStatus.COMPLETED,
+                                 start_date=start_date)
         if counter >= 10:
             loyal = LoyalCustomer(id=user_id)
             db.session.add(loyal)
@@ -251,13 +254,13 @@ def create_receipt(session_id, staff_id, payment_method):
         )
 
         db.session.add(card_usage)
-    
+
     order = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).first()
     receipt_details = ReceiptDetails(
         receipt_id=receipt.id,
         total_room_fee=get_session_price(session_id, datetime.now()),
         total_service_fee=get_order_price(order.id) if order else 0.0,
-        discount_rate= discount_rate,
+        discount_rate=discount_rate,
         payment_method=payment_method
     )
 

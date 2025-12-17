@@ -12,34 +12,39 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/staffs/payments" class="nav-link flex-row {{ 'active' if request.path == '/staffs/payments' else '' }}">
+                        <a href="/staffs/payments"
+                           class="nav-link flex-row {{ 'active' if request.path == '/staffs/payments' else '' }}">
                             Payments
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/staffs/rooms" class="nav-link flex-row {{ 'active' if request.path.startswith('/staffs/rooms') else '' }}">
+                        <a href="/staffs/rooms"
+                           class="nav-link flex-row {{ 'active' if request.path.startswith('/staffs/rooms') else '' }}">
                             Rooms
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/staffs/products" class="nav-link flex-row {{ 'active' if request.path.startswith('/staffs/products') else '' }}">
+                        <a href="/staffs/products"
+                           class="nav-link flex-row {{ 'active' if request.path.startswith('/staffs/products') else '' }}">
                             Products
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            href="#"
-                            role="button"
-                            aria-expanded="false">
+                           data-bs-toggle="dropdown"
+                           href="#"
+                           role="button"
+                           aria-expanded="false">
                             Xin chào!
                             <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" width="28" height="28"
                                  class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/api/logincheck">Điểm danh</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
                         </ul>
                     </li>
