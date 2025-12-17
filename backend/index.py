@@ -1,8 +1,11 @@
 import math
-from flask import render_template, redirect, request
+from datetime import datetime
+
+from flask import render_template, redirect, request, jsonify
 from flask_login import current_user, login_required, logout_user, login_user
 
-from backend import app, login, dao
+from backend import app, login, dao, db
+from backend.models import StaffWorkingHour
 
 
 # ===========================================================
@@ -36,6 +39,8 @@ def registerView():
 # ===========================================================
 @app.route('/logout')
 def logout_process():
+    if current_user.is_authenticated and current_user.is_staff:
+        return redirect('/api/logoutcheck')
     logout_user()
     return redirect('/')
 
@@ -180,8 +185,44 @@ def staff_rooms_preview():
 
 
 @app.route('/api/logincheck')
+@login_required
 def staff_logincheck():
-    pass
+    if current_user.is_authenticated and current_user.is_staff:
+        is_logout = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
+                                                  ,StaffWorkingHour.logout_date == None).first()
+        if is_logout.logout_date:
+            check = StaffWorkingHour(staff_id=current_user.id)
+
+            db.session.add(check)
+            db.session.commit()
+
+            return redirect('/staffs')
+
+    return jsonify({
+        'status': 400,
+        'err_msg': 'Kiểm tra lại quyền của người dùng'
+    })
+
+
+@app.route('/api/logoutcheck')
+@login_required
+def staff_logoutcheck():
+    if current_user.is_authenticated and current_user.is_staff:
+        check = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
+                                              ,StaffWorkingHour.logout_date == None).first()
+        if check:
+            check.logout_date = datetime.now()
+
+            db.session.add(check)
+            db.session.commit()
+
+            logout_user()
+            return redirect('/')
+
+    return jsonify({
+        'status': 400,
+        'err_msg': 'Kiểm tra lại quyền của người dùng'
+    })
 
 
 @login.user_loader
