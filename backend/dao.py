@@ -250,7 +250,7 @@ def create_receipt(session_id, staff_id, payment_method):
             loyal_customer_id=loyal.id,
         )
 
-        db.session.add_all([loyal, card_usage])
+        db.session.add(card_usage)
     
     order = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).first()
     receipt_details = ReceiptDetails(

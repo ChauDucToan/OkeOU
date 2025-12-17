@@ -2,7 +2,7 @@ from email.mime import image
 import random
 
 from backend import app, db
-from backend.models import Category, Product, Room, RoomStatus, RoomType, User, UserRole
+from backend.models import Category, Product, Room, RoomStatus, RoomType, User, UserRole, Staff
 from backend.utils import hash_password
 
 if __name__ == '__main__':
@@ -30,12 +30,13 @@ if __name__ == '__main__':
             role=UserRole.ADMIN
         )
 
-        staff_user = User(
+        staff_user = Staff(
             name='staff',
             username='staff',
             password=hash_password('okeou'),
             phone='4545454545',
             email='staff@ou.edu.vn',
+            identity_card='0123456789123',
             role=UserRole.STAFF
         )
 
