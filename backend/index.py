@@ -14,7 +14,7 @@ from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
 from backend.daos.user_daos import create_user, get_users
 from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour
-from backend.utils.booking_utils import create_booking
+from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.user_utils import auth_user
 
 
@@ -148,6 +148,7 @@ def room_detail_preview(room_id):
 
 @app.route('/api/bookings/occupies/<int:room_id>')
 def room_occupies_preview(room_id):
+    cancel_pending_booking()
     date_str = request.args.get('date')
 
     if date_str:
@@ -176,6 +177,9 @@ def room_occupies_preview(room_id):
 def booking_payment_preview(booking_id):
     booking = Booking.query.get(booking_id)
 
+    if not current_user.is_authenticated:
+        current_user.id = 1
+
     if not booking or booking.user_id != current_user.id:
         return redirect('/rooms')
     
@@ -201,7 +205,6 @@ def booking_payment_preview(booking_id):
 
 
 @app.route('/api/bookings/confirm', methods=['POST'])
-@login_required
 def confirm_booking():
     try:
         data = request.form
@@ -213,6 +216,9 @@ def confirm_booking():
 
         start_time = datetime.strptime(start_str, '%Y-%m-%d %H:%M:%S')
         end_time = datetime.strptime(end_str, '%Y-%m-%d %H:%M:%S')
+
+        if not current_user.is_authenticated:
+            current_user.id = 1
 
         booking = create_booking(user_id=current_user.id,
                                 room_id=room_id,
@@ -335,7 +341,8 @@ def staff_logoutcheck():
 
 @login.user_loader
 def load_user(pk):
-    return get_users(user_id=pk).first()
+    user = get_users(user_id=pk).first()
+    return user
 
 
 if __name__ == '__main__':

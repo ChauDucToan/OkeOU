@@ -8,10 +8,9 @@ from backend.models import Booking, BookingStatus, Room, RoomStatus, Session, Se
 def cancel_pending_booking():
     limit_time = datetime.now() - timedelta(minutes=15)
 
-    pending_booking = get_bookings(booking_status=[BookingStatus.PENDING]).filter(Booking.booking_date < limit_time).all()
+    pending_booking = get_bookings(booking_status=[BookingStatus.PENDING]).filter(Booking.booking_date < limit_time)
 
-    for booking in pending_booking:
-        booking.booking_status = BookingStatus.CANCELLED
+    pending_booking.update({Booking.booking_status: BookingStatus.CANCELLED}, synchronize_session=False)
 
     try:
         db.session.commit()
