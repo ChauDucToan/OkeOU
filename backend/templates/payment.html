@@ -1,0 +1,196 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Thanh toán đặt phòng{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary">Xác nhận thanh toán</h2>
+        <p class="text-muted">Vui lòng hoàn tất thanh toán để giữ phòng</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Chi tiết đặt phòng</h5>
+                </div>
+                <div class="card-body px-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <img src="{{ room.image }}" alt="Room" class="rounded" 
+                             style="width: 100px; height: 70px; object-fit: cover;">
+                        <div class="ms-3">
+                            <h4 class="mb-0 text-dark">{{ room.name }}</h4>
+                            <span class="badge bg-info text-dark">Sức chứa: {{ booking.head_count }} người</span>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6 text-muted">Mã đơn:</div>
+                        <div class="col-6 fw-bold text-end">#{{ booking.id }}</div>
+
+                        <div class="col-6 text-muted">Khách hàng:</div>
+                        <div class="col-6 fw-bold text-end">{{ current_user.name }}</div>
+
+                        <div class="col-6 text-muted">Bắt đầu:</div>
+                        <div class="col-6 fw-bold text-end text-primary">
+                            {{ booking.scheduled_start_time.strftime('%H:%M %d/%m/%Y') }}
+                        </div>
+
+                        <div class="col-6 text-muted">Kết thúc:</div>
+                        <div class="col-6 fw-bold text-end text-primary">
+                            {{ booking.scheduled_end_time.strftime('%H:%M %d/%m/%Y') }}
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <h5 class="mb-0">Tổng thanh toán:</h5>
+                        <h3 class="fw-bold text-danger mb-0">
+                            {{ "{:,.0f}".format(room.type.hourly_price * (booking.scheduled_end_time - booking.scheduled_start_time).total_seconds() / 3600) }} VNĐ
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 mb-4 bg-light">
+                <div class="card-body text-center py-4">
+                    <p class="mb-2 text-muted fw-bold">THỜI GIAN GIỮ CHỖ CÒN LẠI</p>
+                    <div class="display-4 fw-bold text-danger" id="countdown-timer">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white pt-4 px-4 border-bottom-0">
+                    <h5 class="mb-0 fw-bold">Chọn phương thức thanh toán</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form id="paymentForm" action="/api/payment/create_payment" method="POST">
+                        <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                        
+                        <div class="payment-option mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" id="vnpay" value="VNPAY" checked>
+                            <label class="form-check-label w-100 p-3 border rounded d-flex align-items-center justify-content-between cursor-pointer" for="vnpay">
+                                <span><i class="bi bi-credit-card-2-front me-2"></i>Ví VNPAY / Ngân hàng</span>
+                                <img src="https://vnpay.vn/assets/images/logo-icon/logo-primary.svg" height="24" alt="VNPay">
+                            </label>
+                        </div>
+
+                        <div class="payment-option mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" id="momo" value="MOMO">
+                            <label class="form-check-label w-100 p-3 border rounded d-flex align-items-center justify-content-between cursor-pointer" for="momo">
+                                <span><i class="bi bi-phone me-2"></i>Ví MoMo</span>
+                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" height="24" alt="Momo">
+                            </label>
+                        </div>
+
+                        <div class="payment-option mb-4">
+                            <input class="form-check-input" type="radio" name="payment_method" id="cash" value="CASH">
+                            <label class="form-check-label w-100 p-3 border rounded d-flex align-items-center justify-content-between cursor-pointer" for="cash">
+                                <span><i class="bi bi-cash-coin me-2"></i>Thanh toán tại quầy</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-5 shadow-sm">
+                            THANH TOÁN NGAY
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="timeoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body">
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-alarm-fill" style="font-size: 3rem;"></i>
+                </div>
+                <h3 class="fw-bold">Hết thời gian giữ chỗ!</h3>
+                <p class="text-muted">Đã quá 15 phút thanh toán. Đơn đặt phòng này đã bị hủy tự động để nhường chỗ cho khách hàng khác.</p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="/rooms/{{ room.id }}" class="btn btn-primary">Đặt lại phòng này</a>
+                    <a href="/" class="btn btn-outline-secondary">Về trang chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-option input[type="radio"] {
+        display: none; /* Ẩn nút radio mặc định */
+    }
+    .payment-option label {
+        transition: all 0.2s;
+        border: 1px solid #dee2e6;
+    }
+    /* Khi radio được check thì label đổi màu */
+    .payment-option input[type="radio"]:checked + label {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Lấy số giây còn lại từ server (Render bởi Jinja2)
+        let remainingTime = {{ remain_time | int }};
+        const timerElement = document.getElementById('countdown-timer');
+        const timeoutModal = new bootstrap.Modal(document.getElementById('timeoutModal'));
+        const payBtn = document.querySelector('button[type="submit"]');
+
+        function updateTimerDisplay() {
+            // Nếu hết giờ
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                timerElement.innerText = "00:00";
+                
+                // Hiện modal và khóa nút thanh toán
+                payBtn.disabled = true;
+                payBtn.innerText = "Hết hạn thanh toán";
+                timeoutModal.show();
+                return;
+            }
+
+            // Tính phút và giây
+            let m = Math.floor(remainingTime / 60);
+            let s = remainingTime % 60;
+            
+            // Format 00:00
+            m = m < 10 ? '0' + m : m;
+            s = s < 10 ? '0' + s : s;
+            
+            timerElement.innerText = `${m}:${s}`;
+            
+            // Hiệu ứng màu đỏ khi còn dưới 1 phút
+            if (remainingTime < 60) {
+                timerElement.classList.add('text-danger');
+                timerElement.classList.add('animate__animated', 'animate__flash'); // Nếu có animate.css
+            }
+            
+            remainingTime--;
+        }
+
+        // Chạy ngay lần đầu
+        updateTimerDisplay();
+        
+        // Loop mỗi giây
+        const timerInterval = setInterval(updateTimerDisplay, 1000);
+    });
+</script>
+
+{% endblock %}

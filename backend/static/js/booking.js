@@ -137,15 +137,31 @@ function showError(msg) {
 // Hàm gọi API thực tế (tái sử dụng từ code cũ của bạn)
 function submitBookingAPI() {
     const formData = new FormData(document.getElementById('bookingForm'));
-    fetch('/api/booking/confirm-create', { 
+    
+    const dateStr = document.getElementById('selectedDate').value; // Ví dụ: "2025-12-18"
+    
+    // 2. Lấy giờ từ form data hiện tại (chỉ là "14:30")
+    const timeStart = formData.get('start_time'); 
+    const timeEnd = formData.get('end_time');
+
+    // 3. Ghép chuỗi thành format chuẩn (YYYY-MM-DD HH:MM:SS)
+    // Lưu ý: Thêm ":00" vào giây cho chuẩn format
+    const fullStartTime = `${dateStr} ${timeStart}:00`; 
+    const fullEndTime = `${dateStr} ${timeEnd}:00`;
+
+    // 4. Ghi đè lại giá trị vào formData trước khi gửi
+    formData.set('start_time', fullStartTime);
+    formData.set('end_time', fullEndTime);
+    
+    fetch('/api/bookings/confirm', { 
         method: 'POST',
         body: formData
     })
     .then(res => res.json())
     .then(data => {
-        if (data.code === 200) {
+        if (data.status === 200) {
                 // Redirect sang trang thanh toán
-            window.location.href = `/booking/${data.booking_id}/payment`;
+            window.location.href = `/bookings/${data.booking_id}/payment`;
         } else {
             showError(data.msg || "Có lỗi xảy ra từ hệ thống.");
         }

@@ -1,5 +1,7 @@
 import math
 from datetime import datetime, timedelta
+from tracemalloc import start
+from turtle import st
 
 from flask import render_template, redirect, request, jsonify
 from flask_login import current_user, login_required, logout_user, login_user
@@ -9,9 +11,10 @@ from backend.daos.booking_daos import get_bookings
 from backend.daos.category_daos import get_categories
 from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
-from backend.daos.room_daos import count_rooms, load_rooms
+from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
 from backend.daos.user_daos import create_user, get_users
-from backend.models import BookingStatus, RoomStatus, StaffWorkingHour
+from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour
+from backend.utils.booking_utils import create_booking
 from backend.utils.user_utils import auth_user
 
 
@@ -167,6 +170,67 @@ def room_occupies_preview(room_id):
 
         return jsonify(result)
     return jsonify({})
+
+
+@app.route('/bookings/<int:booking_id>/payment')
+def booking_payment_preview(booking_id):
+    booking = Booking.query.get(booking_id)
+
+    if not booking or booking.user_id != current_user.id:
+        return redirect('/rooms')
+    
+    if booking.booking_status != BookingStatus.PENDING:
+         return redirect('/rooms')
+    
+    expire_time = booking.booking_date + timedelta(minutes=15)
+    remain_time = int((expire_time - datetime.now()).total_seconds())
+
+    if remain_time <= 0:
+        booking.booking_status = BookingStatus.CANCELLED
+        try:
+            db.session.commit()
+        except Exception as ex:
+            print(str(ex))
+        return redirect('/rooms')
+    
+    room = get_rooms(room_id=booking.room_id)[0]
+
+    return render_template('payment.html', booking=booking,
+                            room=room,
+                            remain_time=remain_time)
+
+
+@app.route('/api/bookings/confirm', methods=['POST'])
+@login_required
+def confirm_booking():
+    try:
+        data = request.form
+
+        room_id = data.get('room_id')
+        start_str = data.get('start_time') 
+        end_str = data.get('end_time')
+        head_count = data.get('head_count')
+
+        start_time = datetime.strptime(start_str, '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.strptime(end_str, '%Y-%m-%d %H:%M:%S')
+
+        booking = create_booking(user_id=current_user.id,
+                                room_id=room_id,
+                                scheduled_start_time=start_time,
+                                scheduled_end_time=end_time,
+                                head_count=int(head_count))
+
+        return jsonify({
+                'status': 200,
+                'booking_id': booking.id,
+                'msg': 'Created booking'
+            })
+    
+    except Exception as ex:
+        return jsonify({
+                'status': 400,
+                'msg': str(ex)
+            })
 
 # ===========================================================
 #   Payments Page
