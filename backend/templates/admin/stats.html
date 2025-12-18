@@ -1,0 +1,266 @@
+{% extends 'admin/master.html' %} {% block body %}
+<div class="container">
+  <div
+    class="d-flex justify-content-between align-items-center bg-white rounded-3 p-2 mt-3"
+  >
+    <h5>Thống kê báo cáo</h5>
+    <div>
+      <div class="dropdown">
+        <button
+          class="btn btn-outline-secondary dropdown-toggle"
+          type="button"
+          id="dropdownMenu1"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          Ngày
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
+          <a class="dropdown-item" value="day" href="#">Ngày</a>
+          <a class="dropdown-item" value="month" href="#">Tháng</a>
+          <a class="dropdown-item" value="quarter" href="#">Quý</a>
+          <a class="dropdown-item" value="year" href="#">Năm</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex mt-3">
+    <div class="card card-outline-primary m-3 shadow-sm w-25">
+      <div
+        class="card-block d-flex p-4 align-items-center justify-content-between"
+      >
+        <div class="text-left">
+          <p class="mb-0 text-muted">Doanh thu</p>
+          <h4 class="font-weight-bold text-success mb-0">25M</h4>
+        </div>
+
+        <div
+          class="growth-badge d-flex align-items-center justify-content-center ml-4"
+        >
+          +15%
+        </div>
+      </div>
+    </div>
+    <div class="card card-outline-primary m-3 shadow-sm w-25">
+      <div
+        class="card-block d-flex p-4 align-items-center justify-content-between"
+      >
+        <div class="text-left">
+          <p class="mb-0 text-muted">Đơn hàng</p>
+          <h4 class="font-weight-bold text-danger mb-0">89</h4>
+        </div>
+
+        <div
+          class="growth-badge d-flex align-items-center justify-content-center ml-2"
+        >
+          +17%
+        </div>
+      </div>
+    </div>
+    <div class="card card-outline-primary m-3 shadow-sm w-25">
+      <div
+        class="card-block d-flex p-4 align-items-center justify-content-between"
+      >
+        <div class="text-left">
+          <p class="mb-0 text-muted">Khách hàng</p>
+          <h4 class="font-weight-bold text-primary mb-0">142</h4>
+        </div>
+
+        <div
+          class="growth-badge d-flex align-items-center justify-content-center ml-2"
+        >
+          +14%
+        </div>
+      </div>
+    </div>
+    <div class="card card-outline-primary m-3 shadow-sm w-25">
+      <div
+        class="card-block d-flex p-4 align-items-center justify-content-between"
+      >
+        <div class="text-left">
+          <p class="mb-0 text-muted">Tăng trưởng</p>
+          <h4 class="font-weight-bold text-warning mb-0">+18.7%</h4>
+        </div>
+
+        <div
+          class="growth-badge d-flex align-items-center justify-content-center ml-2"
+        >
+          +15%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap">
+    <div class="w-50" style="height: 500px">
+      <div class="p-4 bg-white m-2 rounded shadow-sm h-50">
+        <canvas id="myChartTime"></canvas>
+      </div>
+      <div class="p-4 bg-white m-2 rounded shadow-sm h-50">
+        <canvas id="myChartService"></canvas>
+      </div>
+    </div>
+    <div class="w-50">
+      <div class="p-4 bg-white m-2 rounded shadow-sm" style="height: 500px">
+        <canvas id="myChartRoom"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    function drawChart(ctx, labels, data, type = "bar") {
+      new Chart(ctx, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "# Doanh thu",
+              data: data,
+              borderWidth: 1,
+              backgroundColor: [
+                "red",
+                "green",
+                "blue",
+                "gold",
+                "brown",
+                "pink",
+              ],
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 2,
+              borderRadius: 5,
+              barPercentage: 0.6,
+            },
+          ],
+        },
+        options: {
+          resonsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (value) => value.toLocaleString("vi-VN") + " ₫",
+              },
+            },
+          },
+        },
+      });
+    }
+
+    function generateData(periodType) {
+      // ------------------------------------------------
+      // 1. Tạo dữ liệu cho Biểu đồ chính (Timeline)
+      // ------------------------------------------------
+      let timeLabels = [];
+      switch (periodType) {
+        case "hour":
+          for (let i = 8; i <= 23; i++) timeLabels.push(`${i}h:00`);
+          break;
+        case "day":
+          timeLabels = [
+            "Thứ 2",
+            "Thứ 3",
+            "Thứ 4",
+            "Thứ 5",
+            "Thứ 6",
+            "Thứ 7",
+            "Chủ Nhật",
+          ];
+          break;
+        case "month":
+          for (let i = 1; i <= 12; i++) timeLabels.push(`Tháng ${i}`);
+          break;
+        case "quarter":
+          timeLabels = ["Quý 1", "Quý 2", "Quý 3", "Quý 4"];
+          break;
+        case "year":
+          timeLabels = ["2022", "2023", "2024", "2025"];
+          break;
+      }
+      // Doanh thu tổng theo thời gian
+      const timeData = timeLabels.map(
+        () => Math.floor(Math.random() * 5000000) + 1000000
+      );
+
+      // ------------------------------------------------
+      // 2. Tạo dữ liệu cho Biểu đồ Loại phòng (Room Type)
+      // ------------------------------------------------
+      // Chỉ có 2 loại chính, số liệu là Tổng doanh thu trong khoảng thời gian đó
+      const roomLabels = ["Phòng VIP", "Phòng Thường"];
+      const roomData = [
+        Math.floor(Math.random() * 20000000) + 10000000, // VIP thường cao hơn
+        Math.floor(Math.random() * 10000000) + 5000000,
+      ];
+
+      // ------------------------------------------------
+      // 3. Tạo dữ liệu cho Biểu đồ Top Dịch vụ (Top Products)
+      // ------------------------------------------------
+      const productLabels = [
+        "Heineken",
+        "Tiger",
+        "Mực nướng",
+        "Hải sản nướng",
+        "Coca Cola",
+      ];
+      const productData = productLabels.map(
+        () => Math.floor(Math.random() * 5000000) + 500000
+      );
+
+      // Trả về object chứa 3 bộ dữ liệu chuẩn format {labels, data}
+      return {
+        timeline: {
+          labels: timeLabels,
+          data: timeData,
+        },
+        roomType: {
+          labels: roomLabels,
+          data: roomData,
+        },
+        topProducts: {
+          labels: productLabels,
+          data: productData,
+        },
+      };
+    }
+
+    const {
+      timeline: hourTimeline, // Dữ liệu biểu đồ đường
+      roomType: hourRoom, // Dữ liệu biểu đồ tròn
+      topProducts: hourProducts, // Dữ liệu biểu đồ cột
+    } = generateData("hour");
+
+    // // 2. Lấy dữ liệu Ngày
+    // const {
+    //     timeline: dayTimeline,
+    //     roomType: dayRoom,
+    //     topProducts: dayProducts
+    // } = generateData("day");
+
+    // // 3. Lấy dữ liệu Tháng
+    // const {
+    //     timeline: monthTimeline,
+    //     roomType: monthRoom,
+    //     topProducts: monthProducts
+    // } = generateData("month");
+
+    const ctx1 = document.getElementById("myChartTime");
+    drawChart(ctx1, hourTimeline.labels, hourTimeline.data, "line");
+
+    const ctx2 = document.getElementById("myChartRoom");
+    drawChart(ctx2, hourRoom.labels, hourRoom.data, "pie");
+
+    const ctx3 = document.getElementById("myChartService");
+    drawChart(ctx3, hourProducts.labels, hourProducts.data, "bar");
+  </script>
+</div>
+
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
+</style>
+{% endblock %}

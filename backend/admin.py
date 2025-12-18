@@ -6,6 +6,7 @@ from flask_login import current_user, logout_user
 from backend import app, db
 from backend.models import Room, RoomType, Product, Staff
 
+from backend import app
 
 class AdminView(ModelView):
     def is_accessible(self):
@@ -57,6 +58,18 @@ class LogoutView(BaseView):
     def is_accessible(self) -> bool:
         return current_user.is_authenticated and current_user.is_admin
 
+class StatsView(BaseView):
+    @expose('/')
+    def index(self):
+        return self.render('admin/stats.html')
+
+    @expose('/time')
+    def time_stats(self):
+        return self.render('admin/time_stats.html')
+
+    def is_accessible(self) -> bool:
+        return current_user.is_authenticated and current_user.is_admin
+
 
 class MyAdminIndexView(AdminIndexView):
     @expose('/')
@@ -70,4 +83,5 @@ admin.add_view(AdminView(Staff, db.session))
 admin.add_view(RoomView(Room, db.session))
 admin.add_view(RoomTypeView(RoomType, db.session))
 admin.add_view(ProductView(Product, db.session))
+admin.add_view(StatsView(name="Thống kê"))
 admin.add_view(LogoutView(name='Logout'))

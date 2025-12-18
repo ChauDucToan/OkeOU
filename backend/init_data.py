@@ -28,14 +28,22 @@ def create_sample_data():
         db.session.add_all([type_normal, type_vip])
         db.session.commit()
 
+        # Định nghĩa placeholder ảnh phòng
+        ROOM_NORMAL_IMG = "https://res.cloudinary.com/okeou/image/upload/v1/room_normal.jpg"
+        ROOM_VIP_IMG = "https://res.cloudinary.com/okeou/image/upload/v1/room_vip.jpg"
+
         # P101 (Thường) - Đang có khách
-        room1 = Room(name="P101", capacity=10, room_type=type_normal.id, status=RoomStatus.OCCUPIED)
+        # Đã thêm image=ROOM_NORMAL_IMG
+        room1 = Room(name="P101", capacity=10, room_type=type_normal.id, status=RoomStatus.OCCUPIED, image=ROOM_NORMAL_IMG)
         # VIP01 (VIP) - Trống
-        room2 = Room(name="VIP01", capacity=15, room_type=type_vip.id, status=RoomStatus.AVAILABLE)
+        # Đã thêm image=ROOM_VIP_IMG
+        room2 = Room(name="VIP01", capacity=15, room_type=type_vip.id, status=RoomStatus.AVAILABLE, image=ROOM_VIP_IMG)
         # VIP02 (VIP) - Đang có khách
-        room3 = Room(name="VIP02", capacity=15, room_type=type_vip.id, status=RoomStatus.OCCUPIED)
+        # Đã thêm image=ROOM_VIP_IMG
+        room3 = Room(name="VIP02", capacity=15, room_type=type_vip.id, status=RoomStatus.OCCUPIED, image=ROOM_VIP_IMG)
         # P102 (Thường) - Đang có khách
-        room4 = Room(name="P102", capacity=12, room_type=type_normal.id, status=RoomStatus.OCCUPIED)
+        # Đã thêm image=ROOM_NORMAL_IMG
+        room4 = Room(name="P102", capacity=12, room_type=type_normal.id, status=RoomStatus.OCCUPIED, image=ROOM_NORMAL_IMG)
 
         db.session.add_all([room1, room2, room3, room4])
         db.session.commit()
@@ -44,6 +52,14 @@ def create_sample_data():
         # 3. Tạo User
         # ---------------------------------------------------------
         print("👤 Tạo dữ liệu User...")
+
+        # Admin
+        admin = Staff(
+            name="Nguyễn Văn Thu Ngân", username="admin", password=hash_password('123456'),
+            role=UserRole.ADMIN,
+            phone="0901234533", email="admin@okeou.com", identity_card="079123456222"
+        )
+        db.session.add(admin)
 
         # Nhân viên
         staff = Staff(
@@ -114,7 +130,7 @@ def create_sample_data():
         sess2 = Session(
             start_time=datetime.now() - timedelta(minutes=30),
             session_status=SessionStatus.ACTIVE,
-            user_id=customer_vip.id,  # Ông VIP này bao 2 phòng
+            user_id=customer_vip.id,
             room_id=room3.id
         )
 

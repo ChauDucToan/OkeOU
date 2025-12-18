@@ -58,7 +58,7 @@ function pay() {
       })
       .then((data) => {
         alert(data.msg);
-        window.location.href = "/rooms/";
+        window.location.href = "/rooms-dashboard/";
       })
       .catch((err) => {
         alert(err.message);

@@ -41,8 +41,9 @@ endblock %} {% block content %}
         <hr class="my-2" />
         <div class="d-flex justify-content-between">
           <button class="btn btn-outline-secondary">Xem chi tiết</button>
-          {% if r.status.name == "OCCUPIED" and current_user.role.name ==
-          "STAFF" %}
+          {% if r.status.name == "OCCUPIED" and (current_user.role.name ==
+          "STAFF" or current_user.role.name ==
+          "ADMIN") %}
           <button class="btn btn-primary" onclick="caculateBill({{r.id}})">
             Trả phòng
           </button>

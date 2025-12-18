@@ -213,8 +213,9 @@
         <button class="btn btn-outline-secondary" onclick="window.print()">
           Xuất hóa đơn
         </button>
-        {% if current_user.is_authenticated and current_user.role.name ==
-        'STAFF' %}
+        {% if current_user.is_authenticated and (current_user.role.name ==
+        'STAFF' or current_user.role.name ==
+        'ADMIN')%}
         <button class="btn btn-success" onclick="pay()">Thanh toán</button>
         {% endif %}
       </div>
