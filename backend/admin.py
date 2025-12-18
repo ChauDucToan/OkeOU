@@ -1,13 +1,15 @@
-from flask import redirect
+from flask import redirect, request
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 
-import dao
 from backend import app, db
 from backend.models import Room, RoomType, Product, Staff
 
 from backend import app
+from daos.revenue_daos import revenue_by_room_type, revenue_by_product, revenue_by_time, revenue_by_room_name, \
+    count_customers
+
 
 class AdminView(ModelView):
     def is_accessible(self):
@@ -66,7 +68,11 @@ class StatsView(BaseView):
 
     @expose('/time')
     def time_stats(self):
-        return self.render('admin/time_stats.html', stats=dao.revenue_room('day'))
+        period = request.args.get('period')
+        return self.render('admin/time_stats.html', revenue_by_room_name=revenue_by_room_name(period),
+                           revenue_by_room_type=revenue_by_room_type(period),
+                           revenue_by_product=revenue_by_product(period),
+                           revenue_by_time=revenue_by_time(period))
 
     def is_accessible(self) -> bool:
         return current_user.is_authenticated and current_user.is_admin

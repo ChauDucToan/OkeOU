@@ -1,16 +1,15 @@
 import math
-from datetime import datetime
-
-from flask import render_template, redirect, request, jsonify, session
+from datetime import datetime, timedelta
+from flask import render_template, session, jsonify, redirect, request
 from flask_login import current_user, login_required, logout_user, login_user
 
-import dao
 from backend import app, login, db
 from backend.daos.category_daos import get_categories
-from backend.daos.payment_daos import count_payments
+from backend.daos.payment_daos import count_payments, calculate_bill, add_bill
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, load_rooms
 from backend.daos.user_daos import add_user, get_users
+from backend.daos.session_daos import get_sessions
 from backend.models import StaffWorkingHour, UserRole, PaymentMethod
 from backend.utils.user_utils import auth_user
 
@@ -46,8 +45,8 @@ def registerView():
 # ===========================================================
 @app.route('/logout')
 def logout_process():
-    if current_user.is_authenticated and current_user.is_staff:
-        return redirect('/api/logoutcheck')
+    # if current_user.is_authenticated and current_user.is_staff:
+    #     return redirect('/api/logoutcheck')
     logout_user()
     return redirect('/')
 
@@ -135,20 +134,17 @@ def rooms_preview():
 # ===========================================================
 #   Payments Page
 # ===========================================================
-# @app.route('/payments')
-# @login_required
-# def payments_preview():
-#     if not current_user.is_authenticated:
-#         current_user.id = 1
-#     return render_template('payments.html',
-#                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
-
+@app.route('/payments')
+@login_required
+def payments_preview():
+    return render_template('payments.html',
+                           pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
 @app.route('/api/payment/caculate', methods=['post'])
 @login_required
 def caculate_payment():
-    if current_user.role != UserRole.STAFF:
+    if current_user.role != UserRole.STAFF and current_user.role != UserRole.ADMIN:
         return jsonify({
             'status': 403,
             'err_msg': 'Truy cập bị từ chối! Chỉ nhân viên thu ngân mới có quyền thanh toán.'
@@ -158,23 +154,22 @@ def caculate_payment():
 
     if not room_id:
         return jsonify({'error': 'Thiếu room_id'}), 400
-    curr_session = dao.get_current_session(room_id)
+    curr_session = get_sessions(room_id)
 
     if not curr_session:
         return jsonify({'error': 'Không tìm thấy phiên hát đang hoạt động'}), 404
 
-    bill_detail = dao.calculate_bill(curr_session.id)
+    bill_detail = calculate_bill(curr_session.id)
 
     session['bill_detail'] = bill_detail
     return jsonify(bill_detail)
 
 
-#
 @app.route('/api/pay', methods=['post'])
 @login_required
 def pay():
     try:
-        if current_user.role != UserRole.STAFF:
+        if current_user.role != UserRole.STAFF and current_user.role != UserRole.ADMIN:
             return jsonify({
                 'status': 403,
                 'err_msg': 'Truy cập bị từ chối!'
@@ -203,12 +198,6 @@ def pay():
             }), 400
         final_total = server_bill.get('final_total', 0)
 
-        if (paid_amount < final_total):
-            return jsonify({
-                'status': 400,
-                'err_msg': 'Không đủ tiền.'
-            }), 400
-
         payment_method = data.get('payment_method', 'CASH').upper()
         if payment_method not in PaymentMethod._member_names_:
             return jsonify({
@@ -217,8 +206,13 @@ def pay():
             }), 400
 
         # Tinh lai Bill cho chac
-        bill_detail = dao.calculate_bill(session_id=client_session_id)
-        dao.add_bill(bill_detail, payment_method)
+        bill_detail = calculate_bill(session_id=client_session_id)
+        if (paid_amount < bill_detail.get('final_total')):
+            return jsonify({
+                'status': 400,
+                'err_msg': 'Không đủ tiền.'
+            }), 400
+        add_bill(bill_detail, payment_method)
         del session['bill_detail']
 
         return jsonify({'status': 200, 'msg': 'Thanh toán thành công!'})
@@ -229,13 +223,13 @@ def pay():
 @app.route('/rooms-dashboard/')
 def rooms():
     return render_template('dashboard/rooms_dashboard.html',
-                           get_rooms=dao.load_rooms)
+                           get_rooms=load_rooms)
 
 
 @app.route('/payment/')
 def payment_page():
-    if current_user.role != UserRole.STAFF:
-        return redirect("/rooms")
+    if current_user.role != UserRole.STAFF  and current_user.role != UserRole.ADMIN:
+        return redirect("/rooms-dashboard")
     data = session.get('bill_detail')
     return render_template('payment/payment.html', bill_detail=data, payment_methods=PaymentMethod)
 

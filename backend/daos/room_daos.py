@@ -15,7 +15,7 @@ def get_rooms(room_id=None, status=None, kw=None):
     return r
 
 
-def load_rooms(room_id, status=None, kw=None, page=1):
+def load_rooms(room_id=None, status=None, kw=None, page=1):
     r = get_rooms(room_id, status, kw)
 
     if page:

@@ -10,11 +10,34 @@
     <div class="row g-3 mb-4">
       <div class="col-3">
         <a
-          href="{{ url_for('statsview.time_stats') }}"
+          href="{{ url_for('statsview.time_stats', period='day') }}"
           class="card shadow-sm text-decoration-none"
+          onclick=""
         >
           <div class="card-body text-center p-3">
-            <span class="fw-bold text-uppercase">Thời gian</span>
+            <span class="fw-bold text-uppercase">Ngày</span>
+          </div>
+        </a>
+      </div>
+      <div class="col-3">
+        <a
+          href="{{ url_for('statsview.time_stats', period='week') }}"
+          class="card shadow-sm text-decoration-none"
+          onclick=""
+        >
+          <div class="card-body text-center p-3">
+            <span class="fw-bold text-uppercase">Tuần</span>
+          </div>
+        </a>
+      </div>
+      <div class="col-3">
+        <a
+          href="{{ url_for('statsview.time_stats', period='month') }}"
+          class="card shadow-sm text-decoration-none"
+          onclick=""
+        >
+          <div class="card-body text-center p-3">
+            <span class="fw-bold text-uppercase">Tháng</span>
           </div>
         </a>
       </div>
