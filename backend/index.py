@@ -5,12 +5,13 @@ from flask import render_template, redirect, request, jsonify
 from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login, db
-from backend.dao.category_dao import get_categories
-from backend.dao.payment_dao import count_payments
-from backend.dao.product_dao import count_products, load_products
-from backend.dao.room_dao import count_rooms, load_rooms
-from backend.dao.user_dao import add_user, auth_user, get_users
+from backend.daos.category_daos import get_categories
+from backend.daos.payment_daos import count_payments
+from backend.daos.product_daos import count_products, load_products
+from backend.daos.room_daos import count_rooms, load_rooms
+from backend.daos.user_daos import add_user, get_users
 from backend.models import StaffWorkingHour
+from backend.utils.user_utils import auth_user
 
 
 # ===========================================================
@@ -195,7 +196,7 @@ def staff_rooms_preview():
 def staff_logincheck():
     if current_user.is_authenticated and current_user.is_staff:
         is_logout = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
-                                                  ,StaffWorkingHour.logout_date == None).first()
+                                                  ,StaffWorkingHour.logout_date is None).first()
         if not is_logout:
             check = StaffWorkingHour(staff_id=current_user.id)
 
@@ -215,7 +216,7 @@ def staff_logincheck():
 def staff_logoutcheck():
     if current_user.is_authenticated and current_user.is_staff:
         check = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
-                                              ,StaffWorkingHour.logout_date == None).first()
+                                              ,StaffWorkingHour.logout_date is None).first()
         if check:
             check.logout_date = datetime.now()
 

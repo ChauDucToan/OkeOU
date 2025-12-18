@@ -1,9 +1,7 @@
-from backend.dao.session_dao import get_sessions
-from backend.models import Session, SessionStatus, User, UserRole, LoyalCustomer
+from backend.models import Session, User, UserRole
 from backend import db, cloudinary
 from backend.utils import hash_password
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
 
 def get_users(user_id=None, name=None, username=None,
               phone=None, email=None, role=None):
@@ -30,12 +28,6 @@ def get_users(user_id=None, name=None, username=None,
     return u
 
 
-def auth_user(username, password):
-    password = hash_password(password)
-    return User.query.filter(User.username == username.strip(),
-                             User.password == password).first()
-
-
 def add_user(name, username, password, email,
              phoneNumber,
              avatar="https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
@@ -56,24 +48,6 @@ def add_user(name, username, password, email,
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
-
-
-def add_loyal_customer(user_id):
-    loyal = LoyalCustomer.query.get(user_id)
-    if not loyal:
-        now = datetime.now()
-        start_date = datetime(now.year, now.month, 1)
-        counter = get_sessions(user_id=user_id,
-                                 status=SessionStatus.COMPLETED,
-                                 start_date=start_date).count()
-        if counter >= 10:
-            loyal = LoyalCustomer(id=user_id)
-            db.session.add(loyal)
-            try:
-                db.session.commit()
-            except IntegrityError as ie:
-                db.session.rollback()
-                raise Exception(str(ie.orig))
             
 
 def get_user_from_session(session_id):

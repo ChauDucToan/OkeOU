@@ -1,37 +1,11 @@
-from backend.models import Receipt, ReceiptDetails, Session
-from backend import app, db
-from backend.dao.session_dao import get_session_price
-from backend.dao.user_dao import get_user_from_session
-from backend.dao.order_dao import get_order_price
+from backend.models import Receipt, ReceiptDetails
+from backend import db
+from backend.daos.session_daos import get_session_price
+from backend.daos.user_daos import get_user_from_session
+from backend.daos.order_daos import get_order_price
 from backend.models import LoyalCustomer, CustomerCardUsage, OrderStatus, Order
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
-
-
-def get_payments(session_id=None):
-    r = Receipt.query
-
-    if session_id:
-        r = r.filter(Receipt.session_id == session_id)
-
-    return r
-
-
-def load_payments(session_id=None, page=1):
-    r = get_payments(session_id=session_id)
-
-    if page:
-        page_size = app.config["PAGE_SIZE"]
-        start = (page - 1) * page_size
-        r = r.slice(start, start + page_size)
-    return r.all()
-
-
-def count_payments(user_id=None):
-    r = Receipt.query
-    if user_id:
-        r = r.join(Session, Receipt.session_id == Session.id).filter(Session.user_id == user_id)
-    return r.count()
 
 
 def create_receipt(session_id, staff_id, payment_method):
