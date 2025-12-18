@@ -149,11 +149,19 @@ class SessionStatus(GenericEnum):
     FINISHED = 2
 
 
+class BookingStatus(GenericEnum):
+    PENDING = 1
+    CANCELLED = 2
+    CONFIRMED = 3
+    COMPLETED = 4
+
+
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
     scheduled_end_time = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'), nullable=False)
     head_count = Column(Integer, CheckConstraint('head_count > 0 and head_count <= 15'), default=1, nullable=False)
+    booking_status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
