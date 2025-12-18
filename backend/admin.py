@@ -3,6 +3,7 @@ from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 
+import dao
 from backend import app, db
 from backend.models import Room, RoomType, Product, Staff
 
@@ -65,7 +66,7 @@ class StatsView(BaseView):
 
     @expose('/time')
     def time_stats(self):
-        return self.render('admin/time_stats.html')
+        return self.render('admin/time_stats.html', stats=dao.revenue_room('day'))
 
     def is_accessible(self) -> bool:
         return current_user.is_authenticated and current_user.is_admin

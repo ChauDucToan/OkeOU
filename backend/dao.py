@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from backend.models import Category, Product, User, Job, Room, RoomStatus, Session, SessionStatus, Order, \
     RoomType, LoyalCustomer, CustomerCardUsage, PaymentMethod, Receipt, ReceiptDetails, UserRole
 from backend import app, db
-from backend.utils import hash_password
+from backend.utils.user_utils import hash_password
 
 
 # ===========================================================
@@ -36,11 +36,13 @@ def load_rooms(room_id=None, status=None, kw=None, page=1):
 
     return q.all()
 
+
 def get_room_price(room_id):
     room = Room.query.get(room_id)
     if room:
         return room.type.hourly_price
     return 0
+
 
 # ===========================================================
 #   Categories dao functions
@@ -137,8 +139,8 @@ def add_loyal_customer(user_id):
         now = datetime.now()
         start_date = datetime(now.year, now.month, 1)
         counter = count_sessions(user_id=user_id,
-                                status=SessionStatus.COMPLETED,
-                                start_date=start_date)
+                                 status=SessionStatus.COMPLETED,
+                                 start_date=start_date)
         if counter >= 10:
             loyal = LoyalCustomer(id=user_id)
             db.session.add(loyal)
@@ -269,7 +271,7 @@ def create_receipt(session_id, staff_id, payment_method):
         receipt_id=receipt.id,
         total_room_fee=get_session_price(session_id, datetime.now()),
         total_service_fee=get_order_price(order.id) if order else 0.0,
-        discount_rate= discount_rate,
+        discount_rate=discount_rate,
         payment_method=payment_method
     )
 
@@ -281,9 +283,11 @@ def create_receipt(session_id, staff_id, payment_method):
         db.session.rollback()
         raise Exception(str(ie.orig))
 
+
 def get_current_session(room_id):
-    return Session.query.filter(Session.room_id==room_id,
-                                Session.session_status==SessionStatus.ACTIVE).first()
+    return Session.query.filter(Session.room_id == room_id,
+                                Session.session_status == SessionStatus.ACTIVE).first()
+
 
 def calculate_bill(session_id):
     curr_session = Session.query.get(session_id)
@@ -305,23 +309,16 @@ def calculate_bill(session_id):
     order_details = []
 
     for o in orders:
-        details = db.session.query(
-            Product.name,
-            product_order.c.amount,
-            product_order.c.price_at_time
-        ).join(Product).filter(product_order.c.order_id == o.id).all()
-
-        for name, amount, price_at_time in details:
-            total_price = int(amount) * float(price_at_time)
+        for detail in o.details:
+            total_price = detail.amount * detail.price_at_time
             service_fee += total_price
-            order_details.append(
-                {
-                    "name": name,
-                    "amount": amount,
-                    "price": price_at_time,
-                    "total": total_price
-                }
-            )
+
+            order_details.append({
+                "name": detail.product.name,
+                "amount": detail.amount,
+                "price": detail.price_at_time,
+                "total": total_price
+            })
 
         sub_total = total_room_fee + service_fee
         discount = 0
@@ -329,7 +326,7 @@ def calculate_bill(session_id):
 
         loyal_customer = LoyalCustomer.query.get(curr_session.user_id)
         if loyal_customer:
-            point = loyal_customer.customer_points
+            point = len(loyal_customer.card_usages)
             if point >= 10:
                 discount = round(0.05 * sub_total)
         vat = round(0.1 * (sub_total - discount))
@@ -351,6 +348,7 @@ def calculate_bill(session_id):
             "final_total": round(final_total, 0)
         }
 
+
 def add_bill(bill_details, payment_method="CASH"):
     if bill_details:
         session_id = bill_details['session_id']
@@ -358,8 +356,8 @@ def add_bill(bill_details, payment_method="CASH"):
 
         total_room_fee = bill_details['room_fee']
         total_service_fee = bill_details['service_fee']
-        discount_amount = bill_details.get('discount', 0)
-        vat_amount = bill_details.get('vat', 0)
+        # discount_amount = bill_details.get('discount', 0)
+        # vat_amount = bill_details.get('vat', 0)
 
         # Cap nhat gio ket thuc cua phien hat
         session = Session.query.get(session_id)
@@ -375,11 +373,11 @@ def add_bill(bill_details, payment_method="CASH"):
         room = Room.query.get(session.room_id)
         room.status = RoomStatus.AVAILABLE
         # Cap nhat diem tich luy cho khach hang
-        customer = LoyalCustomer.query.get(session.user_id)
-        if customer:
-            customer.customer_points += 1
-            usage = CustomerCardUsage(loyal_customer_id=customer.id, amount=bill_details['final_total'])
-            db.session.add(usage)
+        # customer = LoyalCustomer.query.get(session.user_id)
+        # if customer:
+        #     customer.customer_points += 1
+        #     usage = CustomerCardUsage(loyal_customer_id=customer.id, amount=bill_details['final_total'])
+        #     db.session.add(usage)
 
         method = PaymentMethod.CASH
         # Chua lam
@@ -389,22 +387,50 @@ def add_bill(bill_details, payment_method="CASH"):
         #     method = PaymentMethod.CARD
 
         # Cap nhat hoa don
-        receipt = Receipt(user_id=session.user_id, session_id=session_id, staff_id=staff_id)
+        receipt = Receipt(session_id=session_id, staff_id=staff_id)
         db.session.add(receipt)
 
         details = ReceiptDetails(
             receipt=receipt,
             total_room_fee=total_room_fee,
             total_service_fee=total_service_fee,
-            discount_amount=discount_amount,
-            vat_amount=vat_amount,
+            # discount_amount=discount_amount,
+            # vat_amount=vat_amount,
             payment_method=method
         )
-
 
         db.session.add(details)
 
         db.session.commit()
+
+
+def revenue_amount(time='hour', month=datetime.now().month):
+    query = ((db.session.query(func.extract(time, Receipt.created_date),
+                               func.sum(ReceiptDetails.total_room_fee +
+                                        ReceiptDetails.total_service_fee))
+              .join(ReceiptDetails, ReceiptDetails.receipt_id == Receipt.id))
+             .filter(func.extract('month', Receipt.created_date) == month))
+    return query.group_by(func.extract(time, Receipt.created_date)).all()
+
+
+def revenue_room(time_unit='day'):
+    current_date = datetime.now()
+
+    query = ((db.session.query(Session.room_id, Room.name,
+                               func.sum(ReceiptDetails.total_room_fee +
+                                        ReceiptDetails.total_service_fee))
+                            .join(Receipt, Session.id == Receipt.session_id)
+                            .join(ReceiptDetails, ReceiptDetails.receipt_id == Receipt.id)
+                            .join(Room, Room.id == Session.room_id))
+                            .filter(func.extract('month', Receipt.created_date) == current_date.date().month)
+                            .filter(func.extract('year', Receipt.created_date) == current_date.date().year))
+
+    if time_unit == 'week':
+        query = query.filter(func.week(Receipt.created_date, 3) == current_date.date().isocalendar()[1])
+    elif time_unit == 'day':
+        query = query.filter(func.extract('day', Receipt.created_date) == current_date.date().day)
+
+    return query.group_by(Session.room_id).all()
 
 
 def revenue_by_time(time='month', year=datetime.now().year):
@@ -420,5 +446,4 @@ def revenue_by_time(time='month', year=datetime.now().year):
 
 if __name__ == '__main__':
     with app.app_context():
-        print(calculate_bill(1))
-
+        print(revenue_room('day'))
