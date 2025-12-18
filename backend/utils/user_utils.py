@@ -3,7 +3,7 @@ from backend import db
 from sqlalchemy.exc import IntegrityError
 from backend.daos.session_daos import get_sessions
 from backend.models import LoyalCustomer, SessionStatus, User
-from backend.utils import hash_password
+from backend.utils.general_utils import hash_password
 
 
 def add_loyal_customer(user_id):
@@ -23,7 +23,7 @@ def add_loyal_customer(user_id):
                 db.session.rollback()
                 raise Exception(str(ie.orig))
             
-            
+
 def auth_user(username, password):
     password = hash_password(password)
     return User.query.filter(User.username == username.strip(),

@@ -1,6 +1,6 @@
 from backend.models import Session, User, UserRole
 from backend import db, cloudinary
-from backend.utils import hash_password
+from backend.utils.general_utils import hash_password
 from sqlalchemy.exc import IntegrityError
 
 def get_users(user_id=None, name=None, username=None,

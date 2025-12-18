@@ -3,7 +3,6 @@ from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 
-import backend.dao as dao
 from backend import app, db
 from backend.models import Room, RoomType, Product, Staff
 
