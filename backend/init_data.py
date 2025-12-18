@@ -1,13 +1,15 @@
 from backend import app, db
+# Sửa import: đổi product_order -> ProductOrder
 from backend.models import (
     User, Staff, LoyalCustomer, UserRole,
     RoomType, Room, RoomStatus,
     Category, Product,
     Session, SessionStatus,
-    Order, OrderStatus, product_order
+    Order, OrderStatus, ProductOrder,CustomerCardUsage
 )
 from datetime import datetime, timedelta
-from backend.utils import hash_password
+from backend.utils.user_utils import hash_password
+
 
 # Để tạo dữ liệu test thử thôi
 def create_sample_data():
@@ -50,12 +52,25 @@ def create_sample_data():
         )
         db.session.add(staff)
 
-        # Khách VIP
         customer_vip = LoyalCustomer(
-            name="Trần Văn Giàu (VIP)", username="khachvip", password=hash_password('123456'),
-            role=UserRole.CUSTOMER, phone="0909888777", email="vip@okeou.com", customer_points=50
+            name="Trần Văn Giàu (VIP)",
+            username="khachvip",
+            password=hash_password('123456'),
+            role=UserRole.CUSTOMER,
+            phone="0909888777",
+            email="vip@okeou.com"
+            # XÓA DÒNG: customer_points=50 đi
         )
         db.session.add(customer_vip)
+        db.session.commit()
+
+        print("💳 Tạo lịch sử điểm tích lũy...")
+        usages = []
+        for _ in range(12):  # Tạo 12 lần sử dụng
+            usages.append(CustomerCardUsage(loyal_customer_id=customer_vip.id))
+
+        db.session.add_all(usages)
+        db.session.commit()
 
         # Khách Vãng Lai (Thêm mới để test đa dạng user)
         customer_normal = User(
@@ -148,7 +163,8 @@ def create_sample_data():
             {"product_id": p2.id, "order_id": ord3.id, "amount": 2, "price_at_time": p2.price},
         ]
 
-        db.session.execute(product_order.insert(), product_inserts)
+        # SỬA LẠI DÒNG NÀY: Dùng ProductOrder.__table__.insert()
+        db.session.execute(ProductOrder.__table__.insert(), product_inserts)
         db.session.commit()
 
         print("✅ === HOÀN TẤT ===")

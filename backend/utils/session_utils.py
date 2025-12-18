@@ -1,0 +1,17 @@
+from backend.daos.room_daos import get_room_price
+from backend.daos.session_daos import get_sessions
+
+
+def get_session_price(session_id, end_time):
+    session = get_sessions(session_id=session_id).first()
+    if session:
+        room_hourly_price = get_room_price(session.room_id)
+
+        if end_time < session.end_time:
+            end_time = session.end_time
+
+        duration_hours = (end_time - session.start_time).total_seconds() / 3600
+        total_price = int(duration_hours * room_hourly_price)
+        return total_price
+
+    return 0

@@ -22,6 +22,7 @@ class UserRole(GenericEnum):
     STAFF = 3
     CUSTOMER = 4
 
+
 class User(BaseModel, UserMixin):
     name = Column(String(80), nullable=False)
     avatar = Column(String(100))
@@ -65,10 +66,14 @@ class Staff(User):
 
 
 class StaffWorkingHour(BaseModel):
-    working_hour = Column(Integer, nullable=False)
-    working_date = Column(DateTime, default=datetime.now)
+    login_date = Column(DateTime, default=datetime.now)
+    logout_date = Column(DateTime)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=False)
     bonus = Column(Float, default=0.0)
+
+    __table_args__ = (
+        CheckConstraint('logout_date > login_date', name='chk_logout_date'),
+    )
 
 
 # ===========================================================
@@ -96,8 +101,8 @@ class Job(BaseModel):
     def __str__(self):
         return self.title
 
-class Application(BaseModel):
 
+class Application(BaseModel):
     job_id = Column(Integer, ForeignKey(Job.id), nullable=False)
 
     full_name = Column(String(80), nullable=False)
@@ -110,6 +115,7 @@ class Application(BaseModel):
 
     def __str__(self):
         return self.full_name
+
 
 # ===========================================================
 #   Room & Device
@@ -138,6 +144,7 @@ class Room(BaseModel):
     def __str__(self):
         return self.name
 
+
 # ===========================================================
 #   Booking
 # ===========================================================
@@ -146,11 +153,19 @@ class SessionStatus(GenericEnum):
     FINISHED = 2
 
 
+class BookingStatus(GenericEnum):
+    PENDING = 1
+    CANCELLED = 2
+    CONFIRMED = 3
+    COMPLETED = 4
+
+
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
     scheduled_end_time = Column(DateTime, nullable=False)
     head_count = Column(Integer, default=1, nullable=False)
+    booking_status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
@@ -176,6 +191,7 @@ class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime)
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
+    deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
