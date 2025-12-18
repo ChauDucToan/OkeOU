@@ -3,7 +3,7 @@ from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Floa
 from enum import Enum as GenericEnum
 from datetime import datetime
 from sqlalchemy.orm import relationship
-
+from cloudinary import CloudinaryResource
 from backend import db, app
 
 
@@ -142,11 +142,19 @@ class SessionStatus(GenericEnum):
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
-    scheduled_end_time = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'), nullable=False)
+    scheduled_end_time = Column(DateTime, nullable=False)
     head_count = Column(Integer, CheckConstraint('head_count > 0 and head_count <= 15'), default=1, nullable=False)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
+
+    # MySQL khong dung cai rang cho 2 cot duoc
+    __table_args__ = (
+        CheckConstraint(
+            'scheduled_end_time > scheduled_start_time',
+            name='chk_booking_time_order'
+        ),
+    )
 
 
 # If the user want to transfer room then set the SessionStatus.FINISHED
@@ -156,10 +164,18 @@ class Booking(BaseModel):
 # want to eat some food
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
-    end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
+    end_time = Column(DateTime)
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
+
+    # MySQL khong dung cai rang cho 2 cot duoc
+    __table_args__ = (
+        CheckConstraint(
+            'end_time > start_time',
+            name='chk_session_time_order'
+        ),
+    )
 
 
 # ===========================================================

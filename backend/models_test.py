@@ -44,12 +44,12 @@ class Test(unittest.TestCase):
             print(f"Found error: {repr(e)}")
 
     def test_booking(self):
-        user = User(name="Test User", username="booking_user", password="123")
+        user = User(name="u3", username="u3", password="123")
         r_type = RoomType(name="VIP", hourly_price=100)
         db.session.add_all([user, r_type])
         db.session.commit()
 
-        room = Room(name="Room 101", capacity=10, room_type=r_type.id)
+        room = Room(name="Phòng VIP 06", capacity=10, room_type=r_type.id)
         db.session.add(room)
         db.session.commit()
 

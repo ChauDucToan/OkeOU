@@ -1,9 +1,9 @@
 from email.mime import image
 import random
+from datetime import datetime, timedelta
 
 from backend import app, db
-from backend.models import Category, Product, Room, RoomStatus, RoomType, User
-
+from backend.models import Category, Product, Room, RoomStatus, RoomType, User, Session
 
 if __name__ == '__main__':
     with app.app_context():
@@ -79,6 +79,17 @@ if __name__ == '__main__':
 
         db.session.add_all([cat_food, cat_drink, cat_fruit])
         db.session.flush()
+
+        start = datetime.now()
+        end = start + timedelta(hours=12)
+        ses = Session(
+            user_id=1,
+            room_id=5,
+            start_time=start,
+            end_time=end,
+        )
+        db.session.add(ses)
+        db.session.commit()
 
         products_data = [
             {

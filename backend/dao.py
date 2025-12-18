@@ -2,7 +2,7 @@ import cloudinary
 
 import cloudinary.uploader
 from sqlalchemy.exc import IntegrityError
-from backend.models import Category, Product, Room, User, Job, UserRole
+from backend.models import Category, Product, Room, User, Job, UserRole, Session, SessionStatus, Order, OrderStatus, product_order
 from backend import app, db
 from backend.utils import hash_password
 
@@ -93,3 +93,35 @@ def add_user(name, username, password, email,
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
+
+def verify_session(user_id):
+    sessionn = Session.query.filter(
+        Session.user_id == user_id,
+        Session.session_status == SessionStatus.ACTIVE
+    ).first()
+
+    return sessionn
+
+def create_order(session_id):
+    ord = Order.query.filter(
+        Order.session_id == session_id,
+        Order.status == OrderStatus.PENDING
+    ).first()
+
+    if not ord:
+        ord = Order(session_id=session_id)
+        db.session.add(ord)
+        db.session.commit()
+    return ord
+
+def add_order(order, ord):
+    if order:
+        for o in order.values():
+            r = product_order.insert().values(
+                order_id = ord.id,
+                product_id = o['id'],
+                amount = o['quantity'],
+                price_at_time = o['price']
+            )
+            db.session.execute(r)
+        db.session.commit()

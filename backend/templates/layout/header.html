@@ -18,8 +18,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link flex-row">
+                        <a href="/orders" class="nav-link flex-row position-relative">
                             Orders
+                            <span class="position-absolute top-30 start-75 translate-middle badge rounded-pill bg-secondary order-counter">{{ stats_order.total_quantity }}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -30,17 +31,19 @@
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle"
-                            data-bs-toggle="dropdown"   
-                            href="#"
-                            role="button"
-                            aria-expanded="false">
+                           data-bs-toggle="dropdown"
+                           href="#"
+                           role="button"
+                           aria-expanded="false">
                             Xin chào!
                             <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" width="28" height="28"
                                  class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/profile">Thông tin hồ sơ</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
                         </ul>
                     </li>

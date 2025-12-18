@@ -1,8 +1,8 @@
 import math
-from flask import render_template, redirect, request
+from flask import render_template, redirect, request, session, jsonify
 from flask_login import current_user, login_required, logout_user, login_user
 
-from backend import app, login
+from backend import app, login, utils
 from backend import dao
 from backend.dao import add_user, auth_user, get_user_by_id
 
@@ -81,7 +81,6 @@ def profile_preview():
     user = get_user_by_id(current_user.id)
 
     return render_template('profile.html', user=user)
-
 # ===========================================================
 #   Products Page
 # ===========================================================
@@ -96,6 +95,79 @@ def products_preview():
                            categories=categories,
                            pages=math.ceil(dao.count_products() / app.config['PAGE_SIZE']))
 
+# ===========================================================
+#   Orders Page
+# ===========================================================
+@app.route('/orders')
+def orders_preview():
+    return render_template('orders.html')
+
+@app.route('/api/orders', methods=['post'])
+def add_to_order():
+    data = request.json
+
+    order = session.get('order')
+
+    if not order:
+        order = {}
+
+    id, image, name, price = str(data.get('id')), data.get('image'), data.get('name'), data.get('price')
+    if id in order:
+        order[id]["quantity"] += 1
+    else:
+        order[id] = {
+            'id': id,
+            'image': image,
+            'name': name,
+            'quantity': 1,
+            'price': price
+        }
+    session['order'] = order
+    return jsonify(utils.stats_order(order))
+
+@app.route('/api/orders/<id>', methods=['put'])
+def update_order(id):
+    order = session.get('order')
+
+    if order and id in order:
+        quantity = int(request.json.get('quantity'))
+        order[id]['quantity'] = quantity
+
+    session['order'] = order
+    return jsonify(utils.stats_order(order))
+
+@app.route('/api/orders/<id>', methods=['delete'])
+def delete_order(id):
+    order = session.get('order')
+
+    if order and id in order:
+        del order[id]
+
+    session['quantity'] = order
+    return jsonify(utils.stats_order(order))
+
+@app.context_processor
+def common_responses():
+    return{
+        'stats_order': utils.stats_order(session.get('order'))
+    }
+
+@app.route('/api/order_process', methods=['post'])
+@login_required
+def order_process():
+    sess = dao.verify_session(current_user.id)
+    if not sess:
+        err_msg = "Bạn chưa đặt phòng hát"
+        return jsonify({'err_msg': 'Bạn chưa đặt phòng hát'}), 400
+
+    try:
+        ord = dao.create_order(session_id=sess.id)
+        dao.add_order(order=session.get('order'), ord=ord)
+        del session['order']
+
+        return jsonify({'message': 'Đặt dịch vụ thành công'}), 200
+    except Exception as ex:
+        return jsonify({'err_msg': str(ex)}), 500
 
 @login.user_loader
 def load_user(pk):

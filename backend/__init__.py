@@ -7,8 +7,8 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 # Read the .env file in order to access to API call
-env_path = Path(__file__).resolve().parent.parent.joinpath('.env')
-load_dotenv()
+env_path = Path(__file__).resolve().parent.parent.joinpath('.env.example')
+load_dotenv(dotenv_path=env_path)
 secret_key = os.getenv("CLOUDINARY_SECRET_KEY")
 cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
 cloud_api_key = os.getenv("CLOUDINARY_API_KEY")
