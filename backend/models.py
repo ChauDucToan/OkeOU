@@ -176,6 +176,7 @@ class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
+    deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 

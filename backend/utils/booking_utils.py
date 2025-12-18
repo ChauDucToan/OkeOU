@@ -8,7 +8,7 @@ from backend.models import Booking, BookingStatus, Room, RoomStatus, Session, Se
 def cancel_pending_booking():
     limit_time = datetime.now() - timedelta(minutes=15)
 
-    pending_booking = get_bookings(booking_status = BookingStatus.PENDING).filter(Booking.booking_date < limit_time).all()
+    pending_booking = get_bookings(booking_status=[BookingStatus.PENDING]).filter(Booking.booking_date < limit_time).all()
 
     for booking in pending_booking:
         booking.booking_status = BookingStatus.CANCELLED
@@ -18,6 +18,7 @@ def cancel_pending_booking():
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
+
 
 def create_booking(scheduled_start_time, scheduled_end_time, head_count, user_id, room_id, deposit_amount=0):
     cancel_pending_booking()
@@ -84,7 +85,8 @@ def convert_booking_to_session(booking_id):
             end_time=booking.scheduled_end_time,
             user_id=booking.user_id,
             room_id=booking.room_id,
-            session_status=SessionStatus.ACTIVE
+            session_status=SessionStatus.ACTIVE,
+            deposit_amount=booking.deposit_amount
         )
         booking.booking_status = BookingStatus.COMPLETED
 
