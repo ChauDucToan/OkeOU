@@ -1,16 +1,17 @@
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import render_template, redirect, request, jsonify
 from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login, db
+from backend.daos.booking_daos import get_bookings
 from backend.daos.category_daos import get_categories
 from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, load_rooms
-from backend.daos.user_daos import add_user, get_users
-from backend.models import StaffWorkingHour
+from backend.daos.user_daos import create_user, get_users
+from backend.models import BookingStatus, RoomStatus, StaffWorkingHour
 from backend.utils.user_utils import auth_user
 
 
@@ -81,7 +82,7 @@ def register_process():
         return render_template('register.html', err_msg=err_msg)
 
     try:
-        add_user(name=data.get('name'),
+        create_user(name=data.get('name'),
                      username=data.get('username'),
                      password=password,
                      email=email,
@@ -122,14 +123,50 @@ def products_preview():
 # ===========================================================
 @app.route('/rooms')
 def rooms_preview():
+    status = request.args.get('status')
     rooms = load_rooms(room_id=request.args.get('room_id'),
-                           status=request.args.get('status'),
+                           status=status if status else [RoomStatus.AVAILABLE],
                            kw=request.args.get('kw'),
                            page=int(request.args.get('page', 1)))
 
     return render_template('rooms.html', rooms=rooms,
                            pages=math.ceil(count_rooms() / app.config['PAGE_SIZE']))
 
+
+@app.route('/rooms/<int:room_id>')
+def room_detail_preview(room_id):
+    rooms = load_rooms(room_id=room_id)
+
+    if not rooms:
+        return redirect('/rooms')
+
+    return render_template('room_detail.html', room=rooms[0])
+
+
+@app.route('/api/bookings/occupies/<int:room_id>')
+def room_occupies_preview(room_id):
+    date_str = request.args.get('date')
+
+    if date_str:
+        start_date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        end_date_obj = start_date_obj + timedelta(days=1)
+
+        occ_bookings = get_bookings(room_id=room_id,
+                                    booking_status=[BookingStatus.CONFIRMED,
+                                                    BookingStatus.PENDING,
+                                                    BookingStatus.COMPLETED],
+                                    scheduled_start_time=start_date_obj,
+                                    scheduled_end_time=end_date_obj)
+        
+        result = {}
+        for idx, b in enumerate(occ_bookings):
+            result[str(idx)] = [
+                b.scheduled_start_time.isoformat(),
+                b.scheduled_end_time.isoformat()
+            ]
+
+        return jsonify(result)
+    return jsonify({})
 
 # ===========================================================
 #   Payments Page

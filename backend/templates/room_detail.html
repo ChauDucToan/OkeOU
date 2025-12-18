@@ -1,0 +1,115 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+Trang chủ
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <img src="{{ room.image }}" class="card-img-top" alt="{{ room.name }}" 
+                     style="height: 350px; object-fit: cover;">
+                <div class="card-body">
+                    <h2 class="card-title fw-bold text-primary">{{ room.name }}</h2>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="badge bg-info text-dark fs-6">Sức chứa: {{ room.capacity }} người</span>
+                        <h4 class="text-danger mb-0">{{ "{:,.0f}".format(room.type.hourly_price) }} VNĐ/giờ</h4>
+                    </div>
+                    <p class="card-text mt-3 text-muted">
+                        Phòng được trang bị âm thanh ánh sáng hiện đại. Vui lòng đặt trước để giữ chỗ.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4">
+                    <h4 class="mb-0">Kiểm tra lịch & Đặt phòng</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="mb-4">
+                        <label for="selectedDate" class="form-label fw-bold">Chọn ngày xem lịch:</label>
+                        <input type="date" id="selectedDate" class="form-control" onchange="loadTimeline()">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small text-muted">Trạng thái phòng trong ngày (0h - 24h)</label>
+                        <div class="position-relative w-100 bg-light rounded border" style="height: 40px;">
+                            <div class="position-absolute start-0 top-0 h-100 border-end" style="width: 25%;"><span class="small ps-1 text-muted">0h</span></div>
+                            <div class="position-absolute start-25 top-0 h-100 border-end" style="width: 25%; left: 25%;"><span class="small ps-1 text-muted">6h</span></div>
+                            <div class="position-absolute start-50 top-0 h-100 border-end" style="width: 25%; left: 50%;"><span class="small ps-1 text-muted">12h</span></div>
+                            <div class="position-absolute start-75 top-0 h-100 border-end" style="width: 25%; left: 75%;"><span class="small ps-1 text-muted">18h</span></div>
+                            <span class="position-absolute end-0 bottom-0 small pe-1 text-muted">24h</span>
+
+                            <div id="timeline-tracks" class="position-absolute top-0 start-0 w-100 h-100"></div>
+                        </div>
+                        <div class="d-flex align-items-center mt-2">
+                            <span class="badge bg-danger me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                            <small class="text-muted">Khoảng thời gian đã có người đặt</small>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <form id="bookingForm" class="row g-3" data-room-id="{{ room.id }}">
+                        <input type="hidden" name="room_id" value="{{ room.id }}">
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Bắt đầu:</label>
+                            <input type="time" class="form-control" name="start_time" step="900" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Kết thúc:</label>
+                            <input type="time" class="form-control" name="end_time" step="900" required>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label class="form-label">Số khách (Tối đa {{ room.capacity }}):</label>
+                            <input type="number" class="form-control" name="head_count" value="1" min="1" max="{{ room.capacity }}" required>
+                        </div>
+
+                        <div class="col-12">
+                            <div id="error-alert" class="alert alert-danger d-none" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i> <span id="error-msg"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="button" onclick="validateAndSubmit()" class="btn btn-primary w-100 py-2 fw-bold">
+                                Đặt phòng ngay
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .occupied-bar {
+        position: absolute;
+        height: 100%;
+        background-color: var(--bs-danger); /* Màu đỏ của Bootstrap */
+        opacity: 0.85;
+        top: 0;
+        /* Hiệu ứng sọc chéo cho đẹp */
+        background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+        background-size: 1rem 1rem;
+        cursor: not-allowed;
+        transition: all 0.3s;
+    }
+    .occupied-bar:hover {
+        opacity: 1;
+        transform: scaleY(1.1);
+        z-index: 10;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+</style>
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+{% endblock %}

@@ -1,9 +1,9 @@
-from email.mime import image
+from datetime import datetime, timedelta
 import random
 
 from backend import app, db
-from backend.models import Category, Product, Room, RoomStatus, RoomType, User, UserRole, Staff
-from backend.utils import hash_password
+from backend.models import Booking, BookingStatus, Category, Product, Room, RoomStatus, RoomType, User, UserRole, Staff
+from backend.utils.general_utils import hash_password
 
 if __name__ == '__main__':
     with app.app_context():
@@ -40,12 +40,32 @@ if __name__ == '__main__':
             role=UserRole.STAFF
         )
 
-        db.session.add_all([default_user, admin_user, staff_user])
-        db.session.commit()
+        dummy_users = []
+        for k in range(5):
+            u_name = f'khachhang{k}'
+            u = User(
+                name=f'Khách Hàng {k}',
+                username=u_name,
+                password=hash_password('123456'),
+                phone=f'0900900000',
+                email=f'{u_name}@gmail.com',
+                role=UserRole.CUSTOMER
+            )
+            dummy_users.append(u)
 
+        all_customers = [default_user] + dummy_users
+        db.session.add_all(all_customers + [admin_user, staff_user])
+        db.session.commit()
+        
         rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)
         rt_vip = RoomType(name="Phòng VIP", hourly_price=200000)
         rt_party = RoomType(name="Phòng Party", hourly_price=400000)
+
+        price_map = {
+            rt_standard.id: rt_standard.hourly_price,
+            rt_vip.id: rt_vip.hourly_price,
+            rt_party.id: rt_party.hourly_price
+        }
 
         db.session.add_all([rt_standard, rt_vip, rt_party])
         db.session.flush()
@@ -200,4 +220,45 @@ if __name__ == '__main__':
 
         db.session.add_all(products)
 
+        db.session.commit()
+
+        bookings = []
+
+        for room in rooms:
+            for day_offset in range(-2, 3):
+                if random.random() > 0.3:
+                    
+                    start_hour = random.randint(10, 20) 
+                    start_minute = random.choice([0, 15, 30])
+                    
+                    base_date = datetime.now().date() + timedelta(days=day_offset)
+                    start_time = datetime.combine(base_date, datetime.min.time()) + timedelta(hours=start_hour, minutes=start_minute)
+                    
+                    duration_hours = random.randint(1, 2)
+                    end_time = start_time + timedelta(hours=duration_hours)
+
+                    if end_time < datetime.now():
+                        status = BookingStatus.COMPLETED
+                    else:
+                        status = random.choice([BookingStatus.CONFIRMED, BookingStatus.PENDING])
+
+                    hourly_price = price_map.get(room.room_type, 100000)
+                    
+                    deposit = int(hourly_price * duration_hours) if status == BookingStatus.CONFIRMED else 0
+
+                    booking = Booking(
+                        scheduled_start_time=start_time,
+                        scheduled_end_time=end_time,
+                        head_count=random.randint(2, room.capacity),
+                        
+                        booking_status=status,
+                        
+                        deposit_amount=deposit,
+                        
+                        user_id=random.choice(all_customers).id,
+                        room_id=room.id
+                    )
+                    bookings.append(booking)
+
+        db.session.add_all(bookings)
         db.session.commit()

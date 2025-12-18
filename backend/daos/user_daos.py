@@ -28,7 +28,7 @@ def get_users(user_id=None, name=None, username=None,
     return u
 
 
-def add_user(name, username, password, email,
+def create_user(name, username, password, email,
              phoneNumber,
              avatar="https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
     u = User(name=name,

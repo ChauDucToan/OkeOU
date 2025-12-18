@@ -19,9 +19,9 @@ Trang chủ
                     <h4 class="card-title">{{ r.name }}</h4>
                     <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
                     <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ r.id }}, '{{ r.name }}', {{ r.type.hourly_price }})">Đặt phòng ngay
-                    </button>
+                    <a class="btn btn-danger" href="/rooms/{{ r.id }}">
+                        Đặt phòng ngay
+                    </a>
                 </div>
             </div>
         </div>
