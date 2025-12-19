@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css"
           integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.css"
           integrity="sha512-vWHsp0PuTxwRMLtGTnbS7PDNtI7yFmmiFq24hjcqpup/KK7ixxWdXwRmerG9gu7peaSRIVxpFcfBSVrGzWcF4w=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -39,6 +40,5 @@
 {% endblock %}
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-<script src="{{ url_for('static', filename='js/orders.js') }}"></script>
 </body>
 </html>

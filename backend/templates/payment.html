@@ -61,7 +61,7 @@
             <div class="card shadow-sm border-0 mb-4 bg-light">
                 <div class="card-body text-center py-4">
                     <p class="mb-2 text-muted fw-bold">THỜI GIAN GIỮ CHỖ CÒN LẠI</p>
-                    <div class="display-4 fw-bold text-danger" id="countdown-timer">
+                    <div class="display-4 fw-bold text-primary" id="countdown-timer">
                         Loading...
                     </div>
                 </div>
@@ -98,6 +98,8 @@
                             </label>
                         </div>
 
+                        <input type="hidden" id="remain_time" value="{{ remain_time }}">
+
                         <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-5 shadow-sm">
                             THANH TOÁN NGAY
                         </button>
@@ -126,71 +128,5 @@
     </div>
 </div>
 
-<style>
-    .payment-option input[type="radio"] {
-        display: none; /* Ẩn nút radio mặc định */
-    }
-    .payment-option label {
-        transition: all 0.2s;
-        border: 1px solid #dee2e6;
-    }
-    /* Khi radio được check thì label đổi màu */
-    .payment-option input[type="radio"]:checked + label {
-        border-color: #0d6efd;
-        background-color: #f8f9fa;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-    }
-    .cursor-pointer {
-        cursor: pointer;
-    }
-</style>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // 1. Lấy số giây còn lại từ server (Render bởi Jinja2)
-        let remainingTime = {{ remain_time | int }};
-        const timerElement = document.getElementById('countdown-timer');
-        const timeoutModal = new bootstrap.Modal(document.getElementById('timeoutModal'));
-        const payBtn = document.querySelector('button[type="submit"]');
-
-        function updateTimerDisplay() {
-            // Nếu hết giờ
-            if (remainingTime <= 0) {
-                clearInterval(timerInterval);
-                timerElement.innerText = "00:00";
-                
-                // Hiện modal và khóa nút thanh toán
-                payBtn.disabled = true;
-                payBtn.innerText = "Hết hạn thanh toán";
-                timeoutModal.show();
-                return;
-            }
-
-            // Tính phút và giây
-            let m = Math.floor(remainingTime / 60);
-            let s = remainingTime % 60;
-            
-            // Format 00:00
-            m = m < 10 ? '0' + m : m;
-            s = s < 10 ? '0' + s : s;
-            
-            timerElement.innerText = `${m}:${s}`;
-            
-            // Hiệu ứng màu đỏ khi còn dưới 1 phút
-            if (remainingTime < 60) {
-                timerElement.classList.add('text-danger');
-                timerElement.classList.add('animate__animated', 'animate__flash'); // Nếu có animate.css
-            }
-            
-            remainingTime--;
-        }
-
-        // Chạy ngay lần đầu
-        updateTimerDisplay();
-        
-        // Loop mỗi giây
-        const timerInterval = setInterval(updateTimerDisplay, 1000);
-    });
-</script>
-
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
 {% endblock %}

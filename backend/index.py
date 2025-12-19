@@ -132,7 +132,7 @@ def register_process():
 @app.route('/profile')
 @login_required
 def profile_preview():
-    user = get_users(user_id=current_user.id)
+    user = get_users(user_id=current_user.id).first()
 
     return render_template('profile.html', user=user)
 

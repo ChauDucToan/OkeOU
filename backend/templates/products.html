@@ -34,8 +34,9 @@ Trang chủ
                     <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
                     <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
                     <a href="#" class="btn btn-primary">Xem chi tiết</a>
-                    <button class="btn btn-danger" onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">Đặt
-                        hàng ngay
+                    <button class="btn btn-danger"
+                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
+                        Đặt hàng ngay
                     </button>
                 </div>
             </div>

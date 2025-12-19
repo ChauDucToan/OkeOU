@@ -43,7 +43,7 @@ Trang chủ
                             <div class="position-absolute start-25 top-0 h-100 border-end" style="width: 25%; left: 25%;"><span class="small ps-1 text-muted">6h</span></div>
                             <div class="position-absolute start-50 top-0 h-100 border-end" style="width: 25%; left: 50%;"><span class="small ps-1 text-muted">12h</span></div>
                             <div class="position-absolute start-75 top-0 h-100 border-end" style="width: 25%; left: 75%;"><span class="small ps-1 text-muted">18h</span></div>
-                            <span class="position-absolute end-0 bottom-0 small pe-1 text-muted">24h</span>
+                            <span class="position-absolute end-0 top-0 small pe-1 text-muted">24h</span>
 
                             <div id="timeline-tracks" class="position-absolute top-0 start-0 w-100 h-100"></div>
                         </div>
@@ -91,25 +91,5 @@ Trang chủ
     </div>
 </div>
 
-<style>
-    .occupied-bar {
-        position: absolute;
-        height: 100%;
-        background-color: var(--bs-danger); /* Màu đỏ của Bootstrap */
-        opacity: 0.85;
-        top: 0;
-        /* Hiệu ứng sọc chéo cho đẹp */
-        background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
-        background-size: 1rem 1rem;
-        cursor: not-allowed;
-        transition: all 0.3s;
-    }
-    .occupied-bar:hover {
-        opacity: 1;
-        transform: scaleY(1.1);
-        z-index: 10;
-        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
-    }
-</style>
 <script src="{{ url_for('static', filename='js/booking.js') }}"></script>
 {% endblock %}
