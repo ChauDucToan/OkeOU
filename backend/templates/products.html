@@ -6,6 +6,21 @@ Trang chủ
 
 {% block content %}
 <div class="container">
+    <form method="get" action="/products" class="d-flex align-items-center gap-2 mt-3 mb-4">
+        <input class="form-control me-2 w-50" type="text" placeholder="Từ khóa" name="kw">
+        <button class="btn btn-success" type="button">Tìm</button>
+        <div class="dropdown">
+            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                Filter
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/products">Tất cả</a></li>
+                {% for c in categories %}
+                <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </form>
     {% if products %}
     <div class="row">
         {% for p in products %}
@@ -17,11 +32,11 @@ Trang chủ
                      alt="{{ p.name }}">
                 <div class="card-body">
                     <h4 class="card-title">{{ p.name }}</h4>
-                    <p class="card-text">Giá: {{ p.price }} VND</p>
+                    <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
+                    <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
                     <a href="#" class="btn btn-primary">Xem chi tiết</a>
-                    <button class="btn btn-danger"  
-                            onclick="addToOrder({{ p.id }}, '{{ p.name }}', {{ p.price }})" 
-                            disabled>
+                    <button class="btn btn-danger"
+                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
                         Đặt hàng ngay
                     </button>
                 </div>

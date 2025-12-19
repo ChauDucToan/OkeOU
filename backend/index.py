@@ -12,10 +12,12 @@ from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
 from backend.daos.user_daos import create_user, get_users
+from backend.daos import order_daos
 from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour, UserRole
 from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.general_utils import redirect_to_error
 from backend.utils.user_utils import auth_user
+from backend.utils import order_utils
 
 
 # ===========================================================
@@ -80,6 +82,7 @@ def logout_process():
     if current_user.is_authenticated and current_user.is_staff:
         return redirect('/api/logoutcheck')
     logout_user()
+    session.pop('order', None)
     return redirect('/')
 
 
@@ -356,6 +359,91 @@ def staff_logoutcheck():
 def load_user(pk):
     user = get_users(user_id=pk).first()
     return user
+
+# ===========================================================
+#   Orders Page
+# ===========================================================
+@app.route('/orders')
+def orders_preview():
+    return render_template('orders.html')
+
+@app.route('/api/orders', methods=['post'])
+def add_to_order():
+    if current_user.is_authenticated:
+        data = request.json
+
+        order = session.get('order')
+
+        if not order:
+            order = {}
+
+        id, image, name, price = str(data.get('id')), data.get('image'), data.get('name'), data.get('price')
+        if id in order:
+            order[id]["quantity"] += 1
+            if order[id]["quantity"] > 30:
+                return jsonify({'err_msg': 'Đặt vượt qua số lượng cho phép'}), 400
+        else:
+            order[id] = {
+                'id': id,
+                'image': image,
+                'name': name,
+                'quantity': 1,
+                'price': price
+            }
+        session['order'] = order
+        return jsonify(order_utils.stats_order(order)), 200
+    else:
+        return jsonify({'err_msg': 'Vui lòng đăng nhập trước khi đặt dịch vụ'}), 400
+
+@app.route('/api/orders/<id>', methods=['put'])
+def update_order(id):
+    order = session.get('order')
+
+    if order and id in order:
+        quantity = int(request.json.get('quantity'))
+        if quantity > 30:
+            return jsonify({'err_msg': 'Số lượng giới hạn là 30'}), 400
+        order[id]['quantity'] = quantity
+        price = order[id]['price']*quantity
+
+    session['order'] = order
+    return jsonify(order_utils.stats_order(order)), 200
+
+@app.route('/api/orders/<id>', methods=['delete'])
+def delete_order(id):
+    order = session.get('order')
+
+    if order and id in order:
+        del order[id]
+
+    session['quantity'] = order
+
+    if session.get('order') == {}:
+        del session['order']
+
+    return jsonify(order_utils.stats_order(order))
+
+@app.context_processor
+def common_responses():
+    return{
+        'stats_order': order_utils.stats_order(session.get('order'))
+    }
+
+@app.route('/api/order_process', methods=['post'])
+@login_required
+def order_process():
+    sess = order_utils.get_verify_session(current_user.id)
+    if not sess:
+        return jsonify({'err_msg': 'Bạn chưa đặt phòng hát'}), 400
+
+    try:
+        ord = order_daos.create_order(session_id=sess.id)
+        order_utils.add_order(order=session.get('order'), ord=ord)
+        del session['order']
+
+        return jsonify({'message': 'Đặt dịch vụ thành công'}), 200
+    except Exception as ex:
+        return jsonify({'err_msg': str(ex)}), 500
 
 
 if __name__ == '__main__':
