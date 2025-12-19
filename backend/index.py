@@ -208,11 +208,14 @@ def booking_payment_preview(booking_id):
     if not current_user.is_authenticated:
         current_user.id = 1
 
-    if not booking or booking.user_id != current_user.id:
-        return redirect('/rooms')
+    if not booking:
+        return redirect_to_error(404, "Booking not found.")
+    
+    if booking.user_id != current_user.id:
+        return redirect_to_error(403, "You do not have permission to access this booking.")
     
     if booking.booking_status != BookingStatus.PENDING:
-         return redirect('/rooms')
+        return redirect_to_error(400, "Booking is not pending payment.")
     
     expire_time = booking.booking_date + timedelta(minutes=15)
     remain_time = int((expire_time - datetime.now()).total_seconds())
