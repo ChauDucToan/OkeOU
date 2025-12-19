@@ -31,14 +31,12 @@ function drawOccupiedSlots(data) {
     const dateInput = document.getElementById('selectedDate').value;
 
     for (let key in data) {
-        const range = data[key]; // [start, end]
+        const range = data[key];
         const start = new Date(range[0]);
         const end = new Date(range[1]);
 
-        // 1. Lưu vào biến toàn cục để tí nữa Validate dùng
         occupiedIntervals.push({ start: start, end: end });
 
-        // 2. Tính toán để vẽ lên giao diện
         const dayStart = new Date(dateInput + 'T00:00:00');
         const dayEnd = new Date(dateInput + 'T23:59:59');
 
@@ -54,19 +52,14 @@ function drawOccupiedSlots(data) {
         const leftPercent = (startMinutes / totalMinutesInDay) * 100;
         const widthPercent = ((endMinutes - startMinutes) / totalMinutesInDay) * 100;
 
-        // Tạo thẻ div đỏ
         const bar = document.createElement('div');
         bar.className = 'occupied-bar';
         bar.style.left = leftPercent + '%';
         bar.style.width = widthPercent + '%';
         
-        // Tooltip hiển thị giờ
         const timeString = `${drawStart.getHours()}:${String(drawStart.getMinutes()).padStart(2, '0')} - ${drawEnd.getHours()}:${String(drawEnd.getMinutes()).padStart(2, '0')}`;
         bar.setAttribute('title', 'Đã đặt: ' + timeString);
-        
-        // (Tùy chọn) Nếu dùng Bootstrap Tooltip thì uncomment dòng dưới
-        // bar.setAttribute('data-bs-toggle', 'tooltip');
-
+    
         tracksContainer.appendChild(bar);
     }
 }
@@ -76,11 +69,9 @@ function validateAndSubmit() {
     const startInput = document.getElementsByName('start_time')[0].value;
     const endInput = document.getElementsByName('end_time')[0].value;
     const errorAlert = document.getElementById('error-alert');
-    const errorMsg = document.getElementById('error-msg');
 
     console.log("Validating:", startInput, endInput);
 
-    // Reset thông báo lỗi
     errorAlert.classList.add('d-none');
 
     if (!dateInput) {
@@ -101,16 +92,13 @@ function validateAndSubmit() {
         return;
     }
 
-    // Check thời gian trong quá khứ
     if (userStart < new Date()) {
             showError("Không thể đặt phòng trong quá khứ.");
             return;
     }
 
-    // CHECK TRÙNG LỊCH (Client Side)
     let conflict = false;
     for (let interval of occupiedIntervals) {
-        // Logic overlap: StartA < EndB && EndA > StartB
         if (userStart < interval.end && userEnd > interval.start) {
             conflict = true;
             break;
@@ -122,8 +110,7 @@ function validateAndSubmit() {
         return;
     }
 
-    // Nếu mọi thứ OK -> Gửi dữ liệu đi (Gọi hàm API tạo booking của bạn)
-    // Ở đây tôi giả lập việc submit form
+
     submitBookingAPI(); 
 }
 
@@ -134,22 +121,18 @@ function showError(msg) {
     errorAlert.classList.remove('d-none');
 }
 
-// Hàm gọi API thực tế (tái sử dụng từ code cũ của bạn)
 function submitBookingAPI() {
     const formData = new FormData(document.getElementById('bookingForm'));
     
-    const dateStr = document.getElementById('selectedDate').value; // Ví dụ: "2025-12-18"
+    const dateStr = document.getElementById('selectedDate').value;
     
-    // 2. Lấy giờ từ form data hiện tại (chỉ là "14:30")
     const timeStart = formData.get('start_time'); 
     const timeEnd = formData.get('end_time');
 
-    // 3. Ghép chuỗi thành format chuẩn (YYYY-MM-DD HH:MM:SS)
-    // Lưu ý: Thêm ":00" vào giây cho chuẩn format
+
     const fullStartTime = `${dateStr} ${timeStart}:00`; 
     const fullEndTime = `${dateStr} ${timeEnd}:00`;
 
-    // 4. Ghi đè lại giá trị vào formData trước khi gửi
     formData.set('start_time', fullStartTime);
     formData.set('end_time', fullEndTime);
     
@@ -160,7 +143,6 @@ function submitBookingAPI() {
     .then(res => res.json())
     .then(data => {
         if (data.status === 200) {
-                // Redirect sang trang thanh toán
             window.location.href = `/bookings/${data.booking_id}/payment`;
         } else {
             showError(data.msg || "Có lỗi xảy ra từ hệ thống.");
@@ -168,7 +150,7 @@ function submitBookingAPI() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", function(){
+window.addEventListener('load', function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('selectedDate').value = today;
     loadTimeline();
