@@ -404,7 +404,6 @@ def update_order(id):
         if quantity > 30:
             return jsonify({'err_msg': 'Số lượng giới hạn là 30'}), 400
         order[id]['quantity'] = quantity
-        price = order[id]['price']*quantity
 
     session['order'] = order
     return jsonify(order_utils.stats_order(order)), 200

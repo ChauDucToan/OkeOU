@@ -1,7 +1,7 @@
 // ==================Add to Order==================
 function updateOrderBadge(total_quantity) {
     let badges = document.getElementsByClassName('order-counter')
-    for ( let b of badges)
+    for ( let b of badges )
         if (total_quantity > 0){
             b.style.display = 'inline-block'
             b.innerText = total_quantity
@@ -23,15 +23,17 @@ function addToOrder(id, image, name, price){
         headers: {
             'Content-Type': 'application/json'
         }
-    }).then(res => res.json().then(data => ({ status: res.status, body: data})))
-        .then(result => {
-            if (result.status === 200){
-                updateOrderBadge(result.body.total_quantity)
-            }
-            else {
-                alert(result.body.err_msg || 'Lỗi hệ thống')
-            }
-        });
+    })
+    .then(res => res.json()
+    .then(data => ({ status: res.status, body: data})))
+    .then(result => {
+        if (result.status === 200){
+            updateOrderBadge(result.body.total_quantity)
+        }
+        else {
+            alert(result.body.err_msg || 'Lỗi hệ thống')
+        }
+    });
 }
 
 // ==================Update Order==================
@@ -60,7 +62,6 @@ function updateOrder(id, obj){
                 let itemAmount = Number(price) * obj.value;
 
                 row.querySelector('.order-product-amount').innerText = itemAmount.toLocaleString('en');
-//                location.reload()
             }
             else {
                 alert(result.body.err_msg || 'Lỗi hệ thống')
@@ -89,7 +90,7 @@ function deleteOrder(id) {
             let item = document.getElementById(`cart${id}`);
             item.style.display = 'none';
 
-            if (data.total_quantity == 0)
+            if (data.total_quantity === 0)
             location.reload()
         })
     }
@@ -99,13 +100,15 @@ function orderProcess(){
     if (confirm('Bạn có chắc chắn là đặt các dịch vụ này không?') === true){
         fetch('/api/order_process', {
             method: 'post',
-        }).then(res => res.json().then(data => ({ status: res.status, body: data })))
-            .then(result => {
-                if (result.status === 200) {
-                    location.reload()
-                } else {
-                    alert(result.body.err_msg || 'Lỗi hệ thống')
-                }
-            })
+        })
+        .then(res => res.json()
+        .then(data => ({ status: res.status, body: data })))
+        .then(result => {
+            if (result.status === 200) {
+                location.reload()
+            } else {
+                alert(result.body.err_msg || 'Lỗi hệ thống')
+            }
+        })
     }
 }
