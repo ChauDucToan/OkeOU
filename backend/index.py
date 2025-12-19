@@ -1,11 +1,10 @@
 import math
 from datetime import datetime, timedelta
-from tracemalloc import start
-from turtle import st
 
-from flask import render_template, redirect, request, jsonify
+from flask import render_template, redirect, request, jsonify, session
 from flask_login import current_user, login_required, logout_user, login_user
 
+from functools import wraps
 from backend import app, login, db
 from backend.daos.booking_daos import get_bookings
 from backend.daos.category_daos import get_categories
@@ -13,10 +12,39 @@ from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
 from backend.daos.user_daos import create_user, get_users
-from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour
+from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour, UserRole
 from backend.utils.booking_utils import cancel_pending_booking, create_booking
+from backend.utils.general_utils import redirect_to_error
 from backend.utils.user_utils import auth_user
 
+
+# ===========================================================
+#   User role decorators
+# ===========================================================
+def user_role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated or current_user.role not in roles:
+                return redirect_to_error(403, "You do not have permission to access this page.")
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+# ===========================================================
+#   Error Redirect
+# ===========================================================
+@app.route('/error')
+def error_view():
+    error_payload = session.pop('error_payload', None)
+
+    if error_payload:
+        code = error_payload.get('code')
+        msg = error_payload.get('msg')
+        return render_template('error.html', status_code=code, err_msg=msg)
+    else:
+        return redirect_to_error(200, "No error information available.")
 
 # ===========================================================
 #   Page Redirect
@@ -64,7 +92,7 @@ def login_process():
     if user:
         login_user(user=user)
     else:
-        err_msg = 'Sai tên đăng nhập hoặc mật khẩu!'
+        err_msg = 'Username or password is incorrect!'
         return render_template('login.html', err_msg=err_msg)
 
     next = request.args.get('next')
@@ -81,7 +109,7 @@ def register_process():
     phoneNumber = data.get('phone')
 
     if password != confirm:
-        err_msg = 'Mật khẩu không khớp!'
+        err_msg = 'Passwords do not match!'
         return render_template('register.html', err_msg=err_msg)
 
     try:
@@ -233,10 +261,7 @@ def confirm_booking():
             })
     
     except Exception as ex:
-        return jsonify({
-                'status': 400,
-                'msg': str(ex)
-            })
+        return redirect_to_error(500, str(ex))
 
 # ===========================================================
 #   Payments Page
@@ -249,16 +274,11 @@ def payments_preview():
                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
-@login.user_loader
-def load_user(pk):
-    return get_users(user_id=pk)
-
-
 # ===========================================================
 #   Staffs Page
 # ===========================================================
 @app.route('/staffs')
-@login_required
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_preview():
     rooms = load_rooms(room_id=request.args.get('room_id'),
                            kw=request.args.get('kw'),
@@ -269,13 +289,14 @@ def staff_preview():
 
 
 @app.route('/staffs/payments')
-@login_required
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_payments_preview():
     return render_template('/staff/payments.html',
                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
 @app.route('/staffs/products')
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_products_preview():
     products = load_products(kw=request.args.get('kw'),
                                 category_id=request.args.get('category_id'),
@@ -288,6 +309,7 @@ def staff_products_preview():
 
 
 @app.route('/staffs/rooms')
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_rooms_preview():
     rooms = load_rooms(room_id=request.args.get('room_id'),
                            status=request.args.get('status'),
@@ -299,44 +321,32 @@ def staff_rooms_preview():
 
 
 @app.route('/api/logincheck')
-@login_required
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_logincheck():
-    if current_user.is_authenticated and current_user.is_staff:
-        is_logout = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
-                                                  ,StaffWorkingHour.logout_date is None).first()
-        if not is_logout:
-            check = StaffWorkingHour(staff_id=current_user.id)
+    is_logout = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
+                                                ,StaffWorkingHour.logout_date is None).first()
+    if not is_logout:
+        check = StaffWorkingHour(staff_id=current_user.id)
 
-            db.session.add(check)
-            db.session.commit()
+        db.session.add(check)
+        db.session.commit()
 
-            return redirect('/staffs')
-
-    return jsonify({
-        'status': 400,
-        'err_msg': 'Kiểm tra lại quyền của người dùng'
-    })
+        return redirect('/staffs')
 
 
 @app.route('/api/logoutcheck')
-@login_required
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_logoutcheck():
-    if current_user.is_authenticated and current_user.is_staff:
-        check = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
-                                              ,StaffWorkingHour.logout_date is None).first()
-        if check:
-            check.logout_date = datetime.now()
+    check = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
+                                            ,StaffWorkingHour.logout_date is None).first()
+    if check:
+        check.logout_date = datetime.now()
 
-            db.session.add(check)
-            db.session.commit()
+        db.session.commit()
 
-            logout_user()
-            return redirect('/')
+    logout_user()
+    return redirect('/')
 
-    return jsonify({
-        'status': 400,
-        'err_msg': 'Kiểm tra lại quyền của người dùng'
-    })
 
 
 @login.user_loader
