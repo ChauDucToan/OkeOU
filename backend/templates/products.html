@@ -14,6 +14,7 @@ Trang chủ
                 Filter
             </button>
             <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/products">Tất cả</a></li>
                 {% for c in categories %}
                 <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
                 {% endfor %}
