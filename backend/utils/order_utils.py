@@ -27,5 +27,18 @@ def add_order(order, ord):
                 amount = o['quantity'],
                 price_at_time = o['price']
             )
-            db.session.execute(r)
+            db.session.add(r)
         db.session.commit()
+
+def stats_order(order):
+    total_quantity, total_amount = 0, 0
+
+    if order:
+        for o in order.values():
+            total_quantity += o['quantity']
+            total_amount += o['quantity'] * o['price']
+
+    return{
+        'total_quantity': total_quantity,
+        'total_amount': total_amount
+    }

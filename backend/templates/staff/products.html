@@ -6,6 +6,20 @@ Trang chủ
 
 {% block content %}
 <div class="container">
+    <form method="get" action="/products" class="d-flex align-items-center gap-2 mt-3 mb-4">
+        <input class="form-control me-2 w-50" type="text" placeholder="Từ khóa" name="kw">
+        <button class="btn btn-success" type="button">Tìm</button>
+        <div class="dropdown">
+            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                Filter
+            </button>
+            <ul class="dropdown-menu">
+                {% for c in categories %}
+                <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </form>
     {% if products %}
     <div class="row">
         {% for p in products %}
