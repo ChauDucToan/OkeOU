@@ -79,7 +79,7 @@ if __name__ == '__main__':
             "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796771/kararoom2_ps4j9u.jpg",
             "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796771/kararoom3_d7o77f.jpg"
         ]
-        for i in range(1, 11):
+        for i in range(1, 26):
             room = Room(
                 name=f"Phòng cơ bản {i:02d}",
                 capacity=random.choice([4, 6, 8, 10, 12]),
@@ -89,7 +89,7 @@ if __name__ == '__main__':
             )
             rooms.append(room)
 
-        for i in range(1, 6):
+        for i in range(1, 12):
             room = Room(
                 name=f"Phòng VIP {i:02d}",
                 capacity=random.choice([6, 10, 12, 14, 15]),
@@ -99,7 +99,7 @@ if __name__ == '__main__':
             )
             rooms.append(room)
 
-        for i in range(1, 4):
+        for i in range(1, 11):
             room = Room(
                 name=f"Phòng Party {i:02d}",
                 capacity=15,
@@ -248,7 +248,7 @@ if __name__ == '__main__':
 
         for room in rooms:
             for day_offset in range(-2, 3):
-                if random.random() > 0.3:
+                if random.random() > 0.1:
                     
                     start_hour = random.randint(10, 20) 
                     start_minute = random.choice([0, 15, 30])

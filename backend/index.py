@@ -159,16 +159,23 @@ def products_preview():
 @app.route('/rooms')
 def rooms_preview():
     r = request.args
+    page=int(r.get('page', 1))
     page_size = app.config['PAGE_SIZE']
     rooms = filter_rooms(room_id=r.get('room_id'),
                            status=r.get('status'),
                            kw=r.get('kw'),
                            capacity=r.get('capacity'),
                            price_max=r.get('price_max'),
-                           sort_by=r.get('sort'),
-                           page=int(r.get('page', 1)))
+                           sort_by=r.get('sort'))
     
     count = rooms.count()
+
+    if page:
+        start = (page - 1) * app.config["PAGE_SIZE"]
+        rooms = rooms.slice(start, start + app.config["PAGE_SIZE"])
+        
+    print(count)
+    print(count / page_size)
 
     return render_template('rooms.html', 
                            rooms=rooms.all(),
@@ -326,16 +333,20 @@ def staff_products_preview():
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_rooms_preview():
     r = request.args
+    page=int(r.get('page', 1))
     page_size = app.config['PAGE_SIZE']
     rooms = filter_rooms(room_id=r.get('room_id'),
                            status=r.get('status'),
                            kw=r.get('kw'),
                            capacity=r.get('capacity'),
                            price_max=r.get('price_max'),
-                           sort_by=r.get('sort'),
-                           page=int(r.get('page', 1)))
+                           sort_by=r.get('sort'))
     
     count = rooms.count()
+
+    if page:
+        start = (page - 1) * app.config["PAGE_SIZE"]
+        rooms = rooms.slice(start, start + app.config["PAGE_SIZE"])
 
     return render_template('/staff/rooms.html', 
                            rooms=rooms.all(),

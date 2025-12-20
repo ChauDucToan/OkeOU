@@ -1,10 +1,9 @@
 from sqlalchemy import desc, asc
 from backend.daos.room_daos import get_rooms
 from backend.models import Room, RoomType
-from backend import app
 
 def filter_rooms(room_id=None, kw=None, price_min=None, price_max=None
-                 , sort_by=None, status=None, capacity=None, page=1):
+                 , sort_by=None, status=None, capacity=None):
     rooms_price = get_rooms(room_id=room_id, kw=kw, status=status).join(RoomType, RoomType.id == Room.room_type)
 
     if price_min:
@@ -22,8 +21,4 @@ def filter_rooms(room_id=None, kw=None, price_min=None, price_max=None
         rooms_price = rooms_price.order_by(desc(Room.name))
     else:
         rooms_price = rooms_price.order_by(asc(Room.name))
-    
-    if page:
-        start = (page - 1) * app.config["PAGE_SIZE"]
-        rooms_price = rooms_price.slice(start, start + app.config["PAGE_SIZE"])
     return rooms_price
