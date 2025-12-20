@@ -158,14 +158,21 @@ def products_preview():
 # ===========================================================
 @app.route('/rooms')
 def rooms_preview():
-    status = request.args.get('status')
-    rooms = load_rooms(room_id=request.args.get('room_id'),
-                           status=status if status else [RoomStatus.AVAILABLE],
-                           kw=request.args.get('kw'),
-                           page=int(request.args.get('page', 1)))
+    r = request.args
+    page_size = app.config['PAGE_SIZE']
+    rooms = filter_rooms(room_id=r.get('room_id'),
+                           status=r.get('status'),
+                           kw=r.get('kw'),
+                           capacity=r.get('capacity'),
+                           price_max=r.get('price_max'),
+                           sort_by=r.get('sort'),
+                           page=int(r.get('page', 1)))
+    
+    count = rooms.count()
 
-    return render_template('rooms.html', rooms=rooms,
-                           pages=math.ceil(count_rooms() / app.config['PAGE_SIZE']))
+    return render_template('rooms.html', 
+                           rooms=rooms.all(),
+                           pages=math.ceil(count / page_size))
 
 
 @app.route('/rooms/<int:room_id>')

@@ -34,8 +34,8 @@ Trang chủ
                     <div class="d-flex flex-wrap gap-3">
                         
                     </div>
-                    <label for="range2" class="form-label">Giá tối đa theo giờ: &lt; <span id="rangeValue2">{{ request.args.get('price_max', 25000) }}</span> VND</label>
-                    <input type="range" class="form-range" min="0" max="500000" value="{{ request.args.get('price_max', 25000) }}" step="25000" id="range2"
+                    <label for="range2" class="form-label">Giá tối đa theo giờ: &lt; <span id="rangeValue2">{{ request.args.get('price_max', 500000) }}</span> VND</label>
+                    <input type="range" class="form-range" min="0" max="500000" value="{{ request.args.get('price_max', 500000) }}" step="25000" id="range2"
                            oninput="handleSliderChange(this, 'rangeValue2')">
                     <label for="range3" class="form-label">Sức chứa: &gt; <span id="rangeValue3">{{ request.args.get('capacity', 1) }}</span> người</label>
                     <input type="range" class="form-range" min="1" max="15" value="{{ request.args.get('capacity', 1) }}" step="1" id="range3"
@@ -74,9 +74,9 @@ Trang chủ
                     <h4 class="card-title">{{ r.name }}</h4>
                     <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
                     <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ r.id }}, '{{ r.name }}', {{ r.type.hourly_price }})">Đặt phòng ngay
-                    </button>
+                    <a class="btn btn-danger"
+                        href="/rooms/{{ r.id }}">Đặt phòng ngay
+                    </a>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@ Trang chủ
     {% if pages > 1 %}
     <ul class="pagination mt-2">
         {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link" href="{{ url_for('staff_rooms_preview', 
+        <li class="page-item"><a class="page-link" href="{{ url_for('rooms', 
                                                     page=i, 
                                                     kw=request.args.get('kw'), 
                                                     price_max=request.args.get('price_max'), 
