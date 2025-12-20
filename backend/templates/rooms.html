@@ -5,8 +5,8 @@ Trang chủ
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row m-2 mb-4">
+<div class="container flex-grow-1">
+    <div class="row m-2 mb-4 mt-3">
         <div class="col-8">
             <input type="text" id="searchInput" class="form-control w-100" placeholder="Tìm kiếm phòng..."
                    value="{{ request.args.get('kw', '') }}" onkeyup="handleSearchInput()" onchange="searchRooms()">
@@ -26,8 +26,8 @@ Trang chủ
             </button>
         </div>
     </div>
-    <div class="collapse" id="filter">
-        <div class="card card-body mb-4">
+    <div class="collapse" id="filter" data-bs-theme="dark">
+        <div class="card card-body glass-effect mb-4">
             <div class="row">
                 <div class="col-md-8 mb-3">
                     <h4>Bộ lọc nâng cao:</h4>
@@ -65,13 +65,13 @@ Trang chủ
     <div class="row">
         {% for r in rooms %}
         <div class="col-md-4 col-6 p-2">
-            <div class="card transition-card">
+            <div class="card transition-card glass-effect rounded-4 text-white">
                 <img class="card-img-top"
                      src="{{ r.image }}"
                      style="height: 200px; object-fit: cover;"
                      alt="{{ r.name }}">
                 <div class="card-body">
-                    <h4 class="card-title">{{ r.name }}</h4>
+                    <h4 class="card-title text-primary">{{ r.name }}</h4>
                     <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
                     <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
                     <a class="btn btn-danger"
@@ -86,11 +86,11 @@ Trang chủ
     <div class="alert alert-danger mt-2">Không có phòng nào!</div>
     {% endif %}
 </div>
-<div class="d-flex justify-content-center">
+<div class="d-flex justify-content-center" data-bs-theme="light">
     {% if pages > 1 %}
     <ul class="pagination mt-2">
         {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link" href="{{ url_for('rooms_preview', 
+        <li class="page-item"><a class="page-link glass-effect" href="{{ url_for('rooms_preview', 
                                                     page=i, 
                                                     kw=request.args.get('kw'), 
                                                     price_max=request.args.get('price_max'), 

@@ -6,49 +6,49 @@
 <div class="container py-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold text-primary">Xác nhận thanh toán</h2>
-        <p class="text-muted">Vui lòng hoàn tất thanh toán để giữ phòng</p>
+        <p class="text-white">Vui lòng hoàn tất thanh toán để giữ phòng</p>
     </div>
 
     <div class="row g-4 justify-content-center">
         <div class="col-lg-7">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Chi tiết đặt phòng</h5>
+            <div class="card shadow-sm glass-effect border-0 h-100">
+                <div class="card-header border-bottom-0 pt-4 px-4">
+                    <h5 class="text-white mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Chi tiết đặt phòng</h5>
                 </div>
                 <div class="card-body px-4">
                     <div class="d-flex align-items-center mb-4">
                         <img src="{{ room.image }}" alt="Room" class="rounded" 
                              style="width: 100px; height: 70px; object-fit: cover;">
                         <div class="ms-3">
-                            <h4 class="mb-0 text-dark">{{ room.name }}</h4>
+                            <h4 class="mb-0 text-white">{{ room.name }}</h4>
                             <span class="badge bg-info text-dark">Sức chứa: {{ booking.head_count }} người</span>
                         </div>
                     </div>
 
-                    <hr class="text-muted opacity-25">
+                    <hr class="text-white opacity-25">
 
                     <div class="row g-3 mb-3">
-                        <div class="col-6 text-muted">Mã đơn:</div>
-                        <div class="col-6 fw-bold text-end">#{{ booking.id }}</div>
+                        <div class="col-6 text-white">Mã đơn:</div>
+                        <div class="col-6 fw-bold text-white text-end">#{{ booking.id }}</div>
 
-                        <div class="col-6 text-muted">Khách hàng:</div>
-                        <div class="col-6 fw-bold text-end">{{ current_user.name }}</div>
+                        <div class="col-6 text-white">Khách hàng:</div>
+                        <div class="col-6 fw-bold text-white text-end">{{ current_user.name if current_user.is_authenticated else 'Khách vãng lai' }}</div>
 
-                        <div class="col-6 text-muted">Bắt đầu:</div>
+                        <div class="col-6 text-white">Bắt đầu:</div>
                         <div class="col-6 fw-bold text-end text-primary">
                             {{ booking.scheduled_start_time.strftime('%H:%M %d/%m/%Y') }}
                         </div>
 
-                        <div class="col-6 text-muted">Kết thúc:</div>
+                        <div class="col-6 text-white">Kết thúc:</div>
                         <div class="col-6 fw-bold text-end text-primary">
                             {{ booking.scheduled_end_time.strftime('%H:%M %d/%m/%Y') }}
                         </div>
                     </div>
 
-                    <hr class="text-muted opacity-25">
+                    <hr class="text-white opacity-25">
 
                     <div class="d-flex justify-content-between align-items-center mt-4">
-                        <h5 class="mb-0">Tổng thanh toán:</h5>
+                        <h5 class="text-white mb-0">Tổng thanh toán:</h5>
                         <h3 class="fw-bold text-danger mb-0">
                             {{ "{:,.0f}".format(room.type.hourly_price * (booking.scheduled_end_time - booking.scheduled_start_time).total_seconds() / 3600) }} VNĐ
                         </h3>
@@ -58,18 +58,18 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="card shadow-sm border-0 mb-4 bg-light">
+            <div class="card shadow-sm glass-effect border-0 mb-4">
                 <div class="card-body text-center py-4">
-                    <p class="mb-2 text-muted fw-bold">THỜI GIAN GIỮ CHỖ CÒN LẠI</p>
+                    <p class="mb-2 text-white fw-bold">THỜI GIAN GIỮ CHỖ CÒN LẠI</p>
                     <div class="display-4 fw-bold text-primary" id="countdown-timer">
                         Loading...
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white pt-4 px-4 border-bottom-0">
-                    <h5 class="mb-0 fw-bold">Chọn phương thức thanh toán</h5>
+            <div class="card shadow-sm glass-effect border-0">
+                <div class="card-header pt-4 px-4 border-bottom-0">
+                    <h5 class="text-white mb-0 fw-bold">Chọn phương thức thanh toán</h5>
                 </div>
                 <div class="card-body px-4 pb-4">
                     <form id="paymentForm" action="/api/payment/create_payment" method="POST">
@@ -77,7 +77,7 @@
                         
                         <div class="payment-option mb-3">
                             <input class="form-check-input" type="radio" name="payment_method" id="vnpay" value="VNPAY" checked>
-                            <label class="form-check-label w-100 p-3 border rounded d-flex align-items-center justify-content-between cursor-pointer" for="vnpay">
+                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="vnpay">
                                 <span><i class="bi bi-credit-card-2-front me-2"></i>Ví VNPAY / Ngân hàng</span>
                                 <img src="https://vnpay.vn/assets/images/logo-icon/logo-primary.svg" height="24" alt="VNPay">
                             </label>
@@ -85,7 +85,7 @@
 
                         <div class="payment-option mb-3">
                             <input class="form-check-input" type="radio" name="payment_method" id="momo" value="MOMO">
-                            <label class="form-check-label w-100 p-3 border rounded d-flex align-items-center justify-content-between cursor-pointer" for="momo">
+                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="momo">
                                 <span><i class="bi bi-phone me-2"></i>Ví MoMo</span>
                                 <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" height="24" alt="Momo">
                             </label>
@@ -93,7 +93,7 @@
 
                         <div class="payment-option mb-4">
                             <input class="form-check-input" type="radio" name="payment_method" id="cash" value="CASH">
-                            <label class="form-check-label w-100 p-3 border rounded d-flex align-items-center justify-content-between cursor-pointer" for="cash">
+                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="cash">
                                 <span><i class="bi bi-cash-coin me-2"></i>Thanh toán tại quầy</span>
                             </label>
                         </div>
@@ -110,15 +110,15 @@
     </div>
 </div>
 
-<div class="modal fade" id="timeoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal modal-bg-dark fade" id="timeoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4">
-            <div class="modal-body">
+        <div class="modal-content glass-modal text-center p-4">
+            <div class="modal-body text-white">
                 <div class="mb-3 text-danger">
                     <i class="bi bi-alarm-fill" style="font-size: 3rem;"></i>
                 </div>
                 <h3 class="fw-bold">Hết thời gian giữ chỗ!</h3>
-                <p class="text-muted">Đã quá 15 phút thanh toán. Đơn đặt phòng này đã bị hủy tự động để nhường chỗ cho khách hàng khác.</p>
+                <p>Đã quá 15 phút thanh toán. Đơn đặt phòng này đã bị hủy tự động để nhường chỗ cho khách hàng khác.</p>
                 <div class="d-grid gap-2 mt-4">
                     <a href="/rooms/{{ room.id }}" class="btn btn-primary">Đặt lại phòng này</a>
                     <a href="/" class="btn btn-outline-secondary">Về trang chủ</a>

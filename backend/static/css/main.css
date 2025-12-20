@@ -29,12 +29,15 @@
 }
 .payment-option input[type="radio"]:checked + label {
     border-color: #0d6efd;
-    background-color: #f8f9fa;
+    background-color: transparent;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 .cursor-pointer {
     cursor: pointer;
 }
+
+/* Card Transition Styles */
+
 .transition-card {
     transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -42,6 +45,9 @@
     transform: translateY(-5px);
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
 }
+
+/* Select Animation Styles */
+
 .select-anim {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid #eee;
@@ -55,4 +61,310 @@
     border-color: #0d6efd;
     box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
     transform: translateY(0);
+}
+
+.btn .btn-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn .btn-glass:active {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+/* --- Custom AI Theme Styles --- */
+
+:root {
+    --brand-purple: #8b5cf6;
+    --brand-pink: #ec4899;
+    --brand-dark: #1a2742; /* 0f172a */
+    --brand-neon: #00f2fe;
+}
+
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background-color: var(--brand-dark);
+    color: white;
+    overflow-x: hidden;
+}
+
+.text-brand-neon { color: var(--brand-neon) !important; }
+.text-brand-pink { color: var(--brand-pink) !important; }
+.text-brand-purple { color: var(--brand-purple) !important; }
+.bg-brand-dark { background-color: var(--brand-dark); }
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+    transition: all 0.3s ease;
+}
+
+.navbar-scrolled {
+    background-color: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    background: transparent !important;
+    border: 1px solid transparent;
+    border-radius: 30px;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.navbar .nav-link.active {
+    color: #ffffff !important;
+    
+    background: rgba(255, 255, 255, 0.15) !important; 
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hover-zoom-img {
+    transition: transform 0.7s ease;
+}
+
+.card-hover:hover .hover-zoom-img {
+    transform: scale(1.1);
+}
+
+.card-block {
+    display: inline-block;
+    white-space: normal;
+}
+
+/* Animations */
+@keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+.blob {
+    position: absolute;
+    filter: blur(70px);
+    z-index: 0;
+    opacity: 0.4;
+    animation: blob 7s infinite;
+}
+.blob-1 { top: 0; left: -10px; width: 300px; height: 300px; background-color: var(--brand-purple); }
+.blob-2 { top: 0; right: -10px; width: 300px; height: 300px; background-color: cyan; animation-delay: 2s; }
+.blob-3 { bottom: -30px; left: 80px; width: 300px; height: 300px; background-color: var(--brand-pink); animation-delay: 4s; }
+
+/* Form Controls Dark Mode Override */
+.form-control, .form-select {
+    background-color: rgba(15, 23, 42, 0.5);
+    border: 1px solid #4b5563;
+    color: white;
+}
+.form-control:focus, .form-select:focus {
+    background-color: rgba(15, 23, 42, 0.8);
+    border-color: var(--brand-neon);
+    color: white;
+    box-shadow: 0 0 0 0.25rem rgba(0, 242, 254, 0.25);
+}
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+.dropdown-menu-glass {
+    background: rgba(255, 255, 255, 0.15) !important; /* Nền trong suốt */
+    backdrop-filter: blur(15px);        /* Làm mờ hậu cảnh mạnh hơn chút để dễ đọc chữ */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Viền mỏng */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Bóng đổ để tách biệt nền */
+    padding: 10px 0;
+    margin-top: 10px; /* Tách ra khỏi navbar một chút cho đẹp */
+    border-radius: 15px; /* Bo góc mềm mại hơn */
+}
+
+/* 2. Các mục (Item) bên trong */
+.dropdown-menu-glass .dropdown-item {
+    color: rgba(255, 255, 255, 0.9); /* Chữ trắng */
+    transition: ease-in-out 0.2s all;
+    font-weight: 500;
+}
+
+/* 3. Hiệu ứng khi di chuột vào mục (Hover) */
+.dropdown-menu-glass .dropdown-item:hover,
+.dropdown-menu-glass .dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.05); /* Sáng lên thay vì màu xám mặc định */
+    color: #ffffff;
+}
+
+/* 4. Đường kẻ ngang phân cách */
+.dropdown-menu-glass .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.05); /* Mờ đi cho tiệp màu */
+}
+
+
+/* 1. Class áp dụng cho Table */
+.table-glass {
+    --bs-table-bg: transparent;       /* Xóa nền mặc định của Bootstrap */
+    --bs-table-color: #fff;           /* Chữ màu trắng */
+    --bs-table-border-color: rgba(255, 255, 255, 0.2); /* Đường kẻ mờ */
+    margin-bottom: 0;
+}
+
+/* Xử lý phần Header của bảng */
+.table-glass thead th {
+    background-color: rgba(255, 255, 255, 0.1); /* Nền header hơi sáng hơn chút */
+    color: #fff;
+    border-bottom-width: 1px;
+    font-weight: 600;
+}
+
+/* Xử lý các ô dữ liệu */
+.table-glass td, .table-glass th {
+    background-color: transparent !important; /* Đảm bảo trong suốt */
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Hiệu ứng khi hover vào dòng */
+.table-glass tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* Sáng lên nhẹ khi di chuột */
+}
+
+.form-check-input {
+    background-color: transparent; 
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Viền trắng mờ */
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.2em;
+    cursor: pointer;
+}
+
+/* 2. Khi được chọn (Checked) */
+.form-check-input:checked {
+    background-color: #0d6efd; /* Màu xanh Primary (hoặc màu bạn thích) */
+    border-color: #0d6efd;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.5); /* Hiệu ứng phát sáng neon */
+}
+
+/* 3. Xóa cái viền focus mặc định xấu xí của Bootstrap */
+.form-check-input:focus {
+    box-shadow: none; 
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.form-control-glass {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff !important;
+}
+
+.form-control-glass:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: none; /* Bỏ shadow xanh mặc định */
+}
+
+.form-floating > .form-control-glass::placeholder {
+    color: transparent;
+}
+
+.form-floating > label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.form-floating > .form-control-glass:focus ~ label,
+.form-floating > .form-control-glass:not(:placeholder-shown) ~ label {
+    color: #fff;
+    background-color: transparent !important;
+    opacity: 1;
+}
+
+.login-glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+}
+
+.payment-option label {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important; /* Ghi đè class border bootstrap */
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05); /* Nền kính nhẹ */
+}
+
+/* Hiệu ứng khi di chuột vào */
+.payment-option label:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* KỸ THUẬT QUAN TRỌNG: */
+/* Khi radio được check, ta style cho cái label nằm ngay sau nó (+) */
+.payment-option .form-check-input:checked + label {
+    background-color: rgba(13, 110, 253, 0.15); /* Nền xanh nhạt */
+    border-color: #0d6efd !important; /* Viền xanh sáng */
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.2); /* Glow nhẹ */
+}
+
+
+.glass-modal {
+    /* 1. Gán đè biến màu nền của Bootstrap */
+    --bs-modal-bg: rgba(60, 60, 60, 0.6); 
+    
+    /* 2. Gán đè biến màu viền */
+    --bs-modal-border-color: rgba(255, 255, 255, 0.2);
+    
+    /* 3. Gán đè biến màu chữ (nếu muốn chắc chắn trắng) */
+    --bs-modal-color: #ffffff;
+    
+    /* 4. Riêng hiệu ứng mờ (blur) thì Bootstrap chưa có biến, 
+       nên ta vẫn phải viết thủ công thuộc tính này */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    
+    /* Đổ bóng */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Xử lý Header/Footer để nó bỏ cái viền xám mặc định đi 
+   bằng cách dùng chính biến border-color ta vừa set ở trên */
+.glass-modal .modal-header,
+.glass-modal .modal-footer {
+    border-color: var(--bs-modal-border-color);
 }

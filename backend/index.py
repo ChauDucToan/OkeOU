@@ -13,7 +13,7 @@ from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
 from backend.daos.user_daos import create_user, get_users
 from backend.daos import order_daos
-from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour, UserRole
+from backend.models import Booking, BookingStatus, StaffWorkingHour, UserRole
 from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.general_utils import redirect_to_error
 from backend.utils.room_utils import filter_rooms
@@ -54,15 +54,14 @@ def error_view():
 # ===========================================================
 @app.route('/')
 def index():
-    rooms = load_rooms(room_id=request.args.get('room_id'),
-                           kw=request.args.get('kw'),
-                           page=int(request.args.get('page', 1)))
+    rooms = load_rooms(page=1)
+    
+    products = load_products(page=1)
 
     if current_user.is_authenticated and current_user.is_staff:
         return redirect('/staffs')
 
-    return render_template('index.html', rooms=rooms,
-                           pages=math.ceil(count_rooms() / app.config['PAGE_SIZE']))
+    return render_template('index.html', rooms=rooms, products=products)
 
 
 @app.route('/login')
