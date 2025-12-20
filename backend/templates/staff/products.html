@@ -14,6 +14,7 @@ Trang chủ
                 Filter
             </button>
             <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/products">Tất cả</a></li>
                 {% for c in categories %}
                 <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
                 {% endfor %}
@@ -24,7 +25,7 @@ Trang chủ
     <div class="row">
         {% for p in products %}
         <div class="col-md-4 col-6 p-2">
-            <div class="card">
+            <div class="card transition-card">
                 <img class="card-img-top"
                      src="{{ p.image }}"
                      style="height: 200px; object-fit: cover;"
@@ -32,10 +33,11 @@ Trang chủ
                 <div class="card-body">
                     <h4 class="card-title">{{ p.name }}</h4>
                     <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
-                    <p class="card-text">Giá: {{ p.price }} VND</p>
+                    <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
                     <a href="#" class="btn btn-primary">Xem chi tiết</a>
-                    <button class="btn btn-danger" onclick="addToOrder({{ p.id }}, '{{ p.name }}', {{ p.price }})">Đặt
-                        hàng ngay
+                    <button class="btn btn-danger"
+                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
+                        Đặt hàng ngay
                     </button>
                 </div>
             </div>
@@ -55,4 +57,5 @@ Trang chủ
     </ul>
     {% endif %}
 </div>
+<script src="{{ url_for('static', filename='js/orders.js') }}"></script>
 {% endblock %}

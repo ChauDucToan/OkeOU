@@ -16,6 +16,7 @@ from backend.daos import order_daos
 from backend.models import Booking, BookingStatus, RoomStatus, StaffWorkingHour, UserRole
 from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.general_utils import redirect_to_error
+from backend.utils.room_utils import filter_rooms
 from backend.utils.user_utils import auth_user
 from backend.utils import order_utils
 
@@ -317,13 +318,21 @@ def staff_products_preview():
 @app.route('/staffs/rooms')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_rooms_preview():
-    rooms = load_rooms(room_id=request.args.get('room_id'),
-                           status=request.args.get('status'),
-                           kw=request.args.get('kw'),
-                           page=int(request.args.get('page', 1)))
+    r = request.args
+    page_size = app.config['PAGE_SIZE']
+    rooms = filter_rooms(room_id=r.get('room_id'),
+                           status=r.get('status'),
+                           kw=r.get('kw'),
+                           capacity=r.get('capacity'),
+                           price_max=r.get('price_max'),
+                           sort_by=r.get('sort'),
+                           page=int(r.get('page', 1)))
+    
+    count = rooms.count()
 
-    return render_template('/staff/rooms.html', rooms=rooms,
-                           pages=math.ceil(count_rooms() / app.config['PAGE_SIZE']))
+    return render_template('/staff/rooms.html', 
+                           rooms=rooms.all(),
+                           pages=math.ceil(count / page_size))
 
 
 @app.route('/api/logincheck')
