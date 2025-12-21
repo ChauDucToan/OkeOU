@@ -146,10 +146,10 @@ def products_preview():
                                 category_id=request.args.get('category_id'),
                                 page=int(request.args.get('page', 1)))
     categories = get_categories()
-
+    print(count_products(request.args.get('kw'), request.args.get('category_id')) / app.config['PAGE_SIZE'])
     return render_template('products.html', products=products,
                            categories=categories,
-                           pages=math.ceil(count_products() / app.config['PAGE_SIZE']))
+                           pages=math.ceil(count_products(request.args.get('kw'), request.args.get('category_id')) / app.config['PAGE_SIZE']))
 
 
 # ===========================================================
@@ -403,18 +403,27 @@ def add_to_order():
         if not order:
             order = {}
 
-        id, image, name, price = str(data.get('id')), data.get('image'), data.get('name'), data.get('price')
+        id = str(data.get('id'))
+        image = data.get('image')
+        name = data.get('name')
+        price = data.get('price')
+        amount = data.get('amount')
+
+        product = order_utils.check_amount_product(id)
         if id in order:
             order[id]["quantity"] += 1
             if order[id]["quantity"] > 30:
                 return jsonify({'err_msg': 'Đặt vượt qua số lượng cho phép'}), 400
+            if product.amount < order[id]["quantity"]:
+                return jsonify({'err_msg': 'Dịch vụ đặt vượt quá số lượng còn lại'}), 400
         else:
             order[id] = {
                 'id': id,
                 'image': image,
                 'name': name,
                 'quantity': 1,
-                'price': price
+                'price': price,
+                'amount': amount
             }
         session['order'] = order
         return jsonify(order_utils.stats_order(order)), 200
@@ -429,6 +438,9 @@ def update_order(id):
         quantity = int(request.json.get('quantity'))
         if quantity > 30:
             return jsonify({'err_msg': 'Số lượng giới hạn là 30'}), 400
+        product = order_utils.check_amount_product(order[id]['id'])
+        if product.amount < quantity:
+            return jsonify({'err_msg': 'Dịch vụ đặt vượt quá số lượng còn lại'}), 400
         order[id]['quantity'] = quantity
 
     session['order'] = order
@@ -461,12 +473,18 @@ def order_process():
     if not sess:
         return jsonify({'err_msg': 'Bạn chưa đặt phòng hát'}), 400
 
+    order = session.get('order')
+    if not order:
+        return jsonify({'err_msg': 'Bạn chưa đặt dịch vụ'}), 400
+
     try:
         ord = order_daos.create_order(session_id=sess.id)
         order_utils.add_order(order=session.get('order'), ord=ord)
         del session['order']
 
         return jsonify({'message': 'Đặt dịch vụ thành công'}), 200
+    except ValueError as ex:
+        return jsonify({'err_msg': str(ex)}), 400
     except Exception as ex:
         return jsonify({'err_msg': str(ex)}), 500
 

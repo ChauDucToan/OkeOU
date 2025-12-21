@@ -32,13 +32,19 @@ Trang chủ
                      alt="{{ p.name }}">
                 <div class="card-body">
                     <h4 class="card-title">{{ p.name }}</h4>
-                    <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
+                    <p class="card-text">Số lượng: <cite>{{ p.amount }} {{ p.unit }}</cite></p>
                     <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
                     <a href="#" class="btn btn-primary">Xem chi tiết</a>
+                    {% if p.active == 1 %}
                     <button class="btn btn-danger"
-                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
+                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }}, {{ p.amount }})" >
                         Đặt hàng ngay
                     </button>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>
+                        Hết hàng
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -49,7 +55,7 @@ Trang chủ
     {% endif %}
 </div>
 <div class="d-flex justify-content-center">
-    {% if pages > 1 %}
+    {% if pages > 1 and products %}
     <ul class="pagination mt-2">
         {% for i in range(1, pages + 1) %}
         <li class="page-item"><a class="page-link glass-effect" href="/products?page={{i}}">{{ i }}</a></li>
