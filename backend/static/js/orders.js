@@ -11,14 +11,15 @@ function updateOrderBadge(total_quantity) {
         }
 }
 
-function addToOrder(id, image, name, price){
+function addToOrder(id, image, name, price, amount){
     fetch('/api/orders',{
         method: 'post',
         body: JSON.stringify({
             'id': id,
             'image': image,
             'name': name,
-            'price': price
+            'price': price,
+            'amount': amount
         }),
         headers: {
             'Content-Type': 'application/json'
@@ -65,6 +66,7 @@ function updateOrder(id, obj){
             }
             else {
                 alert(result.body.err_msg || 'Lỗi hệ thống')
+                obj.value = obj.defaultValue;
             }
         })
 }

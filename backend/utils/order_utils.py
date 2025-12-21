@@ -1,4 +1,4 @@
-from backend.models import Order, Session, SessionStatus, ProductOrder
+from backend.models import Order, Session, SessionStatus, ProductOrder, Product
 from backend import db
 
 def get_order_price(order_id):
@@ -18,9 +18,17 @@ def get_verify_session(user_id):
 
     return sessionn
 
+def check_amount_product(id):
+    return Product.query.get(id)
+
 def add_order(order, ord):
     if order:
         for o in order.values():
+            product = check_amount_product(o['id'])
+            if product.amount < o['quantity']:
+                raise ValueError(f"Số lượng còn lại của sản phẩm {product.name} là {product.amount}")
+            product.amount -= o['quantity']
+
             r = ProductOrder(
                 order_id = ord.id,
                 product_id = o['id'],
@@ -28,6 +36,8 @@ def add_order(order, ord):
                 price_at_time = o['price']
             )
             db.session.add(r)
+            if product.amount == 0:
+                product.active = False
         db.session.commit()
 
 def stats_order(order):
