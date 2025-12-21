@@ -1,6 +1,6 @@
 function caculateBill(roomId) {
   //    alert('hello')
-  fetch("/api/payment/caculate", {
+  fetch("/api/payment/calculate", {
     method: "post",
     body: JSON.stringify({
       room_id: roomId,
@@ -25,43 +25,34 @@ function pay() {
   const paymentBtn = document.querySelector(".btn-payment.btn-primary");
   const method = paymentBtn ? paymentBtn.innerText.trim() : "CASH";
 
-  const sessionIdInput = document.getElementById("currentSessionId");
-  const sessionId = sessionIdInput ? sessionIdInput.value : null;
-  const customerMoney = document.getElementById("paidAmount").value;
+  let paidAmount = parseInt(document.getElementById("paidAmount").value) || 0;
 
-  let paidAmount = parseInt(customerMoney) || 0;
-
-  if (paidAmount === 0 || isNaN(paidAmount)) {
+  if (method === "CASH" && (paidAmount === 0 || isNaN(paidAmount))) {
     alert("Vui lòng nhập số tiền khách đưa!");
     return;
   }
 
   if (confirm("Bạn chắc chắn thanh toán?") === true) {
-    fetch("/api/pay", {
-      method: "post",
-      body: JSON.stringify({
-        session_id: sessionId,
-        payment_method: method,
-        paid_amount: paidAmount,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((err) => {
-            throw new Error(err.err_msg);
-          });
+      let requestBody = {};
+
+      if (method === "CASH") {
+          requestBody.paid_amount = paidAmount;
+      }
+
+      fetch(`/api/payment/create/${method}/checkout`, {
+          method: "post",
+          body: JSON.stringify(requestBody),
+          headers: {
+            "Content-Type": "application/json",
+          },
+      })
+      .then((res) => res.json().then((data) => ({ status: res.status, body: data})))
+      .then((result) => {
+        if (result.status === 200) {
+            window.location.href = result.body.payUrl
+        } else {
+            alert(result.body.err_msg || "Lỗi hệ thống!!!")
         }
-        return res.json();
-      })
-      .then((data) => {
-        alert(data.msg);
-        window.location.href = "/rooms-dashboard/";
-      })
-      .catch((err) => {
-        alert(err.message);
       });
   }
 }

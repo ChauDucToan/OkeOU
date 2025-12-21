@@ -169,6 +169,7 @@ class Booking(BaseModel):
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
+    ref = Column(String(100), nullable=True, unique=True)
 
     # MySQL khong dung cai rang buoc kia duoc
     __table_args__ = (
@@ -250,15 +251,24 @@ class Order(BaseModel):
 # ===========================================================
 #   Payments
 # ===========================================================
+class ReceiptStatus(GenericEnum):
+    PENDING = 1
+    COMPLETED = 2
+    FAILED = 3
+
 class PaymentMethod(GenericEnum):
     CASH = 1
     TRANSFER = 2
     CARD = 3
+    MOMO = 4
+    VNPAY = 5
 
 
 class Receipt(BaseModel):
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
+    status = Column(Enum(ReceiptStatus), default=ReceiptStatus.PENDING)
+    ref = Column(String(100), nullable=True, unique=True)
 
     created_date = Column(DateTime, default=datetime.now())
     details = relationship('ReceiptDetails', backref='receipt', lazy=True)

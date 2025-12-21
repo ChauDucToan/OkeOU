@@ -1,17 +1,23 @@
+import json
 import math
+import uuid
 from datetime import datetime, timedelta
 from flask import render_template, session, jsonify, redirect, request
 from flask_login import current_user, login_required, logout_user, login_user
 
 from backend import app, login, db
 from backend.daos.category_daos import get_categories
-from backend.daos.payment_daos import count_payments, calculate_bill, add_bill
+from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, load_rooms
 from backend.daos.user_daos import add_user, get_users
 from backend.daos.session_daos import get_sessions
-from backend.models import StaffWorkingHour, UserRole, PaymentMethod
+from backend.models import StaffWorkingHour, UserRole, PaymentMethod, SessionStatus, ReceiptStatus
 from backend.utils.user_utils import auth_user
+from backend.service.payment.payment_strategy import PaymentStrategyFactory
+from service.payment.payment_handler import PaymentHandlerFactory
+from utils import payment_utils
+from utils.payment_utils import get_bill_before_pay
 
 
 # ===========================================================
@@ -141,90 +147,81 @@ def payments_preview():
                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
-@app.route('/api/payment/caculate', methods=['post'])
+@app.route('/api/payment/calculate', methods=['post'])
 @login_required
-def caculate_payment():
-    if current_user.role != UserRole.STAFF and current_user.role != UserRole.ADMIN:
-        return jsonify({
-            'status': 403,
-            'err_msg': 'Truy cập bị từ chối! Chỉ nhân viên thu ngân mới có quyền thanh toán.'
-        }), 403
+def calculate_payment():
+    if current_user.is_staff and current_user.is_admin:
+        return jsonify({'err_msg': 'Truy cập bị từ chối!'}), 403
     session['bill_detail'] = {}
     room_id = request.json.get('room_id')
 
     if not room_id:
-        return jsonify({'error': 'Thiếu room_id'}), 400
-    curr_session = get_sessions(room_id)
+        return jsonify({'err_msg': 'Thiếu room_id'}), 400
+    curr_session = get_sessions(room_id=room_id, status=[SessionStatus.ACTIVE]).first()
 
     if not curr_session:
-        return jsonify({'error': 'Không tìm thấy phiên hát đang hoạt động'}), 404
+        return jsonify({'err_msg': 'Không tìm thấy phiên hát đang hoạt động'}), 404
 
-    bill_detail = calculate_bill(curr_session.id)
+    bill_detail = get_bill_before_pay(curr_session.id)
+    print(bill_detail)
 
     session['bill_detail'] = bill_detail
     return jsonify(bill_detail)
 
-
-@app.route('/api/pay', methods=['post'])
+@app.route('/api/payment/create/<method>/<payment_type>', methods=['post'])
 @login_required
-def pay():
-    try:
-        if current_user.role != UserRole.STAFF and current_user.role != UserRole.ADMIN:
-            return jsonify({
-                'status': 403,
-                'err_msg': 'Truy cập bị từ chối!'
-            }), 403
-        # Validate cho du lieu dau vao
-        data = request.json;
-        if data is None:
-            return jsonify({'status': 400, 'err_msg': 'Dữ liệu gửi lên không hợp lệ'}), 400
-        client_session_id = data.get('session_id')
+def create_payment(method, payment_type):
+    try :
+        # Tạo mã giao dịch khác nhau cho mỗi giao dịch
+        ref = str(uuid.uuid4())
+        handler = PaymentHandlerFactory.get_handler(payment_type)
         try:
-            paid_amount = float(data.get('paid_amount', 0))
-        except:
-            paid_amount = 0
+            strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+        except Exception as ex:
+            print(ex)
+            return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
 
-        server_bill = session.get('bill_detail')
-        if server_bill is None:
-            return jsonify({
-                'status': 400,
-                'err_msg': 'Phiên giao dịch đã hết hạn hoặc chưa được tạo. Vui lòng tải lại trang!'
-            }), 400
+        amount = handler.init_payment_and_get_amout(request_data=request.json, session_data=session, payment_method=strategy.get_payment_method(), ref=ref)
+        result = strategy.create_payment(amount=str(int(amount)), ref=ref)
 
-        if str(server_bill.get('session_id')) != str(client_session_id):
-            return jsonify({
-                'status': 400,
-                'err_msg': 'Dữ liệu không đồng bộ. Vui lòng tải lại trang!'
-            }), 400
-        final_total = server_bill.get('final_total', 0)
+        if strategy.get_payment_method() == PaymentMethod.CASH:
+            paid_amount = float(request.json.get('paid_amount', 0))
+            if paid_amount < float(amount):
+                return jsonify({'err_msg': 'Không đủ tiền.'}), 400
+            strategy.process_payment({"ref": ref})
+            if payment_type.upper() == "CHECKOUT":
+                del session['bill_detail']
+        return jsonify(result), 200
+    except Exception as ex :
+        print(ex)
+        return jsonify({'err_msg': 'Lỗi hệ thống.'}), 500
 
-        payment_method = data.get('payment_method', 'CASH').upper()
-        if payment_method not in PaymentMethod._member_names_:
-            return jsonify({
-                'status': 400,
-                'err_msg': f'Phương thức thanh toán không hợp lệ.'
-            }), 400
+@app.route('/api/ipn/<method>/<payment_type>', methods=['post', 'get'])
+def return_ipn(method, payment_type):
+    try :
+        if request.method == 'POST':
+            data = request.json
+        else:
+            data = request.args.to_dict()
+        print(data)
 
-        # Tinh lai Bill cho chac
-        bill_detail = calculate_bill(session_id=client_session_id)
-        if (paid_amount < bill_detail.get('final_total')):
-            return jsonify({
-                'status': 400,
-                'err_msg': 'Không đủ tiền.'
-            }), 400
-        add_bill(bill_detail, payment_method)
-        del session['bill_detail']
-
-        return jsonify({'status': 200, 'msg': 'Thanh toán thành công!'})
-    except Exception as ex:
-        return jsonify({'status': 400, 'err_msg': str(ex)}), 400
-
+        strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+        strategy.process_payment(data)
+        # Xử lý thêm để hiện giao diện kêt quả thanh toán
+        # if request.method == 'GET':
+        #     return render_template('xxx', seccess=True)
+        return jsonify({'msg': 'Thanh toán thành công'}), 204
+    except Exception as e:
+        print(e)
+        # Tng tự
+        # if request.method == 'GET':
+        # return render_template('xxx', seccess=False)
+        return jsonify({'err_msg': "Lỗi hệ thống!!!"}), 500
 
 @app.route('/rooms-dashboard/')
 def rooms():
     return render_template('dashboard/rooms_dashboard.html',
                            get_rooms=load_rooms)
-
 
 @app.route('/payment/')
 def payment_page():

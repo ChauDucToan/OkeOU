@@ -151,15 +151,15 @@ def create_sample_data():
         print("📝 Tạo Order cho các phòng...")
 
         # Order 1 (Room 1): 10 Bia + 1 Mực
-        ord1 = Order(session_id=sess1.id, status=OrderStatus.PENDING)
+        ord1 = Order(session_id=sess1.id, status=OrderStatus.SERVED)
         db.session.add(ord1)
 
         # Order 2 (Room 3): 24 Bia (1 Thùng) + 2 Trái Cây (VIP nhậu lớn)
-        ord2 = Order(session_id=sess2.id, status=OrderStatus.PENDING)
+        ord2 = Order(session_id=sess2.id, status=OrderStatus.SERVED)
         db.session.add(ord2)
 
         # Order 3 (Room 4): 2 Coca (Khách lẻ uống nước ngọt)
-        ord3 = Order(session_id=sess3.id, status=OrderStatus.PENDING)
+        ord3 = Order(session_id=sess3.id, status=OrderStatus.SERVED)
         db.session.add(ord3)
 
         db.session.commit()

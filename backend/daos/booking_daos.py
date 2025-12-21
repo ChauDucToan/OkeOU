@@ -2,7 +2,8 @@ from backend.models import Booking
 
 
 def get_bookings(room_id=None, user_id=None, booking_status=None, 
-                 scheduled_start_time=None, scheduled_end_time=None):
+                 scheduled_start_time=None, scheduled_end_time=None,
+                 ref=None):
     b = Booking.query
 
     if user_id:
@@ -19,6 +20,8 @@ def get_bookings(room_id=None, user_id=None, booking_status=None,
 
     if scheduled_end_time:
         b = b.filter(Booking.scheduled_end_time <= scheduled_end_time)
+    if ref:
+        b = b.filter(Booking.ref == ref)
 
     return b
 
