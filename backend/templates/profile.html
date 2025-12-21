@@ -6,12 +6,12 @@ Trang hồ sơ cá nhân
 
 {% block content %}
 <div class="container flex-grow-1 d-flex align-items-center justify-content-center">
-    <div class="row w-100 gx-5">
+    <div class="glass-panel row w-100 gx-5">
         <div class="col-md-4 d-flex flex-column align-items-center">
             <img src="{{ user.avatar }}"
                  alt="{{ user.name }}"
                  width="128" height="128"
-                 class="rounded-circle mb-3 shadow-sm">
+                 class="rounded-circle mb-3 border border-white">
             <button type="button" onclick=""
                     class="btn btn-primary"
                     data-bs-toggle="modal"
@@ -20,13 +20,13 @@ Trang hồ sơ cá nhân
             </button>
         </div>
         <div class="col-md-8">
-            <h3>Hồ sơ cá nhân</h3>
+            <h3 class="text-brand-neon">Hồ sơ cá nhân</h3>
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
                     <label for="name">Tên đầy đủ:</label>
                 </div>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" placeholder="{{ user.name }}" disabled>
+                    <input class="form-control form-control-glass" type="text" placeholder="{{ user.name }}" readonly>
                 </div>
             </div>
             <div class="row mb-3 align-items-center">
@@ -34,7 +34,7 @@ Trang hồ sơ cá nhân
                     <label for="name">Tên người dùng:</label>
                 </div>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" placeholder="{{ user.username }}" disabled>
+                    <input class="form-control" type="text" placeholder="{{ user.username }}" readonly>
                 </div>
             </div>
             <div class="row mb-3 align-items-center">
@@ -42,7 +42,7 @@ Trang hồ sơ cá nhân
                     <label for="name">Email:</label>
                 </div>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" placeholder="{{ user.email }}" disabled>
+                    <input class="form-control" type="text" placeholder="{{ user.email }}" readonly>
                 </div>
             </div>
             <div class="row mb-3 align-items-center">
@@ -50,7 +50,7 @@ Trang hồ sơ cá nhân
                     <label for="name">Số điện thoại:</label>
                 </div>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" placeholder="{{ user.phone }}" disabled>
+                    <input class="form-control" type="text" placeholder="{{ user.phone }}" readonly>
                 </div>
             </div>
             <div class="row">
@@ -62,13 +62,13 @@ Trang hồ sơ cá nhân
 <div class="modal fade" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true"
      id="changeAvatarModal">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content glass-effect text-white">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                ...
+                Sẽ cập nhật thêm tính năng này sau
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

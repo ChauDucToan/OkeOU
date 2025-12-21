@@ -1,26 +1,24 @@
-<nav>
-    <div class="px-3 py-2 text-bg-dark border-bottom" data-bs-theme="dark">
-        <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/"
-                   class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                    <img width="115" height="75" src="/static/images/logo.png" alt="OkeOU">
-                </a>
-                <ul class="nav nav-pills">
+<nav class="navbar navbar-expand-lg {{ 'fixed-top' if request.path == '/' else '' }} glass-effect py-3" id="navbar">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-center w-100">
+            <a href="/"
+                class="my-2 my-lg-0 me-lg-auto">
+                <img width="115" height="75" src="/static/images/logo.png" alt="OkeOU">
+            </a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="nav nav-pills end-0">
                     <li class="nav-item">
                         <a href="/" class="nav-link flex-row {{ 'active' if request.path == '/' else '' }}">
                             Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link flex-row {{ 'active' if request.path == '/orders' else '' }}">
+                        <a href="/orders" class="nav-link flex-row {{ 'active' if request.path == '/orders' else '' }}">
                             Orders
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/payments"
-                           class="nav-link flex-row {{ 'active' if request.path == '/payments' else '' }}">
-                            Payments
+                            <span class="position-absolute top-30 start-75 translate-middle badge rounded-pill bg-secondary order-counter"
+                                    style="display: {{ 'inline-block' if stats_order.total_quantity !=0 else 'none' }}">
+                                {{ stats_order.total_quantity }}
+                            </span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -31,22 +29,22 @@
                     </li>
                     <li class="nav-item">
                         <a href="/products"
-                           class="nav-link flex-row {{ 'active' if request.path.startswith('/products') else '' }}">
+                            class="nav-link flex-row {{ 'active' if request.path.startswith('/products') else '' }}">
                             Products
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle"
-                           data-bs-toggle="dropdown"
-                           href="#"
-                           role="button"
-                           aria-expanded="false">
+                            data-bs-toggle="dropdown"
+                            href="#"
+                            role="button"
+                            aria-expanded="false">
                             Xin chào!
                             <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" width="28" height="28"
-                                 class="rounded-circle">
+                                    class="rounded-circle">
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-glass dropdown-menu-end">
                             <li><a class="dropdown-item" href="/profile">Thông tin hồ sơ</a></li>
                             {% if current_user.is_admin %}
                             <li><a class="dropdown-item" href="/admin">Trang quản trị</a></li>

@@ -6,11 +6,66 @@ Trang chủ
 
 {% block content %}
 <div class="container">
+    <div class="row m-2 mb-4">
+        <div class="col-8">
+            <input type="text" id="searchInput" class="form-control w-100" placeholder="Tìm kiếm phòng..."
+                   value="{{ request.args.get('kw', '') }}" onkeyup="handleSearchInput()" onchange="searchRooms()">
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-primary w-100"
+                data-bs-toggle="collapse" data-bs-target="#filter"
+                aria-expanded="false" aria-controls="filter">
+                <i class="bi bi-filter"></i>
+                Lọc
+            </button>
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-primary w-100" onclick="searchRooms()">
+                <i class="bi bi-search"></i>
+                Tìm kiếm
+            </button>
+        </div>
+    </div>
+    <div class="collapse" id="filter">
+        <div class="card card-body mb-4">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <h4>Bộ lọc nâng cao:</h4>
+                    <div class="d-flex flex-wrap gap-3">
+                        
+                    </div>
+                    <label for="range2" class="form-label">Giá tối đa theo giờ: &lt; <span id="rangeValue2">{{ request.args.get('price_max', 500000) }}</span> VND</label>
+                    <input type="range" class="form-range" min="0" max="500000" value="{{ request.args.get('price_max', 500000) }}" step="25000" id="range2"
+                           oninput="handleSliderChange(this, 'rangeValue2')">
+                    <label for="range3" class="form-label">Sức chứa: &gt; <span id="rangeValue3">{{ request.args.get('capacity', 1) }}</span> người</label>
+                    <input type="range" class="form-range" min="1" max="15" value="{{ request.args.get('capacity', 1) }}" step="1" id="range3"
+                           oninput="handleSliderChange(this, 'rangeValue3')">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h4>Sắp xếp theo:</h4>
+                    <select id="sortSelect" class="form-select select-anim" onchange="searchRooms()">
+                        <option value="name_asc" {% if request.args.get('sort') == 'name_asc' %}selected{% endif %}>Tên (A-Z)</option>
+                        <option value="name_desc" {% if request.args.get('sort') == 'name_desc' %}selected{% endif %}>Tên (Z-A)</option>
+                        <option value="price_asc" {% if request.args.get('sort') == 'price_asc' %}selected{% endif %}>Giá thấp - cao</option>
+                        <option value="price_desc" {% if request.args.get('sort') == 'price_desc' %}selected{% endif %}>Giá cao - thấp</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-6 mb-3">
+                    <button class="btn btn-secondary w-100" type="button" onclick="resetFilters()">Đặt lại bộ lọc</button>
+                </div>
+                <div class="col-6 mb-3">
+                    <button class="btn btn-primary w-100" type="button" onclick="searchRooms()">Áp dụng bộ lọc</button>
+                </div>
+            </div>
+        </div>
+    </div>
     {% if rooms %}
     <div class="row">
         {% for r in rooms %}
         <div class="col-md-4 col-6 p-2">
-            <div class="card">
+            <div class="card transition-card">
                 <img class="card-img-top"
                      src="{{ r.image }}"
                      style="height: 200px; object-fit: cover;"
@@ -19,9 +74,9 @@ Trang chủ
                     <h4 class="card-title">{{ r.name }}</h4>
                     <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
                     <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ r.id }}, '{{ r.name }}', {{ r.type.hourly_price }})">Đặt phòng ngay
-                    </button>
+                    <a class="btn btn-danger"
+                        href="/rooms/{{ r.id }}">Đặt phòng ngay
+                    </a>
                 </div>
             </div>
         </div>
@@ -35,9 +90,15 @@ Trang chủ
     {% if pages > 1 %}
     <ul class="pagination mt-2">
         {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link" href="/?page={{i}}">{{ i }}</a></li>
+        <li class="page-item"><a class="page-link" href="{{ url_for('rooms_preview', 
+                                                    page=i, 
+                                                    kw=request.args.get('kw'), 
+                                                    price_max=request.args.get('price_max'), 
+                                                    capacity=request.args.get('capacity'), 
+                                                    sort=request.args.get('sort')) }}">{{ i }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
 </div>
+<script src="{{ url_for('static', filename='js/rooms.js') }}"></script>
 {% endblock %}

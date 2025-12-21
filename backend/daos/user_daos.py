@@ -1,5 +1,6 @@
+from cloudinary import uploader
 from backend.models import Session, User, UserRole
-from backend import db, cloudinary
+from backend import db
 from backend.utils.general_utils import hash_password
 from sqlalchemy.exc import IntegrityError
 
@@ -28,7 +29,7 @@ def get_users(user_id=None, name=None, username=None,
     return u
 
 
-def add_user(name, username, password, email,
+def create_user(name, username, password, email,
              phoneNumber,
              avatar="https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
     u = User(name=name,
@@ -39,7 +40,7 @@ def add_user(name, username, password, email,
              phone=phoneNumber)
 
     if avatar:
-        res = cloudinary.uploader.upload(avatar)
+        res = uploader.upload(avatar)
         u.avatar = res.get('secure_url')
 
     db.session.add(u)

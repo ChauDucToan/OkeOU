@@ -1,0 +1,278 @@
+/* =========================================
+   1. VARIABLES & BOOTSTRAP OVERRIDES
+   ========================================= */
+:root {
+    --brand-purple: #8b5cf6;
+    --brand-pink: #ec4899;
+    --brand-dark: #1a2742;
+    --brand-neon: #00f2fe;
+    
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-bg-hover: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-blur: 15px;
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
+
+    --bs-body-bg: var(--brand-dark);
+    --bs-body-color: #ffffff;
+    --bs-primary: #0d6efd; 
+    --bs-primary-rgb: 13, 110, 253;
+    
+    --bs-modal-bg: rgba(26, 39, 66, 0.85);
+    --bs-modal-border-color: var(--glass-border);
+    --bs-modal-color: #fff;
+    --bs-border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* =========================================
+   2. GLOBAL BASE & TYPOGRAPHY
+   ========================================= */
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.text-brand-neon { color: var(--brand-neon) !important; }
+.text-brand-pink { color: var(--brand-pink) !important; }
+.text-brand-purple { color: var(--brand-purple) !important; }
+
+/* =========================================
+   3. SHARED UTILITIES (MODULAR)
+   ========================================= */
+
+.glass-panel, .glass-effect, .login-glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.glass-panel {
+    border-radius: 15px;
+    padding: 1.25rem;
+}
+
+.login-glass-panel {
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.cursor-pointer { cursor: pointer; }
+
+/* =========================================
+   4. COMPONENTS: FORMS (Universal)
+   ========================================= */
+
+
+   .form-control, .form-select, .form-control-glass {
+    background-color: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white !important;
+    backdrop-filter: blur(5px);
+}
+
+.form-control:focus, .form-select:focus, .form-control-glass:focus {
+    background-color: rgba(15, 23, 42, 0.8);
+    border-color: var(--brand-neon);
+    box-shadow: 0 0 0 0.25rem rgba(0, 242, 254, 0.25);
+    color: white;
+}
+
+.form-control::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+.form-floating > .form-control-glass:focus ~ label,
+.form-floating > .form-control-glass:not(:placeholder-shown) ~ label {
+    background-color: transparent !important;
+    color: #fff;
+    opacity: 1;
+}
+.form-floating > label { color: rgba(255, 255, 255, 0.7); }
+
+.form-check-input {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+}
+.form-check-input:focus { box-shadow: none; }
+
+/* =========================================
+   5. COMPONENTS: NAVBAR
+   ========================================= */
+.navbar {
+    transition: all 0.3s ease;
+    padding: 0.75rem 0;
+}
+
+.navbar-scrolled {
+    background-color: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 30px;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover, .navbar .nav-link.active {
+    color: #ffffff !important;
+    background: var(--glass-bg-hover) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu-glass {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    margin-top: 10px;
+}
+.dropdown-menu-glass .dropdown-item {
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    margin: 2px 5px;
+    width: auto;
+}
+.dropdown-menu-glass .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+.dropdown-menu-glass .dropdown-divider { border-top-color: rgba(255, 255, 255, 0.1); }
+
+/* =========================================
+   6. COMPONENTS: TABLES & CARDS
+   ========================================= */
+.table-glass {
+    --bs-table-bg: transparent;
+    --bs-table-color: #fff;
+    --bs-table-border-color: rgba(255, 255, 255, 0.2);
+}
+.table-glass thead th {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+.table-glass tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.payment-option input[type="radio"] { display: none; }
+.payment-option label {
+    transition: all 0.2s;
+    border: 1px solid var(--glass-border) !important;
+    background: rgba(255, 255, 255, 0.05);
+    width: 100%;
+    display: block;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.payment-option input[type="radio"]:checked + label {
+    border-color: var(--bs-primary) !important;
+    background-color: rgba(13, 110, 253, 0.15);
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.2);
+}
+
+.occupied-bar {
+    position: absolute;
+    height: 100%;
+    background-color: var(--bs-danger);
+    opacity: 0.85;
+    top: 0;
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-size: 1rem 1rem;
+    transition: all 0.3s;
+}
+
+/* =========================================
+   7. ANIMATIONS
+   ========================================= */
+@keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+.blob {
+    position: absolute;
+    filter: blur(70px);
+    z-index: -1;
+    opacity: 0.4;
+    animation: blob 7s infinite;
+}
+.blob-1 { top: 0; left: -10px; width: 300px; height: 300px; background-color: var(--brand-purple); }
+.blob-2 { top: 0; right: -10px; width: 300px; height: 300px; background-color: cyan; animation-delay: 2s; }
+.blob-3 { bottom: -30px; left: 80px; width: 300px; height: 300px; background-color: var(--brand-pink); animation-delay: 4s; }
+
+/* =========================================
+   8. DESKTOP SPECIFICS (HOVER EFFECTS)
+   ========================================= */
+@media (hover: hover) and (pointer: fine) {
+    .occupied-bar:hover {
+        opacity: 1;
+        transform: scaleY(1.1);
+        z-index: 10;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+    
+    .transition-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .transition-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    
+    .select-anim:hover {
+        border-color: var(--bs-primary);
+        background-color: var(--glass-bg-hover);
+    }
+    
+    .btn-glass:hover {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-hover:hover .hover-zoom-img {
+        transform: scale(1.1);
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .payment-option label:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+}
+
+/* =========================================
+   9. MOBILE OPTIMIZATIONS
+   ========================================= */
+@media (max-width: 991.98px) {
+    .blob { width: 200px; height: 200px; filter: blur(50px); }
+    
+    .navbar-collapse {
+        background: rgba(15, 23, 42, 0.98);
+        padding: 1rem;
+        border-radius: 15px;
+        margin-top: 10px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .btn, .nav-link, .form-control {
+        min-height: 44px;
+        margin-right: 3px;
+    }
+    
+    .glass-panel { padding: 1rem; }
+}

@@ -124,7 +124,6 @@ class RoomStatus(GenericEnum):
     AVAILABLE = 1
     BOOKED = 2
     OCCUPIED = 3
-    MAINTENANCE = 4
 
 
 class RoomType(BaseModel):

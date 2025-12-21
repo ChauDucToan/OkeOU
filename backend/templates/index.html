@@ -1,43 +1,155 @@
 {% extends 'layout/base.html' %}
 
 {% block title %}
-Trang chủ
+Trang chủ - OkeOU Karaoke
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    {% if rooms %}
-    <div class="row">
-        {% for r in rooms %}
-        <div class="col-md-4 col-6 p-2">
-            <div class="card">
-                <img class="card-img-top"
-                     src="{{ r.image }}"
-                     style="height: 200px; object-fit: cover;"
-                     alt="{{ r.name }}">
-                <div class="card-body">
-                    <h4 class="card-title">{{ r.name }}</h4>
-                    <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
-                    <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ r.id }}, '{{ r.name }}', {{ r.type.hourly_price }})">Đặt phòng ngay
-                    </button>
+<section id="home" class="position-relative d-flex align-items-center justify-content-center min-vh-100 pt-5 overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100 z-0">
+        <img src="/static/images/hero_image.png" 
+                class="w-100 h-100 object-fit-cover opacity-25" alt="Background">
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t" style="background: linear-gradient(to top, var(--brand-dark), transparent);"></div>
+    </div>
+
+    <div class="blob blob-1 rounded-circle"></div>
+    <div class="blob blob-2 rounded-circle"></div>
+    <div class="blob blob-3 rounded-circle"></div>
+
+    <div class="container position-relative z-1 text-center mt-5">
+
+        <h1 class="display-2 fw-black mb-4 lh-1">
+            Hát Cực Đã <br />
+            <span class="text-gradient-purple">Sống Cực Phiêu</span>
+        </h1>
+
+        <p class="text-secondary fs-5 mb-5 mx-auto" style="max-width: 700px;">
+            Hệ thống âm thanh chuẩn Studio, không gian sang trọng và danh sách bài hát cập nhật mỗi ngày. OkeOU - Nơi cảm xúc thăng hoa.
+        </p>
+
+        <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+            <a href="/rooms" class="btn btn-light rounded-pill px-5 py-3 fw-bold shadow-lg">
+                Đặt Phòng Ngay
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="py-5 position-relative">
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="glass-effect p-4 p-lg-5 rounded-4 h-100 border-top border-primary border-opacity-50">
+                    <div class="bg-primary bg-opacity-25 rounded-3 d-inline-flex p-3 mb-4 text-primary">
+                        <i class="fa-solid fa-sliders fs-3"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">Âm Thanh Đỉnh Cao</h3>
+                    <p class="text-secondary small mb-0">Hệ thống loa JBL & Bose đời mới nhất, mix nhạc tự động, lọc tạp âm cho giọng hát trong trẻo như ca sĩ.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-effect p-4 p-lg-5 rounded-4 h-100 border-top border-danger border-opacity-50">
+                    <div class="bg-danger bg-opacity-25 rounded-3 d-inline-flex p-3 mb-4 text-danger">
+                        <i class="fa-solid fa-couch fs-3"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">Không Gian Luxury</h3>
+                    <p class="text-secondary small mb-0">Thiết kế cách âm tuyệt đối, nội thất sang trọng với nhiều phong cách: Cyberpunk, Classic, Modern.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-effect p-4 p-lg-5 rounded-4 h-100 border-top border-info border-opacity-50">
+                    <div class="bg-info bg-opacity-25 rounded-3 d-inline-flex p-3 mb-4 text-info">
+                        <i class="fa-solid fa-tablet-screen-button fs-3"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">Chọn Bài Thông Minh</h3>
+                    <p class="text-secondary small mb-0">Màn hình cảm ứng 4K, cập nhật Youtube realtime, điều khiển qua điện thoại cực tiện lợi.</p>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <div class="alert alert-danger mt-2">Không có phòng nào!</div>
-    {% endif %}
-</div>
-<div class="d-flex justify-content-center">
-    {% if pages > 1 %}
-    <ul class="pagination mt-2">
-        {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link" href="/?page={{i}}">{{ i }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-</div>
+</section>
+
+<!-- Rooms Section -->
+<section id="rooms" class="py-5 overflow-hidden">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="text-brand-pink fw-bold text-uppercase small ls-2">Trải nghiệm khác biệt</span>
+            <h2 class="display-5 fw-bold mt-2">Hệ Thống Phòng Hát</h2>
+        </div>
+
+        <div class="row g-4">
+            {% for room in rooms %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card-hover position-relative rounded-4 overflow-hidden h-100" style="min-height: 400px;">
+                    <img src="{{ room.image }}" class="w-100 h-100 object-fit-cover position-absolute hover-zoom-img" alt="{{ room.name }}">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t" style="background: linear-gradient(to top, black, transparent);"></div>
+                    <div class="position-absolute bottom-0 start-0 p-4 w-100">
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <h3 class="h4 fw-bold text-white mb-1">{{ room.name }}</h3>
+                                <p class="text-secondary small mb-0">{{ room.capacity }} người</p>
+                            </div>
+                            <span class="text-brand-neon fw-bold fs-5">{{ '{:,.0f}'.format(room.type.hourly_price) }}đ/h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Menu Section (Horizontal Scroll) -->
+<section id="menu" class="py-5" style="background: linear-gradient(to right, rgba(88, 28, 135, 0.2), rgba(131, 24, 67, 0.2));">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="h2 fw-bold mb-1">Menu Đồ Uống & Snacks</h2>
+                <p class="text-secondary mb-0">Nạp năng lượng để hát hăng say</p>
+            </div>
+            <a href="/products" class="text-brand-pink text-decoration-none fw-medium">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+        
+        <!-- Scrolling Wrapper -->
+        <div class="position-relative slider-container">
+            <button class="btn btn-glass position-absolute top-50 start-0 translate-middle-y z-2 ms-2 d-none d-lg-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px; border-radius: 50%;"
+                    onclick="scrollSlider('left')">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <div class="d-flex overflow-auto gap-3 py-3 px-1 hide-scrollbar scroll-smooth">
+                {% for product in products %}
+                <div class="flex-shrink-0" style="width: 260px; scroll-snap-align: start;">
+                    <div class="glass-effect p-3 rounded-4 h-100 d-flex flex-column">
+                        <div class="rounded-3 overflow-hidden mb-3 position-relative" style="height: 150px;">
+                            <img src="{{ product.image }}" 
+                                class="w-100 h-100 object-fit-cover" 
+                                alt="{{ product.name }}">
+                        </div>
+                        
+                        <h5 class="fw-bold text-white mb-1">{{ product.name }}</h5>
+                        <p class="text-white-50 small mb-3">{{ product.description }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <span class="text-warning fw-bold fs-5">{{ '{:,.0f}'.format(product.price) }}đ</span>
+                            <button class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center" 
+                                    style="width: 32px; height: 32px;">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button class="btn btn-glass position-absolute top-50 end-0 translate-middle-y z-2 me-2 d-none d-lg-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px; border-radius: 50%;">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
 {% endblock %}

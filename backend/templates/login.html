@@ -8,8 +8,8 @@ Trang đăng nhập
 {% endblock %}
 
 {% block content %}
-<section class="bg-dark align-content-center vh-100">
-    <div class="container form-signin w-50">
+<section class="align-content-center vh-100">
+    <div class="container form-signin login-glass-panel w-50">
         <form class="m-auto row g-3" method="post" action="">
             {% if err_msg %}
             <div class="alert alert-danger">{{err_msg}}</div>
@@ -20,7 +20,7 @@ Trang đăng nhập
             </div>
             <h1 class="h3 mb-3 fw-normal text-white">Xin vui lòng đăng nhập</h1>
             <div class="form-floating">
-                <input type="name" name="username" class="form-control" id="username"
+                <input type="text" name="username" class="form-control" id="username"
                        placeholder="username" required>
                 <label for="username">Username</label>
             </div>
@@ -31,7 +31,7 @@ Trang đăng nhập
             </div>
             <button class="btn btn-primary w-100 py-2 my-3" type="submit">Đăng nhập</button>
             <a class="btn btn-secondary w-100 py-2 m-0" href="/register">Chưa có tài khoản? Đăng ký ngay!</a>
-            <p class="mt-5 mb-3 text-body-secondary text-center">OkeOU © 2025</p>
+            <p class="mt-5 mb-3 text-white text-center">OkeOU © 2025</p>
         </form>
     </div>
 </section>
