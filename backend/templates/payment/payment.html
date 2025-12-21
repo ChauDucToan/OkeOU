@@ -220,7 +220,7 @@
         {% if current_user.is_authenticated and (current_user.role.name ==
         'STAFF' or current_user.role.name ==
         'ADMIN')%}
-        <button class="btn btn-success" onclick="pay()">Thanh toán</button>
+        <button class="btn btn-success" onclick="pay('CHECKOUT')">Thanh toán</button>
         {% endif %}
       </div>
     </div>

@@ -21,7 +21,8 @@ function caculateBill(roomId) {
     });
 }
 
-function pay() {
+//Truyen vao payemnt_type de thay the cho nhieu loai thanh toan nhu la BOOKING cho dat phong, CHECKOUT cho thanh toan tra phong
+function pay(payment_type) {
   const paymentBtn = document.querySelector(".btn-payment.btn-primary");
   const method = paymentBtn ? paymentBtn.innerText.trim() : "CASH";
 
@@ -39,7 +40,7 @@ function pay() {
           requestBody.paid_amount = paidAmount;
       }
 
-      fetch(`/api/payment/create/${method}/checkout`, {
+      fetch(`/api/payment/create/${method}/${payment_type}`, {
           method: "post",
           body: JSON.stringify(requestBody),
           headers: {
