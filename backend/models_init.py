@@ -2,12 +2,13 @@ from datetime import datetime, timedelta
 import random
 
 from backend import app, db
-from backend.models import Booking, BookingStatus, Category, Product, Room, RoomStatus, RoomType, User, UserRole, Staff, Session
+from backend.models import Booking, BookingStatus, Category, Order, OrderStatus, PaymentStatus, Product, Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, User, UserRole, Staff, Session
 from backend.utils.general_utils import hash_password
 
 if __name__ == '__main__':
     with app.app_context():
         random.seed(27)
+        current_time = datetime.now()
 
         def_name = f'usr{random.random() * 10000:.0f}'
         def_password = f'pwd{random.random() * 10000:.0f}'
@@ -248,10 +249,10 @@ if __name__ == '__main__':
 
         for room in rooms:
             for day_offset in range(-2, 3):
-                if random.random() > 0.1:
+                if random.random() > 0.3:
                     
                     start_hour = random.randint(10, 20) 
-                    start_minute = random.choice([0, 15, 30])
+                    start_minute = random.choice([0, 15, 30, 45])
                     
                     base_date = datetime.now().date() + timedelta(days=day_offset)
                     start_time = datetime.combine(base_date, datetime.min.time()) + timedelta(hours=start_hour, minutes=start_minute)
@@ -262,7 +263,7 @@ if __name__ == '__main__':
                     if end_time < datetime.now():
                         status = BookingStatus.COMPLETED
                     else:
-                        status = random.choice([BookingStatus.CONFIRMED, BookingStatus.PENDING])
+                        status = random.choice([BookingStatus.CANCELLED, BookingStatus.PENDING, BookingStatus.CONFIRMED])
 
                     hourly_price = price_map.get(room.room_type, 100000)
                     
@@ -284,3 +285,85 @@ if __name__ == '__main__':
 
         db.session.add_all(bookings)
         db.session.commit()
+
+
+        confirmed_bookings = [b for b in bookings if b.booking_status == BookingStatus.COMPLETED]
+        sessionss = []
+
+        for booking in confirmed_bookings:
+
+            if booking.scheduled_end_time < current_time:
+                session = Session(
+                    user_id=booking.user_id,
+                    room_id=booking.room_id,
+                    start_time=booking.scheduled_start_time,
+                    end_time=booking.scheduled_end_time,
+                    deposit_amount=booking.deposit_amount,
+                    session_status=SessionStatus.FINISHED
+                )
+            else:
+                session = Session(
+                    user_id=booking.user_id,
+                    room_id=booking.room_id,
+                    start_time=booking.scheduled_start_time,
+                    end_time=booking.scheduled_end_time,
+                    deposit_amount=booking.deposit_amount,
+                    session_status=SessionStatus.BOOKED
+                )
+            sessionss.append(session)
+
+        db.session.add_all(sessionss)
+        db.session.commit()
+
+        receipts = []
+        for session in sessionss:
+            if session.session_status == SessionStatus.FINISHED:
+                receipt = Receipt(
+                    session_id=session.id,
+                    staff_id=staff_user.id,
+                    status=PaymentStatus.COMPLETED
+                )
+                receipts.append(receipt)
+            else:
+                receipt = Receipt(
+                    session_id=session.id,
+                    staff_id=None,
+                    status=PaymentStatus.COMPLETED
+                )
+                receipts.append(receipt)
+
+        db.session.add_all(receipts)
+        db.session.commit()
+
+        orders = []
+        total_service_fee = 0.0
+        for session in sessionss:
+            num_orders = random.randint(0, 5)
+            ordered_products = random.sample(products, k=min(num_orders, len(products)))
+            for prod in ordered_products:
+                quantity = random.randint(1, 3)
+                order = Order(
+                    session_id=session.id,
+                    product_id=prod.id,
+                    quantity=quantity,
+                    order_status=OrderStatus.SERVED
+                )
+                total_service_fee += quantity * prod["price"]
+                orders.append(order)
+
+        db.session.add_all(orders)
+        db.session.commit()
+
+        receipt_details_list = []
+        for receipt, session in zip(receipts, sessionss):
+            duration = (session.end_time - session.start_time).total_seconds() / 3600
+            room = Room.query.get(session.room_id)
+            room_type = RoomType.query.get(room.room_type)
+            total_room_fee = room_type.hourly_price * duration
+
+            receipt_details = ReceiptDetails(
+                id=receipt.id,
+                total_room_fee=total_room_fee,
+                total_service_fee=total_service_fee
+            )
+            receipt_details_list.append(receipt_details)

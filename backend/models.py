@@ -145,7 +145,8 @@ class Room(BaseModel):
 # ===========================================================
 class SessionStatus(GenericEnum):
     ACTIVE = 1
-    FINISHED = 2
+    BOOKED = 2
+    FINISHED = 3
 
 
 class BookingStatus(GenericEnum):
@@ -228,6 +229,12 @@ class Order(BaseModel):
 # ===========================================================
 #   Payments
 # ===========================================================
+class PaymentStatus(GenericEnum):
+    PENDING = 1
+    COMPLETED = 2
+    FAILED = 3
+    
+
 class PaymentMethod(GenericEnum):
     CASH = 1
     TRANSFER = 2
@@ -235,6 +242,7 @@ class PaymentMethod(GenericEnum):
 
 
 class Receipt(BaseModel):
+    id = Column(String(100), primary_key=True)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
 
@@ -243,7 +251,7 @@ class Receipt(BaseModel):
 
 
 class ReceiptDetails(BaseModel):
-    receipt_id = Column(Integer, ForeignKey(Receipt.id), nullable=False)
+    id = Column(String(100), ForeignKey(Receipt.id), primary_key=True)
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)

@@ -9,6 +9,9 @@ from backend.utils.order_utils import get_order_price
 from backend.utils.session_utils import get_session_price
 
 
+def sum_monthly_revenue(year: int):
+    pass
+
 def create_receipt(session_id, staff_id, payment_method):
     receipt = Receipt(session_id=session_id, staff_id=staff_id)
     db.session.add(receipt)

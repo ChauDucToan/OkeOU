@@ -4,7 +4,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 
 from backend import app, db
-from backend.models import Room, RoomType, Product, Staff
+from backend.models import Room, Product, Staff
 
 
 class AdminView(ModelView):
@@ -37,15 +37,7 @@ class RoomView(AdminView):
     ]
 
     column_filters = ['name', 'status', 'room_type', 'capacity']
-
-
-class RoomTypeView(AdminView):
-    column_list = [
-        'name',
-        'hourly_price'
-    ]
-
-    column_filters = ['name', 'hourly_price']
+    page_size = app.config['PAGE_SIZE']
 
 
 class LogoutView(BaseView):
@@ -59,15 +51,30 @@ class LogoutView(BaseView):
 
 
 class MyAdminIndexView(AdminIndexView):
+    stats = {
+        'rooms': 10, # Thay bằng: Room.query.count()
+        'products': 55, # Thay bằng: Product.query.count()
+        'staff': 5
+    }
+
     @expose('/')
     def index(self):
-        return self.render('admin/index.html')
+        return self.render('admin/index.html', stats=self.stats)
+    
+
+class ReturnHomeView(BaseView):
+    @expose('/')
+    def index(self):
+        return redirect('/')
+
+    def is_accessible(self):
+        return current_user.is_authenticated
 
 
 admin = Admin(app=app, name='OkeOU', index_view=MyAdminIndexView())
 
 admin.add_view(AdminView(Staff, db.session))
 admin.add_view(RoomView(Room, db.session))
-admin.add_view(RoomTypeView(RoomType, db.session))
 admin.add_view(ProductView(Product, db.session))
 admin.add_view(LogoutView(name='Logout'))
+admin.add_view(ReturnHomeView(name='Return to Home'))
