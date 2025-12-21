@@ -55,6 +55,8 @@ endblock %} {% block content %}
   </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+
 <script>
   window.onload = () => {
     const filterSelect = document.getElementById("filterStatus");
