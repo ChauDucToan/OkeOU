@@ -27,7 +27,4 @@ def load_products(kw=None, category_id=None, page=1):
 
 def count_products(kw=None, category_id=None):
     p = get_products(kw=kw, category_id=category_id)
-    if p.count() > 0:
-        return p.count()
-    else:
-        return 0
+    return p.count()

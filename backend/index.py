@@ -146,7 +146,6 @@ def products_preview():
                                 category_id=request.args.get('category_id'),
                                 page=int(request.args.get('page', 1)))
     categories = get_categories()
-    print(count_products(request.args.get('kw'), request.args.get('category_id')) / app.config['PAGE_SIZE'])
     return render_template('products.html', products=products,
                            categories=categories,
                            pages=math.ceil(count_products(request.args.get('kw'), request.args.get('category_id')) / app.config['PAGE_SIZE']))
@@ -172,9 +171,6 @@ def rooms_preview():
     if page:
         start = (page - 1) * app.config["PAGE_SIZE"]
         rooms = rooms.slice(start, start + app.config["PAGE_SIZE"])
-        
-    print(count)
-    print(count / page_size)
 
     return render_template('rooms.html', 
                            rooms=rooms.all(),
