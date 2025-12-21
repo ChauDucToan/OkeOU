@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from backend import db
 from flask_login import current_user
 
-from backend.models import BookingStatus, ReceiptStatus, Booking
+from backend.models import BookingStatus, PaymentStatus, Booking, Receipt
 from backend.utils import booking_utils, payment_utils
 from daos import session_daos
 
@@ -24,8 +24,8 @@ class BookingHandler(PaymentHandler):
         booking_id = request_data.get('booking_id')
         booking = Booking.query.filter_by(id=booking_id).first()
         booking.ref = ref
-        amount = booking.deposit_amount
         db.session.commit()
+        amount = booking.deposit_amount
         return amount
 
     def get_payment_status(self, status):
@@ -34,15 +34,9 @@ class BookingHandler(PaymentHandler):
         else:
             return BookingStatus.CANCELLED
 
+    # Xử lý cập nhật db sau khi booking ở đây
     def update_db(self, ref, status):
-        status = self.get_payment_status(status)
-        booking = Booking.query.filter_by(ref=ref).first()
-        if status == BookingStatus.CONFIRMED:
-            booking_utils.confirm_booking(booking_id=booking.id)
-        else:
-            # Doi trang thai booking ve cacelled
-            booking.booking_status = BookingStatus.CANCELLED
-            db.session.commit()
+        pass
 
 class CheckoutHandler(PaymentHandler):
     def init_payment_and_get_amout(self, request_data, session_data, payment_method, ref):
@@ -50,20 +44,19 @@ class CheckoutHandler(PaymentHandler):
         if not bill_detail:
             raise ValueError("Phiên thanh toán hết hạn")
         session_id = bill_detail['session_id']
-        payment_utils.create_receipt(session_id=session_id,
-                                     staff_id=current_user.id, payment_method=payment_method,
-                                     ref=ref)
+        receipt_id = Receipt.query.filter(Receipt.session_id == session_id).first().id
+        payment_utils.update_receipt_ref(id=receipt_id, ref=ref)
         amount = bill_detail['final_total']
         return amount
 
     def get_payment_status(self, status):
         if status == "SUCCESS":
-            return ReceiptStatus.COMPLETED
+            return PaymentStatus.COMPLETED
         else:
-            return ReceiptStatus.FAILED
+            return PaymentStatus.FAILED
     def update_db(self, ref, status):
         status = self.get_payment_status(status)
-        if status == ReceiptStatus.COMPLETED:
+        if status == PaymentStatus.COMPLETED:
             payment_utils.process_payment(session_id=session_daos.get_session_by_receipt_ref(ref=ref).id)
         payment_utils.change_receipt_status(ref=ref, status=status)
 

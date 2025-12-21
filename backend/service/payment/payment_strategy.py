@@ -55,25 +55,23 @@ class CashPaymentStrategy(PaymentStrategy):
 
 class MomoPaymentStrategy(PaymentStrategy):
     def __init__(self, payment_type):
-        super().__init__(payment_type=payment_type)
+        super().__init__(payment_type)
         self.accessKey = os.getenv("MOMO_ACCESS_KEY")
         self.secretKey = os.getenv("MOMO_SECRET_KEY")
         self.endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
         self.ipnUrl = f"https://uniramous-earline-colorational.ngrok-free.dev/api/ipn/momo/{payment_type}"
         self.redirectUrl = "http://localhost:5000/"
 
-    def create_payment(self, amount="50000", ref=str(uuid.uuid4())):
+    def create_payment(self, amount, ref):
         partnerCode = "MOMO"
-        orderInfo = "Thanh toan Momo"
-        orderId = ref
+        orderId = str(ref)
         requestId = str(uuid.uuid4())
-        requestType = "payWithMethod"
-        extraData = ""
+        extraData = str(ref)
 
         raw_signature = (f"accessKey={self.accessKey}&amount={amount}&extraData={extraData}"
-                         f"&ipnUrl={self.ipnUrl}&orderId={orderId}&orderInfo={orderInfo}"
+                         f"&ipnUrl={self.ipnUrl}&orderId={orderId}&orderInfo=Thanh toan Momo"
                          f"&partnerCode={partnerCode}&redirectUrl={self.redirectUrl}"
-                         f"&requestId={requestId}&requestType={requestType}")
+                         f"&requestId={requestId}&requestType=payWithMethod")
 
         h = hmac.new(bytes(self.secretKey, 'ascii'), bytes(raw_signature, 'utf-8'), hashlib.sha256)
         signature = h.hexdigest()
@@ -83,27 +81,26 @@ class MomoPaymentStrategy(PaymentStrategy):
             'partnerName': "Test",
             'storeId': "MomoTestStore",
             'requestId': requestId,
-            'amount': int(amount),
+            'amount': str(amount),
             'orderId': orderId,
-            'orderInfo': orderInfo,
+            'orderInfo': "Thanh toan Momo",
             'redirectUrl': self.redirectUrl,
             'ipnUrl': self.ipnUrl,
             'lang': "vi",
             'extraData': extraData,
-            'requestType': requestType,
+            'requestType': "payWithMethod",
             'signature': signature,
-            'autoCapture': True,
-            'orderGroupId': ""
+            'autoCapture': True
         }
 
-        import json
-        print("Payload gửi đi:", json.dumps(data, indent=2))
-
-        response = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json'})
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"Lỗi MoMo: {response.text}")
+        try:
+            response = requests.post(self.endpoint, json=data)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                return {'payUrl': None, 'err_msg': response.text}
+        except Exception as e:
+            return {'payUrl': None, 'err_msg': str(e)}
 
     def verify_payment(self, data):
         keys = [

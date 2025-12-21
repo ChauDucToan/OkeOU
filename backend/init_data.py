@@ -1,191 +1,270 @@
-from backend import app, db
-# Sửa import: đổi product_order -> ProductOrder
-from backend.models import (
-    User, Staff, LoyalCustomer, UserRole,
-    RoomType, Room, RoomStatus,
-    Category, Product,
-    Session, SessionStatus,
-    Order, OrderStatus, ProductOrder,CustomerCardUsage
-)
 from datetime import datetime, timedelta
-from backend.utils.user_utils import hash_password
+import random
+import uuid
 
+from backend import app, db
+from backend.models import (
+    Booking, BookingStatus, Category, Order, OrderStatus,
+    PaymentStatus, PaymentMethod, Product, ProductOrder, Receipt, ReceiptDetails,
+    Room, RoomStatus, RoomType, SessionStatus, User, UserRole,
+    Staff, Session
+)
+from backend.utils.general_utils import hash_password
 
-# Để tạo dữ liệu test thử thôi
-def create_sample_data():
+if __name__ == '__main__':
     with app.app_context():
-        # 1. Làm sạch dữ liệu cũ
-        print("🔄 Đang reset cơ sở dữ liệu...")
+        # 1. Reset Database
         db.drop_all()
         db.create_all()
+        print("Database initialized.")
 
-        # ---------------------------------------------------------
-        # 2. Tạo Loại phòng & Phòng
-        # ---------------------------------------------------------
-        print("🏠 Tạo dữ liệu Phòng...")
-        type_normal = RoomType(name="Thường", hourly_price=100000)
-        type_vip = RoomType(name="VIP", hourly_price=200000)
-        db.session.add_all([type_normal, type_vip])
-        db.session.commit()
+        random.seed(27)
+        current_time = datetime.now()
 
-        # Định nghĩa placeholder ảnh phòng
-        ROOM_NORMAL_IMG = "https://res.cloudinary.com/okeou/image/upload/v1/room_normal.jpg"
-        ROOM_VIP_IMG = "https://res.cloudinary.com/okeou/image/upload/v1/room_vip.jpg"
-
-        # P101 (Thường) - Đang có khách
-        # Đã thêm image=ROOM_NORMAL_IMG
-        room1 = Room(name="P101", capacity=10, room_type=type_normal.id, status=RoomStatus.OCCUPIED, image=ROOM_NORMAL_IMG)
-        # VIP01 (VIP) - Trống
-        # Đã thêm image=ROOM_VIP_IMG
-        room2 = Room(name="VIP01", capacity=15, room_type=type_vip.id, status=RoomStatus.AVAILABLE, image=ROOM_VIP_IMG)
-        # VIP02 (VIP) - Đang có khách
-        # Đã thêm image=ROOM_VIP_IMG
-        room3 = Room(name="VIP02", capacity=15, room_type=type_vip.id, status=RoomStatus.OCCUPIED, image=ROOM_VIP_IMG)
-        # P102 (Thường) - Đang có khách
-        # Đã thêm image=ROOM_NORMAL_IMG
-        room4 = Room(name="P102", capacity=12, room_type=type_normal.id, status=RoomStatus.OCCUPIED, image=ROOM_NORMAL_IMG)
-
-        db.session.add_all([room1, room2, room3, room4])
-        db.session.commit()
-
-        # ---------------------------------------------------------
-        # 3. Tạo User
-        # ---------------------------------------------------------
-        print("👤 Tạo dữ liệu User...")
-
-        # Admin
-        admin = Staff(
-            name="Nguyễn Văn Thu Ngân", username="admin", password=hash_password('123456'),
-            role=UserRole.ADMIN,
-            phone="0901234533", email="admin@okeou.com", identity_card="079123456222"
-        )
-        db.session.add(admin)
-
-        # Nhân viên
-        staff = Staff(
-            name="Nguyễn Văn Thu Ngân", username="staff", password=hash_password('123456'),
-            role=UserRole.STAFF, phone="0901234567", email="staff@okeou.com", identity_card="079123456789"
-        )
-        db.session.add(staff)
-
-        customer_vip = LoyalCustomer(
-            name="Trần Văn Giàu (VIP)",
-            username="khachvip",
+        # ==========================================
+        # 1. USERS
+        # ==========================================
+        admin_user = User(
+            name='Quản trị viên',
+            username='admin',
             password=hash_password('123456'),
-            role=UserRole.CUSTOMER,
-            phone="0909888777",
-            email="vip@okeou.com"
-            # XÓA DÒNG: customer_points=50 đi
-        )
-        db.session.add(customer_vip)
-        db.session.commit()
-
-        print("💳 Tạo lịch sử điểm tích lũy...")
-        usages = []
-        for _ in range(12):  # Tạo 12 lần sử dụng
-            usages.append(CustomerCardUsage(loyal_customer_id=customer_vip.id))
-
-        db.session.add_all(usages)
-        db.session.commit()
-
-        # Khách Vãng Lai (Thêm mới để test đa dạng user)
-        customer_normal = User(
-            name="Nguyễn Văn A (Khách Lẻ)", username="khachle", password=hash_password('123456'),
-            role=UserRole.USER, phone="0911222333", email="khachle@gmail.com"
-        )
-        db.session.add(customer_normal)
-
-        db.session.commit()
-
-        # ---------------------------------------------------------
-        # 4. Tạo Sản phẩm
-        # ---------------------------------------------------------
-        print("🍔 Tạo Menu món ăn...")
-        cat_drink = Category(name="Đồ uống")
-        cat_food = Category(name="Đồ ăn")
-        db.session.add_all([cat_drink, cat_food])
-        db.session.commit()
-
-        p1 = Product(name="Bia Tiger", price=25000, amount=100, unit="Lon", category_id=cat_drink.id)
-        p2 = Product(name="Coca Cola", price=15000, amount=100, unit="Lon", category_id=cat_drink.id)
-        p3 = Product(name="Dĩa Trái Cây", price=100000, amount=50, unit="Dĩa", category_id=cat_food.id)
-        p4 = Product(name="Khô Mực Nướng", price=150000, amount=20, unit="Con", category_id=cat_food.id)
-        db.session.add_all([p1, p2, p3, p4])
-        db.session.commit()
-
-        # ---------------------------------------------------------
-        # 5. Tạo 3 Phiên hát (Sessions)
-        # ---------------------------------------------------------
-        print("🎤 Tạo 3 Phiên hát đang hoạt động...")
-
-        # Session 1: Room 1 - Khách VIP - Hát 2 tiếng
-        sess1 = Session(
-            start_time=datetime.now() - timedelta(hours=2),
-            session_status=SessionStatus.ACTIVE,
-            user_id=customer_vip.id,
-            room_id=room1.id
+            phone='0909000001',
+            email='admin@ou.edu.vn',
+            role=UserRole.ADMIN
         )
 
-        # Session 2: Room 3 (VIP02) - Khách VIP - Hát 30 phút
-        sess2 = Session(
-            start_time=datetime.now() - timedelta(minutes=30),
-            session_status=SessionStatus.ACTIVE,
-            user_id=customer_vip.id,
-            room_id=room3.id
+        staff_user = Staff(
+            name='Nhân viên Thu Ngân',
+            username='staff',
+            password=hash_password('123456'),
+            phone='0909000002',
+            email='staff@ou.edu.vn',
+            identity_card='0123456789123',
+            role=UserRole.STAFF
         )
 
-        # Session 3: Room 4 (P102) - Khách Lẻ - Hát 4 tiếng (Test tiền nhiều)
-        sess3 = Session(
-            start_time=datetime.now() - timedelta(hours=4, minutes=15),
-            session_status=SessionStatus.ACTIVE,
-            user_id=customer_normal.id,
-            room_id=room4.id
-        )
+        dummy_users = []
+        for k in range(5):
+            u = User(
+                name=f'Khách Hàng {k}',
+                username=f'customer{k}',
+                password=hash_password('123456'),
+                phone=f'090090000{k}',
+                email=f'customer{k}@gmail.com',
+                role=UserRole.CUSTOMER
+            )
+            dummy_users.append(u)
 
-        db.session.add_all([sess1, sess2, sess3])
+        db.session.add_all([admin_user, staff_user] + dummy_users)
+        db.session.commit()
+        print("Users created.")
+
+        # ==========================================
+        # 2. ROOMS & TYPES
+        # ==========================================
+        rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)
+        rt_vip = RoomType(name="Phòng VIP", hourly_price=200000)
+        rt_party = RoomType(name="Phòng Party", hourly_price=400000)
+
+        db.session.add_all([rt_standard, rt_vip, rt_party])
         db.session.commit()
 
-        # ---------------------------------------------------------
-        # 6. Tạo Order & Chi tiết món ăn
-        # ---------------------------------------------------------
-        print("📝 Tạo Order cho các phòng...")
-
-        # Order 1 (Room 1): 10 Bia + 1 Mực
-        ord1 = Order(session_id=sess1.id, status=OrderStatus.SERVED)
-        db.session.add(ord1)
-
-        # Order 2 (Room 3): 24 Bia (1 Thùng) + 2 Trái Cây (VIP nhậu lớn)
-        ord2 = Order(session_id=sess2.id, status=OrderStatus.SERVED)
-        db.session.add(ord2)
-
-        # Order 3 (Room 4): 2 Coca (Khách lẻ uống nước ngọt)
-        ord3 = Order(session_id=sess3.id, status=OrderStatus.SERVED)
-        db.session.add(ord3)
-
-        db.session.commit()
-
-        # Insert chi tiết món (Dùng bulk insert cho nhanh)
-        print("🍻 Lên món...")
-        product_inserts = [
-            # Room 1
-            {"product_id": p1.id, "order_id": ord1.id, "amount": 10, "price_at_time": p1.price},
-            {"product_id": p4.id, "order_id": ord1.id, "amount": 1, "price_at_time": p4.price},
-
-            # Room 3 (VIP)
-            {"product_id": p1.id, "order_id": ord2.id, "amount": 24, "price_at_time": p1.price},
-            {"product_id": p3.id, "order_id": ord2.id, "amount": 2, "price_at_time": p3.price},
-
-            # Room 4 (Lẻ)
-            {"product_id": p2.id, "order_id": ord3.id, "amount": 2, "price_at_time": p2.price},
+        rooms = []
+        image_urls = [
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765792240/kararoom_peudkz.jpg",
+            "https://res.cloudinary.com/dtcjixfyd/image/upload/v1765796772/kararoom5_fvddfy.jpg"
         ]
 
-        # SỬA LẠI DÒNG NÀY: Dùng ProductOrder.__table__.insert()
-        db.session.execute(ProductOrder.__table__.insert(), product_inserts)
+
+        def create_rooms(count, prefix, cap_list, r_type):
+            for i in range(1, count + 1):
+                rooms.append(Room(
+                    name=f"{prefix} {i:02d}",
+                    capacity=random.choice(cap_list),
+                    status=RoomStatus.AVAILABLE,
+                    room_type=r_type.id,
+                    image=random.choice(image_urls)
+                ))
+
+
+        create_rooms(10, "Standard", [4, 6, 8], rt_standard)
+        create_rooms(5, "VIP", [10, 12], rt_vip)
+        create_rooms(3, "Party", [15], rt_party)
+
+        db.session.add_all(rooms)
+        db.session.commit()
+        print("Rooms created.")
+
+        # ==========================================
+        # 3. PRODUCTS
+        # ==========================================
+        cat_food = Category(name="Đồ Ăn Nhẹ")
+        cat_drink = Category(name="Đồ Uống")
+
+        db.session.add_all([cat_food, cat_drink])
         db.session.commit()
 
-        print("✅ === HOÀN TẤT ===")
-        print(f"👉 Active Sessions: Room {room1.id}, Room {room3.id}, Room {room4.id}")
+        products_data = [
+            {"name": "Khoai tây chiên", "price": 45000, "cat": cat_food.id, "unit": "Dĩa"},
+            {"name": "Khô bò", "price": 85000, "cat": cat_food.id, "unit": "Dĩa"},
+            {"name": "Tiger Beer", "price": 25000, "cat": cat_drink.id, "unit": "Lon"},
+            {"name": "Coca Cola", "price": 15000, "cat": cat_drink.id, "unit": "Lon"},
+        ]
 
+        products = []
+        for p in products_data:
+            products.append(Product(
+                name=p["name"], price=p["price"], category_id=p["cat"],
+                unit=p["unit"], amount=100, image="default.jpg"
+            ))
 
-if __name__ == "__main__":
-    create_sample_data()
+        db.session.add_all(products)
+        db.session.commit()
+        print("Products created.")
+
+        # ==========================================
+        # 4. BOOKINGS & SESSIONS
+        # ==========================================
+        bookings = []
+        sessions = []
+
+        all_rooms = Room.query.all()
+        random.shuffle(all_rooms)
+        all_customers = User.query.filter(User.role == UserRole.CUSTOMER).all()
+
+        # --- A. 5 Sessions đang ACTIVE (Đang hát) ---
+        for i in range(5):
+            room = all_rooms.pop()
+            user = random.choice(all_customers)
+
+            # Bắt đầu cách đây 1 tiếng
+            start_time = current_time - timedelta(minutes=random.randint(30, 90))
+            # Kết thúc dự kiến trong tương lai
+            end_time = current_time + timedelta(minutes=60)
+
+            room.status = RoomStatus.OCCUPIED  # Phòng đang có người
+            db.session.add(room)
+
+            s = Session(
+                start_time=start_time,
+                end_time=end_time,
+                session_status=SessionStatus.ACTIVE,
+                user_id=user.id,
+                room_id=room.id
+            )
+            sessions.append(s)
+
+            b = Booking(
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                head_count=random.randint(2, room.capacity),
+                booking_status=BookingStatus.COMPLETED,
+                user_id=user.id,
+                room_id=room.id,
+                ref=str(uuid.uuid4())[:8]
+            )
+            bookings.append(b)
+
+        # --- B. 10 Sessions đã FINISHED (Đã xong) ---
+        for i in range(10):
+            if not all_rooms: break
+            room = all_rooms.pop()
+            user = random.choice(all_customers)
+
+            start_time = current_time - timedelta(days=random.randint(1, 3), hours=2)
+            end_time = start_time + timedelta(hours=2)
+
+            s = Session(
+                start_time=start_time,
+                end_time=end_time,
+                session_status=SessionStatus.FINISHED,
+                user_id=user.id,
+                room_id=room.id
+            )
+            sessions.append(s)
+
+            b = Booking(
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                head_count=random.randint(2, room.capacity),
+                booking_status=BookingStatus.COMPLETED,
+                user_id=user.id,
+                room_id=room.id,
+                ref=str(uuid.uuid4())[:8]
+            )
+            bookings.append(b)
+
+        db.session.add_all(bookings)
+        db.session.add_all(sessions)
+        db.session.commit()
+        print(f"Created Bookings & Sessions.")
+
+        # ==========================================
+        # 5. ORDER & RECEIPT LOGIC (UPDATED)
+        # ==========================================
+        for session in sessions:
+            # 1. Tạo Order (Món ăn)
+            order = Order(
+                session_id=session.id,
+                status=OrderStatus.SERVED
+            )
+            db.session.add(order)
+            db.session.commit()
+
+            # Thêm món
+            session_service_fee = 0.0
+            num_items = random.randint(1, 4)
+            chosen_products = random.sample(products, num_items)
+            for prod in chosen_products:
+                qty = random.randint(1, 5)
+                po = ProductOrder(
+                    product_id=prod.id,
+                    order_id=order.id,
+                    amount=qty,
+                    price_at_time=prod.price
+                )
+                db.session.add(po)
+                session_service_fee += (qty * prod.price)
+
+            # 2. TÍNH TIỀN PHÒNG & TRẠNG THÁI RECEIPT
+            room_obj = db.session.get(Room, session.room_id)
+            room_type_obj = db.session.get(RoomType, room_obj.room_type)
+
+            receipt_status = PaymentStatus.PENDING
+            payment_method = PaymentMethod.CASH  # Mặc định
+
+            if session.session_status == SessionStatus.FINISHED:
+                # Đã xong: Tính full thời gian thực tế
+                duration_hours = (session.end_time - session.start_time).total_seconds() / 3600
+                receipt_status = PaymentStatus.COMPLETED
+                payment_method = random.choice(list(PaymentMethod))
+            else:
+                # Đang hát (ACTIVE): Tính từ lúc bắt đầu đến HIỆN TẠI (tạm tính)
+                duration_hours = (current_time - session.start_time).total_seconds() / 3600
+                receipt_status = PaymentStatus.PENDING  # <--- Quan trọng: Trạng thái chờ
+                payment_method = PaymentMethod.CASH  # Chưa thanh toán nên để mặc định
+
+            room_fee = duration_hours * room_type_obj.hourly_price
+
+            # 3. TẠO RECEIPT (Cho cả Active và Finished)
+            receipt = Receipt(
+                session_id=session.id,
+                staff_id=staff_user.id,
+                status=receipt_status,  # PENDING hoặc COMPLETED
+                ref=str(uuid.uuid4())
+            )
+            db.session.add(receipt)
+            db.session.commit()
+
+            # 4. TẠO RECEIPT DETAILS
+            # Lưu ý: Với ACTIVE, đây là hoá đơn tạm tính tại thời điểm hiện tại
+            rd = ReceiptDetails(
+                id=receipt.id,
+                total_room_fee=room_fee,
+                total_service_fee=session_service_fee,
+                payment_method=payment_method
+            )
+            db.session.add(rd)
+
+        db.session.commit()
+        print("Done! Active sessions now have PENDING receipts.")

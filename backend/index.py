@@ -11,14 +11,18 @@ from backend.daos.category_daos import get_categories
 from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
+from backend.daos.session_daos import get_sessions
 from backend.daos.user_daos import create_user, get_users
 from backend.daos import order_daos
-from backend.models import Booking, BookingStatus, StaffWorkingHour, UserRole
+from backend.models import Booking, BookingStatus, StaffWorkingHour, UserRole, SessionStatus, PaymentMethod
 from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.general_utils import redirect_to_error
 from backend.utils.room_utils import filter_rooms
 from backend.utils.user_utils import auth_user
+from backend.utils.payment_utils import get_bill_before_pay
 from backend.utils import order_utils
+from backend.service.payment.payment_handler import PaymentHandlerFactory
+from backend.service.payment.payment_strategy import PaymentStrategyFactory
 
 
 # ===========================================================
@@ -55,7 +59,7 @@ def error_view():
 @app.route('/')
 def index():
     rooms = load_rooms(page=1)
-
+    
     products = load_products(page=1)
 
     if current_user.is_authenticated and current_user.is_staff:
@@ -146,16 +150,15 @@ def products_preview():
                                 category_id=request.args.get('category_id'),
                                 page=int(request.args.get('page', 1)))
     categories = get_categories()
-
     return render_template('products.html', products=products,
                            categories=categories,
-                           pages=math.ceil(count_products() / app.config['PAGE_SIZE']))
+                           pages=math.ceil(count_products(request.args.get('kw'), request.args.get('category_id')) / app.config['PAGE_SIZE']))
 
 
 # ===========================================================
 #   Rooms Page
 # ===========================================================
-@app.route('/rooms')
+@app.route('/rooms/')
 def rooms_preview():
     r = request.args
     page=int(r.get('page', 1))
@@ -166,17 +169,14 @@ def rooms_preview():
                            capacity=r.get('capacity'),
                            price_max=r.get('price_max'),
                            sort_by=r.get('sort'))
-
+    
     count = rooms.count()
 
     if page:
         start = (page - 1) * app.config["PAGE_SIZE"]
         rooms = rooms.slice(start, start + app.config["PAGE_SIZE"])
 
-    print(count)
-    print(count / page_size)
-
-    return render_template('rooms.html',
+    return render_template('rooms.html', 
                            rooms=rooms.all(),
                            pages=math.ceil(count / page_size))
 
@@ -206,7 +206,7 @@ def room_occupies_preview(room_id):
                                                     BookingStatus.COMPLETED],
                                     scheduled_start_time=start_date_obj,
                                     scheduled_end_time=end_date_obj)
-
+        
         result = {}
         for idx, b in enumerate(occ_bookings):
             result[str(idx)] = [
@@ -227,13 +227,13 @@ def booking_payment_preview(booking_id):
 
     if not booking:
         return redirect_to_error(404, "Booking not found.")
-
+    
     if booking.user_id != current_user.id:
         return redirect_to_error(403, "You do not have permission to access this booking.")
-
+    
     if booking.booking_status != BookingStatus.PENDING:
         return redirect_to_error(400, "Booking is not pending payment.")
-
+    
     expire_time = booking.booking_date + timedelta(minutes=15)
     remain_time = int((expire_time - datetime.now()).total_seconds())
 
@@ -244,7 +244,7 @@ def booking_payment_preview(booking_id):
         except Exception as ex:
             print(str(ex))
         return redirect('/rooms')
-
+    
     room = get_rooms(room_id=booking.room_id)[0]
 
     return render_template('payment.html', booking=booking,
@@ -258,7 +258,7 @@ def confirm_booking():
         data = request.form
 
         room_id = data.get('room_id')
-        start_str = data.get('start_time')
+        start_str = data.get('start_time') 
         end_str = data.get('end_time')
         head_count = data.get('head_count')
 
@@ -279,7 +279,7 @@ def confirm_booking():
                 'booking_id': booking.id,
                 'msg': 'Created booking'
             })
-
+    
     except Exception as ex:
         return redirect_to_error(500, str(ex))
 
@@ -295,10 +295,8 @@ def payments_preview():
 
 
 @app.route('/api/payment/calculate', methods=['post'])
-@login_required
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def calculate_payment():
-    if current_user.is_staff and current_user.is_admin:
-        return jsonify({'err_msg': 'Truy cập bị từ chối!'}), 403
     session['bill_detail'] = {}
     room_id = request.json.get('room_id')
 
@@ -310,7 +308,6 @@ def calculate_payment():
         return jsonify({'err_msg': 'Không tìm thấy phiên hát đang hoạt động'}), 404
 
     bill_detail = get_bill_before_pay(curr_session.id)
-    print(bill_detail)
 
     session['bill_detail'] = bill_detail
     return jsonify(bill_detail)
@@ -318,30 +315,53 @@ def calculate_payment():
 @app.route('/api/payment/create/<method>/<payment_type>', methods=['post'])
 @login_required
 def create_payment(method, payment_type):
-    try :
-        # Tạo mã giao dịch khác nhau cho mỗi giao dịch
-        ref = str(uuid.uuid4())
-        handler = PaymentHandlerFactory.get_handler(payment_type)
-        try:
-            strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
-        except Exception as ex:
-            print(ex)
-            return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
-
-        amount = handler.init_payment_and_get_amout(request_data=request.json, session_data=session, payment_method=strategy.get_payment_method(), ref=ref)
-        result = strategy.create_payment(amount=str(int(amount)), ref=ref)
-
-        if strategy.get_payment_method() == PaymentMethod.CASH:
-            paid_amount = float(request.json.get('paid_amount', 0))
-            if paid_amount < float(amount):
-                return jsonify({'err_msg': 'Không đủ tiền.'}), 400
-            strategy.process_payment({"ref": ref})
-            if payment_type.upper() == "CHECKOUT":
-                del session['bill_detail']
-        return jsonify(result), 200
-    except Exception as ex :
+    # Tạo mã giao dịch khác nhau cho mỗi giao dịch
+    import uuid
+    ref = str(uuid.uuid4())
+    handler = PaymentHandlerFactory.get_handler(payment_type)
+    try:
+        strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+    except Exception as ex:
         print(ex)
-        return jsonify({'err_msg': 'Lỗi hệ thống.'}), 500
+        return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
+
+    amount = handler.init_payment_and_get_amout(request_data=request.json, session_data=session,
+                                                payment_method=strategy.get_payment_method(), ref=ref)
+    result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
+
+    if strategy.get_payment_method() == PaymentMethod.CASH:
+        paid_amount = float(request.json.get('paid_amount', 0))
+        if paid_amount < float(amount):
+            return jsonify({'err_msg': 'Không đủ tiền.'}), 400
+        strategy.process_payment({"ref": ref})
+        if payment_type.upper() == "CHECKOUT":
+            del session['bill_detail']
+    return jsonify(result), 200
+    # try :
+    #     # Tạo mã giao dịch khác nhau cho mỗi giao dịch
+    #     import uuid
+    #     ref = str(uuid.uuid4())
+    #     handler = PaymentHandlerFactory.get_handler(payment_type)
+    #     try:
+    #         strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+    #     except Exception as ex:
+    #         print(ex)
+    #         return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
+    #
+    #     amount = handler.init_payment_and_get_amout(request_data=request.json, session_data=session, payment_method=strategy.get_payment_method(), ref=ref)
+    #     result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
+    #
+    #     if strategy.get_payment_method() == PaymentMethod.CASH:
+    #         paid_amount = float(request.json.get('paid_amount', 0))
+    #         if paid_amount < float(amount):
+    #             return jsonify({'err_msg': 'Không đủ tiền.'}), 400
+    #         strategy.process_payment({"ref": ref})
+    #         if payment_type.upper() == "CHECKOUT":
+    #             del session['bill_detail']
+    #     return jsonify(result), 200
+    # except Exception as ex :
+    #     print(ex)
+    #     return jsonify({'err_msg': 'Lỗi hệ thống.'}), 500
 
 @app.route('/api/ipn/<method>/<payment_type>', methods=['post', 'get'])
 def return_ipn(method, payment_type):
@@ -356,13 +376,13 @@ def return_ipn(method, payment_type):
         strategy.process_payment(data)
         # Xử lý thêm để hiện giao diện kêt quả thanh toán
         # if request.method == 'GET':
-        #     return render_template('xxx', seccess=True)
+        #     return render_template('xxx', success=True)
         return jsonify({'msg': 'Thanh toán thành công'}), 204
     except Exception as e:
         print(e)
         # Tng tự
         # if request.method == 'GET':
-        # return render_template('xxx', seccess=False)
+        # return render_template('xxx', success=False)
         return jsonify({'err_msg': "Lỗi hệ thống!!!"}), 500
 
 @app.route('/rooms-dashboard/')
@@ -429,14 +449,14 @@ def staff_rooms_preview():
                            capacity=r.get('capacity'),
                            price_max=r.get('price_max'),
                            sort_by=r.get('sort'))
-
+    
     count = rooms.count()
 
     if page:
         start = (page - 1) * app.config["PAGE_SIZE"]
         rooms = rooms.slice(start, start + app.config["PAGE_SIZE"])
 
-    return render_template('/staff/rooms.html',
+    return render_template('/staff/rooms.html', 
                            rooms=rooms.all(),
                            pages=math.ceil(count / page_size))
 
@@ -492,18 +512,27 @@ def add_to_order():
         if not order:
             order = {}
 
-        id, image, name, price = str(data.get('id')), data.get('image'), data.get('name'), data.get('price')
+        id = str(data.get('id'))
+        image = data.get('image')
+        name = data.get('name')
+        price = data.get('price')
+        amount = data.get('amount')
+
+        product = order_utils.check_amount_product(id)
         if id in order:
             order[id]["quantity"] += 1
             if order[id]["quantity"] > 30:
                 return jsonify({'err_msg': 'Đặt vượt qua số lượng cho phép'}), 400
+            if product.amount < order[id]["quantity"]:
+                return jsonify({'err_msg': 'Dịch vụ đặt vượt quá số lượng còn lại'}), 400
         else:
             order[id] = {
                 'id': id,
                 'image': image,
                 'name': name,
                 'quantity': 1,
-                'price': price
+                'price': price,
+                'amount': amount
             }
         session['order'] = order
         return jsonify(order_utils.stats_order(order)), 200
@@ -518,6 +547,9 @@ def update_order(id):
         quantity = int(request.json.get('quantity'))
         if quantity > 30:
             return jsonify({'err_msg': 'Số lượng giới hạn là 30'}), 400
+        product = order_utils.check_amount_product(order[id]['id'])
+        if product.amount < quantity:
+            return jsonify({'err_msg': 'Dịch vụ đặt vượt quá số lượng còn lại'}), 400
         order[id]['quantity'] = quantity
 
     session['order'] = order
@@ -550,12 +582,18 @@ def order_process():
     if not sess:
         return jsonify({'err_msg': 'Bạn chưa đặt phòng hát'}), 400
 
+    order = session.get('order')
+    if not order:
+        return jsonify({'err_msg': 'Bạn chưa đặt dịch vụ'}), 400
+
     try:
         ord = order_daos.create_order(session_id=sess.id)
         order_utils.add_order(order=session.get('order'), ord=ord)
         del session['order']
 
         return jsonify({'message': 'Đặt dịch vụ thành công'}), 200
+    except ValueError as ex:
+        return jsonify({'err_msg': str(ex)}), 400
     except Exception as ex:
         return jsonify({'err_msg': str(ex)}), 500
 

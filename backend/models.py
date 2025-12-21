@@ -149,7 +149,8 @@ class Room(BaseModel):
 # ===========================================================
 class SessionStatus(GenericEnum):
     ACTIVE = 1
-    FINISHED = 2
+    BOOKED = 2
+    FINISHED = 3
 
 
 class BookingStatus(GenericEnum):
@@ -250,7 +251,7 @@ class Order(BaseModel):
 # ===========================================================
 #   Payments
 # ===========================================================
-class ReceiptStatus(GenericEnum):
+class PaymentStatus(GenericEnum):
     PENDING = 1
     COMPLETED = 2
     FAILED = 3
@@ -266,15 +267,15 @@ class PaymentMethod(GenericEnum):
 class Receipt(BaseModel):
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
-    status = Column(Enum(ReceiptStatus), default=ReceiptStatus.PENDING)
+    status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
     ref = Column(String(100), nullable=True, unique=True)
 
     created_date = Column(DateTime, default=datetime.now())
-    details = relationship('ReceiptDetails', backref='receipt', lazy=True)
+    details = relationship('ReceiptDetails', backref='receipt', lazy=True, uselist=False)
 
 
 class ReceiptDetails(BaseModel):
-    receipt_id = Column(Integer, ForeignKey(Receipt.id), nullable=False)
+    id = Column(Integer, ForeignKey(Receipt.id), primary_key=True)
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)

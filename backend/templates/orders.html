@@ -21,6 +21,7 @@ Orders
                 <thead class="table-light">
                 <tr>
                     <th>Dịch vụ</th>
+                    <th>SL còn lại</th>
                     <th>Giá tiền</th>
                     <th class="text-center">Số lượng</th>
                     <th>Thành tiền</th>
@@ -40,6 +41,7 @@ Orders
                             </div>
                         </div>
                     </td>
+                    <td>{{ o.amount }}</td>
                     <td>{{ '{:,.0f}'.format(o.price) }}</td>
                     <td class="text-center">
                         <input type="number"

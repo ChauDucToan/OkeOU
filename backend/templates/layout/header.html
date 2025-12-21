@@ -45,20 +45,20 @@
                                     class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-glass dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/profile">Thông tin hồ sơ</a></li>
+                            <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user"></i> Thông tin hồ sơ</a></li>
                             {% if current_user.is_admin %}
-                            <li><a class="dropdown-item" href="/admin">Trang quản trị</a></li>
+                            <li><a class="dropdown-item" href="/admin"><i class="fa-solid fa-gear"></i> Trang quản trị</a></li>
                             {% endif %}
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
                         <a href="/login" class="nav-link flex-row">
-                            Đăng nhập
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Đăng nhập
                         </a>
                     </li>
                     {% endif %}
