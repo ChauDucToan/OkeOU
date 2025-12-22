@@ -233,7 +233,13 @@ class PaymentStatus(GenericEnum):
     PENDING = 1
     COMPLETED = 2
     FAILED = 3
-    
+
+class TransactionStatus(GenericEnum):
+    PENDING = 1
+    COMPLETED = 2
+    FAILED = 3
+    REFUNDED = 4
+
 
 class PaymentMethod(GenericEnum):
     CASH = 1
@@ -249,6 +255,22 @@ class Receipt(BaseModel):
 
     created_date = Column(DateTime, default=datetime.now())
     details = relationship('ReceiptDetails', backref='receipt', lazy=True)
+    transactions = relationship('Transaction', backref='receipt', lazy=True)
+
+
+
+class Transaction(BaseModel):
+    receipt_id = Column(String(100), ForeignKey(Receipt.id), nullable=False)
+    amount = Column(Float, nullable=False)
+    payment_method = Column(Enum(PaymentMethod), nullable=False)
+    status = Column(Enum(TransactionStatus), default=TransactionStatus.PENDING)
+    
+    transaction_code = Column(String(100), unique=True)
+    bank_code = Column(String(50))
+    card_type = Column(String(50))
+    
+    created_date = Column(DateTime, default=datetime.now)
+    completed_date = Column(DateTime)
 
 
 class ReceiptDetails(BaseModel):
