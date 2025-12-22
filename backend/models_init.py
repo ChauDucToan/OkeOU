@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 import random
+import uuid
 
 from backend import app, db
-from backend.models import Booking, BookingStatus, Category, Order, OrderStatus, PaymentStatus, Product, Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, User, UserRole, Staff, Session
+from backend.models import Booking, BookingStatus, Category, Order, OrderStatus, PaymentStatus, Product, ProductOrder, Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, User, UserRole, Staff, Session
 from backend.utils.general_utils import hash_password
 
 if __name__ == '__main__':
@@ -317,8 +318,10 @@ if __name__ == '__main__':
 
         receipts = []
         for session in sessionss:
+            id = str(uuid.uuid4())
             if session.session_status == SessionStatus.FINISHED:
                 receipt = Receipt(
+                    id = id,
                     session_id=session.id,
                     staff_id=staff_user.id,
                     status=PaymentStatus.COMPLETED
@@ -326,6 +329,7 @@ if __name__ == '__main__':
                 receipts.append(receipt)
             else:
                 receipt = Receipt(
+                    id = id,
                     session_id=session.id,
                     staff_id=None,
                     status=PaymentStatus.COMPLETED
@@ -333,26 +337,39 @@ if __name__ == '__main__':
                 receipts.append(receipt)
 
         db.session.add_all(receipts)
-        db.session.commit()
+        db.session.flush()
 
         orders = []
         total_service_fee = 0.0
         for session in sessionss:
+            order = Order(
+                    session_id=session.id,
+                    status=OrderStatus.SERVED
+                )
+            orders.append(order)
+
+        db.session.add_all(orders)
+        db.session.flush()
+
+        prod_ord = []
+        for order in orders:
             num_orders = random.randint(0, 5)
             ordered_products = random.sample(products, k=min(num_orders, len(products)))
             for prod in ordered_products:
-                quantity = random.randint(1, 3)
-                order = Order(
-                    session_id=session.id,
+                amount = random.randint(1, 3)
+                p_order = ProductOrder(
+                    order_id=order.id,
                     product_id=prod.id,
-                    quantity=quantity,
-                    order_status=OrderStatus.SERVED
+                    amount=amount,
+                    price_at_time=prod.price
                 )
-                total_service_fee += quantity * prod["price"]
-                orders.append(order)
 
-        db.session.add_all(orders)
+                total_service_fee += amount * prod.price
+                prod_ord.append(p_order)
+
+        db.session.add_all(prod_ord)
         db.session.commit()
+
 
         receipt_details_list = []
         for receipt, session in zip(receipts, sessionss):
@@ -367,3 +384,6 @@ if __name__ == '__main__':
                 total_service_fee=total_service_fee
             )
             receipt_details_list.append(receipt_details)
+
+        db.session.add_all(receipt_details_list)
+        db.session.commit()
