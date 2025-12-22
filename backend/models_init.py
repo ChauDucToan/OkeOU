@@ -329,7 +329,8 @@ if __name__ == '__main__':
                     id = id,
                     session_id=session.id,
                     staff_id=staff_user.id,
-                    status=PaymentStatus.COMPLETED
+                    status=PaymentStatus.COMPLETED,
+                    created_date=session.end_time  # Sử dụng end_time của session
                 )
                 receipts.append(receipt)
             else:
@@ -337,7 +338,8 @@ if __name__ == '__main__':
                     id = id,
                     session_id=session.id,
                     staff_id=None,
-                    status=PaymentStatus.COMPLETED
+                    status=PaymentStatus.COMPLETED,
+                    created_date=session.end_time  # Sử dụng end_time của session
                 )
                 receipts.append(receipt)
 

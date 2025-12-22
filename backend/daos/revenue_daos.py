@@ -4,20 +4,35 @@ from backend.models import  Product,  Room,  Session, SessionStatus, Order, \
     RoomType, Receipt, ReceiptDetails, ProductOrder
 from backend import db, app
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def get_total_amount(time_unit='day'):
     current_date = datetime.now()
     query = (db.session.query(func.sum(ReceiptDetails.total_room_fee + ReceiptDetails.total_service_fee))
                     .join(Receipt, ReceiptDetails.id == Receipt.id)
-                    .filter(func.extract('year', Receipt.created_date) == current_date.year)
-                    .filter(func.extract('month', Receipt.created_date) == current_date.month))
+                    .filter(func.extract('year', Receipt.created_date) == current_date.year))
 
-    if time_unit == 'week':
-        query = query.filter(func.week(Receipt.created_date, 3) == current_date.date().isocalendar()[1])
-    elif time_unit == 'day':
-        query = query.filter(func.extract('day', Receipt.created_date) == current_date.date().day)
+    start_date = None
+    end_date = None
+
+    if time_unit == 'day':
+        start_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=1) - timedelta(microseconds=1)
+    elif time_unit == 'week':
+        start_date = current_date - timedelta(days=current_date.weekday())
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=7) - timedelta(microseconds=1)
+    elif time_unit == 'month':
+        start_date = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if current_date.month == 12:
+            end_date = start_date.replace(year=current_date.year + 1, month=1) - timedelta(microseconds=1)
+        else:
+            end_date = start_date.replace(month=current_date.month + 1) - timedelta(microseconds=1)
+    
+    if start_date and end_date:
+        query = query.filter(Receipt.created_date >= start_date) \
+                     .filter(Receipt.created_date <= end_date)
 
     return int(query.first()[0])
 
