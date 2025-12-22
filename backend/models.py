@@ -244,7 +244,6 @@ class TransactionStatus(GenericEnum):
 class PaymentMethod(GenericEnum):
     CASH = 1
     TRANSFER = 2
-    CARD = 3
 
 
 class Receipt(BaseModel):
@@ -256,7 +255,6 @@ class Receipt(BaseModel):
     created_date = Column(DateTime, default=datetime.now())
     details = relationship('ReceiptDetails', backref='receipt', lazy=True)
     transactions = relationship('Transaction', backref='receipt', lazy=True)
-
 
 
 class Transaction(BaseModel):
