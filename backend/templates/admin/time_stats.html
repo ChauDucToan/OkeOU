@@ -1,0 +1,170 @@
+{% extends 'admin/master.html' %} {% block body %}
+<div>
+    <div
+            class="d-flex justify-content-between align-items-center bg-white rounded-3 p-2 mt-3"
+    >
+        <h5>Thống kê báo cáo</h5>
+    </div>
+    <div class="d-flex mt-3">
+        <div class="card card-outline-primary m-3 shadow-sm w-25">
+            <div
+                    class="card-block d-flex p-4 align-items-center justify-content-between"
+            >
+                <div class="text-left">
+                    <p class="mb-0 text-muted">Doanh thu</p>
+                    <h4 class="font-weight-bold text-success mb-0">{{revenue_by_time.total_amount}}đ</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card card-outline-primary m-3 shadow-sm w-25">
+            <div
+                    class="card-block d-flex p-4 align-items-center justify-content-between"
+            >
+                <div class="text-left">
+                    <p class="mb-0 text-muted">Đơn hàng</p>
+                    <h4 class="font-weight-bold text-danger mb-0">{{revenue_by_time.count_orders}}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card card-outline-primary m-3 shadow-sm w-25">
+            <div
+                    class="card-block d-flex p-4 align-items-center justify-content-between"
+            >
+                <div class="text-left">
+                    <p class="mb-0 text-muted">Khách hàng</p>
+                    <h4 class="font-weight-bold text-primary mb-0">{{revenue_by_time.count_customers}}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card card-outline-primary m-3 shadow-sm w-25">
+            <div
+                    class="card-block d-flex p-4 align-items-center justify-content-between"
+            >
+                <div class="text-left">
+                    <p class="mb-0 text-muted">Số lần hát</p>
+                    <h4 class="font-weight-bold text-warning mb-0">{{revenue_by_time.count_sessions}}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap">
+        <div class="w-50" style="height: 500px">
+            <div class="p-4 bg-white m-2 rounded shadow-sm h-50">
+                <table class="table">
+                    <thead class="thead-default">
+                    <tr>
+                        <th>Id</th>
+                        <th>Tên phòng</th>
+                        <th>Doanh thu</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in revenue_by_room_name %}
+                    <tr>
+                        <td>{{r[0]}}</td>
+                        <td>{{r[1]}}</td>
+                        <td>{{r[2]}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 bg-white m-2 rounded shadow-sm h-50">
+                <canvas id="myChartTime"></canvas>
+            </div>
+        </div>
+        <div class="w-50">
+            <div class="p-4 bg-white m-2 rounded shadow-sm" style="height: 500px">
+                <canvas id="myChartRoom"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div
+                class="d-flex justify-content-between align-items-center bg-white rounded-3 p-2 mt-3"
+        >
+            <h5>Doanh thu dịch vụ</h5>
+        </div>
+        <div class="p-4 bg-white m-2 rounded shadow-sm" style="height: 500px">
+            <canvas id="myChartService"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        function drawChart(ctx, labels, data, type = "bar") {
+          new Chart(ctx, {
+            type: type,
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "# Doanh thu",
+                  data: data,
+                  borderWidth: 1,
+                  backgroundColor: [
+                    "red",
+                    "green",
+                    "blue",
+                    "gold",
+                    "brown",
+                    "pink",
+                  ],
+                  borderColor: "rgba(54, 162, 235, 1)",
+                  borderWidth: 2,
+                  borderRadius: 5,
+                  barPercentage: 0.6,
+                },
+              ],
+            },
+            options: {
+              resonsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: (value) => value.toLocaleString("vi-VN") + " ₫",
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        labelTimes = [];
+        dataTimes = [];
+        labelRoomType = [];
+        dataRoomType = [];
+        labelProduct = [];
+        dataProduct = [];
+
+        const ctx1 = document.getElementById("myChartTime");
+        const ctx2 = document.getElementById("myChartRoom");
+        const ctx3 = document.getElementById("myChartService");
+        {% for r in revenue_by_room_name %}
+        labelTimes.push('{{r[1]}}')
+        dataTimes.push({{r[2]}})
+        {% endfor %}
+        {% for r in revenue_by_room_type %}
+        labelRoomType.push('{{r[0]}}')
+        dataRoomType.push({{r[1]}})
+        {% endfor %}
+        {% for r in revenue_by_product %}
+        labelProduct.push('{{r[0]}}')
+        dataProduct.push({{r[1]}})
+        {% endfor %}
+        drawChart(ctx1, labelTimes, dataTimes, "bar");
+        drawChart(ctx2, labelRoomType, dataRoomType, "pie");
+        drawChart(ctx3, labelProduct, dataProduct, "bar");
+    </script>
+</div>
+
+<style>
+    body {
+      background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

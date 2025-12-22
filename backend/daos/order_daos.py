@@ -1,5 +1,6 @@
 from backend.models import Order, OrderStatus
-from backend import db
+from backend import db, app
+
 
 def get_orders(session_id=None, status=None):
     r = Order.query

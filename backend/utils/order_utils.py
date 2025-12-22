@@ -1,4 +1,4 @@
-from backend.models import Order, Session, SessionStatus, ProductOrder, Product
+from backend.models import Order, Session, SessionStatus, ProductOrder, Product, OrderStatus
 from backend import db
 
 def get_order_price(order_id):
@@ -52,3 +52,19 @@ def stats_order(order):
         'total_quantity': total_quantity,
         'total_amount': total_amount
     }
+
+
+def get_order_details(session_id):
+    orders = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).all()
+    order_details = []
+    for order in orders:
+        for detail in order.details:
+            total_price = detail.amount * detail.price_at_time
+            order_details.append({
+                "name": detail.product.name,
+                "amount": detail.amount,
+                "price": detail.price_at_time,
+                "total": total_price
+            })
+
+    return order_details

@@ -67,9 +67,13 @@ class Staff(User):
 
 class StaffWorkingHour(BaseModel):
     login_date = Column(DateTime, default=datetime.now)
-    logout_date = Column(DateTime, CheckConstraint('logout_date > login_date'))
+    logout_date = Column(DateTime)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=False)
     bonus = Column(Float, default=0.0)
+
+    __table_args__ = (
+        CheckConstraint('logout_date > login_date', name='chk_logout_date'),
+    )
 
 
 # ===========================================================
@@ -159,13 +163,25 @@ class BookingStatus(GenericEnum):
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
-    scheduled_end_time = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'), nullable=False)
-    head_count = Column(Integer, CheckConstraint('head_count > 0 and head_count <= 15'), default=1, nullable=False)
+    scheduled_end_time = Column(DateTime, nullable=False)
+    head_count = Column(Integer, default=1, nullable=False)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
+    ref = Column(String(100), nullable=True, unique=True)
 
+    # MySQL khong dung cai rang buoc kia duoc
+    __table_args__ = (
+        CheckConstraint(
+            'scheduled_end_time > scheduled_start_time',
+            name='chk_booking_time_order'
+        ),
+        CheckConstraint(
+            'head_count > 0 AND head_count <= 15',
+            name='chk_booking_head_count'
+        ),
+    )
 
 # If the user want to transfer room then set the SessionStatus.FINISHED
 # and create new session
@@ -174,12 +190,18 @@ class Booking(BaseModel):
 # want to eat some food
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
-    end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
+    end_time = Column(DateTime)
     session_status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
+    __table_args__ = (
+        CheckConstraint(
+            'end_time > start_time',
+            name='chk_session_time_order'
+        ),
+    )
 
 # ===========================================================
 #   Other Services (Food)
@@ -233,26 +255,26 @@ class PaymentStatus(GenericEnum):
     PENDING = 1
     COMPLETED = 2
     FAILED = 3
-    
 
 class PaymentMethod(GenericEnum):
     CASH = 1
     TRANSFER = 2
     CARD = 3
+    MOMO = 4
+    VNPAY = 5
 
 
 class Receipt(BaseModel):
-    id = Column(String(100), primary_key=True)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
 
     created_date = Column(DateTime, default=datetime.now())
-    details = relationship('ReceiptDetails', backref='receipt', lazy=True)
+    details = relationship('ReceiptDetails', backref='receipt', lazy=True, uselist=False)
 
 
 class ReceiptDetails(BaseModel):
-    id = Column(String(100), ForeignKey(Receipt.id), primary_key=True)
+    id = Column(Integer, ForeignKey(Receipt.id), primary_key=True)
 
     total_room_fee = Column(Float, default=0.0)
     total_service_fee = Column(Float, default=0.0)

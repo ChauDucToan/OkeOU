@@ -11,14 +11,18 @@ from backend.daos.category_daos import get_categories
 from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
 from backend.daos.room_daos import count_rooms, get_rooms, load_rooms
+from backend.daos.session_daos import get_sessions
 from backend.daos.user_daos import create_user, get_users
 from backend.daos import order_daos
-from backend.models import Booking, BookingStatus, StaffWorkingHour, UserRole
+from backend.models import Booking, BookingStatus, StaffWorkingHour, UserRole, SessionStatus, PaymentMethod
 from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.general_utils import redirect_to_error
 from backend.utils.room_utils import filter_rooms
 from backend.utils.user_utils import auth_user
+from backend.utils.payment_utils import get_bill_before_pay
 from backend.utils import order_utils
+from backend.service.payment.payment_handler import PaymentHandlerFactory
+from backend.service.payment.payment_strategy import PaymentStrategyFactory
 
 
 # ===========================================================
@@ -154,7 +158,7 @@ def products_preview():
 # ===========================================================
 #   Rooms Page
 # ===========================================================
-@app.route('/rooms')
+@app.route('/rooms/')
 def rooms_preview():
     r = request.args
     page=int(r.get('page', 1))
@@ -288,6 +292,115 @@ def payments_preview():
         current_user.id = 1
     return render_template('payments.html',
                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
+
+
+@app.route('/api/payment/calculate', methods=['post'])
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
+def calculate_payment():
+    session['bill_detail'] = {}
+    room_id = request.json.get('room_id')
+
+    if not room_id:
+        return jsonify({'err_msg': 'Thiếu room_id'}), 400
+    curr_session = get_sessions(room_id=room_id, status=[SessionStatus.ACTIVE]).first()
+
+    if not curr_session:
+        return jsonify({'err_msg': 'Không tìm thấy phiên hát đang hoạt động'}), 404
+
+    bill_detail = get_bill_before_pay(curr_session.id)
+
+    session['bill_detail'] = bill_detail
+    return jsonify(bill_detail)
+
+@app.route('/api/payment/create/<method>/<payment_type>', methods=['post'])
+@login_required
+def create_payment(method, payment_type):
+    # Tạo mã giao dịch khác nhau cho mỗi giao dịch
+    import uuid
+    ref = str(uuid.uuid4())
+    handler = PaymentHandlerFactory.get_handler(payment_type)
+    try:
+        strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+    except Exception as ex:
+        print(ex)
+        return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
+
+    amount = handler.init_payment_and_get_amout(request_data=request.json, session_data=session,
+                                                payment_method=strategy.get_payment_method(), ref=ref)
+    result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
+
+    if strategy.get_payment_method() == PaymentMethod.CASH:
+        paid_amount = float(request.json.get('paid_amount', 0))
+        if paid_amount < float(amount):
+            return jsonify({'err_msg': 'Không đủ tiền.'}), 400
+        strategy.process_payment({"ref": ref})
+        if payment_type.upper() == "CHECKOUT":
+            del session['bill_detail']
+    return jsonify(result), 200
+    # try :
+    #     # Tạo mã giao dịch khác nhau cho mỗi giao dịch
+    #     import uuid
+    #     ref = str(uuid.uuid4())
+    #     handler = PaymentHandlerFactory.get_handler(payment_type)
+    #     try:
+    #         strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+    #     except Exception as ex:
+    #         print(ex)
+    #         return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
+    #
+    #     amount = handler.init_payment_and_get_amout(request_data=request.json, session_data=session, payment_method=strategy.get_payment_method(), ref=ref)
+    #     result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
+    #
+    #     if strategy.get_payment_method() == PaymentMethod.CASH:
+    #         paid_amount = float(request.json.get('paid_amount', 0))
+    #         if paid_amount < float(amount):
+    #             return jsonify({'err_msg': 'Không đủ tiền.'}), 400
+    #         strategy.process_payment({"ref": ref})
+    #         if payment_type.upper() == "CHECKOUT":
+    #             del session['bill_detail']
+    #     return jsonify(result), 200
+    # except Exception as ex :
+    #     print(ex)
+    #     return jsonify({'err_msg': 'Lỗi hệ thống.'}), 500
+
+@app.route('/api/ipn/<method>/<payment_type>', methods=['post', 'get'])
+def return_ipn(method, payment_type):
+    try :
+        if request.method == 'POST':
+            data = request.json
+        else:
+            data = request.args.to_dict()
+        print(data)
+
+        strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
+        strategy.process_payment(data)
+        # Xử lý thêm để hiện giao diện kêt quả thanh toán
+        # if request.method == 'GET':
+        #     return render_template('xxx', success=True)
+        return jsonify({'msg': 'Thanh toán thành công'}), 204
+    except Exception as e:
+        print(e)
+        # Tng tự
+        # if request.method == 'GET':
+        # return render_template('xxx', success=False)
+        return jsonify({'err_msg': "Lỗi hệ thống!!!"}), 500
+
+@app.route('/rooms-dashboard/')
+def rooms():
+    return render_template('dashboard/rooms_dashboard.html',
+                           get_rooms=load_rooms)
+
+@app.route('/payment/')
+def payment_page():
+    if current_user.role != UserRole.STAFF  and current_user.role != UserRole.ADMIN:
+        return redirect("/rooms-dashboard")
+    data = session.get('bill_detail')
+    return render_template('payment/payment.html', bill_detail=data, payment_methods=PaymentMethod)
+
+
+@login.user_loader
+def load_user(pk):
+    return get_users(user_id=pk)
 
 
 # ===========================================================
