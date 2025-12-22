@@ -1,40 +1,30 @@
+import time
 from sqlalchemy import func
 
 from backend.models import  Product,  Room,  Session, SessionStatus, Order, \
     RoomType, Receipt, ReceiptDetails, ProductOrder
 from backend import db, app
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 def get_total_amount(time_unit='day'):
     current_date = datetime.now()
     query = (db.session.query(func.sum(ReceiptDetails.total_room_fee + ReceiptDetails.total_service_fee))
                     .join(Receipt, ReceiptDetails.id == Receipt.id)
-                    .filter(func.extract('year', Receipt.created_date) == current_date.year))
+                    .join(Session, Session.id == Receipt.session_id)
+                    .filter(func.extract('year', Session.end_time) == current_date.year))
 
-    start_date = None
-    end_date = None
-
-    if time_unit == 'day':
-        start_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_date = start_date + timedelta(days=1) - timedelta(microseconds=1)
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
     elif time_unit == 'week':
-        start_date = current_date - timedelta(days=current_date.weekday())
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_date = start_date + timedelta(days=7) - timedelta(microseconds=1)
-    elif time_unit == 'month':
-        start_date = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        if current_date.month == 12:
-            end_date = start_date.replace(year=current_date.year + 1, month=1) - timedelta(microseconds=1)
-        else:
-            end_date = start_date.replace(month=current_date.month + 1) - timedelta(microseconds=1)
-    
-    if start_date and end_date:
-        query = query.filter(Receipt.created_date >= start_date) \
-                     .filter(Receipt.created_date <= end_date)
+        query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
+    elif time_unit == 'day':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
-    return int(query.first()[0])
+    result = query.first()[0]
+    return int(result) if result is not None else 0
 
 def count_orders(time_unit='day'):
     current_date = datetime.now()
@@ -42,44 +32,53 @@ def count_orders(time_unit='day'):
     query = (db.session.query(func.count(Order.id))
                     .join(Session, Order.session_id == Session.id)
                     .filter(Session.session_status == SessionStatus.FINISHED)
-                    .filter(func.extract('year', Session.end_time) == current_date.year)
-                    .filter(func.extract('month', Session.end_time) == current_date.month))
-
-    if time_unit == 'week':
+                    .filter(func.extract('year', Session.end_time) == current_date.year))
+    
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+    elif time_unit == 'week':
         query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
     elif time_unit == 'day':
-        query = query.filter(func.extract('day', Session.end_time) == current_date.date().day)
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
-    return query.first()[0]
+    result = query.first()[0]
+    return result if result is not None else 0
 
 def count_sessions(time_unit='day'):
     current_date = datetime.now()
     query = (db.session.query(func.count(Session.id))
                       .filter(Session.session_status == SessionStatus.FINISHED)
-                      .filter(func.extract('year', Session.end_time) == current_date.year)
-                      .filter(func.extract('month', Session.end_time) == current_date.month))
+                      .filter(func.extract('year', Session.end_time) == current_date.year))
 
-    if time_unit == 'week':
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+    elif time_unit == 'week':
         query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
     elif time_unit == 'day':
-        query = query.filter(func.extract('day', Session.end_time) == current_date.date().day)
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
-    return query.first()[0]
+    result = query.first()[0]
+    return result if result is not None else 0
 
 def count_customers(time_unit='day'):
     current_date = datetime.now()
 
     query = (db.session.query(func.count(Session.user_id))
              .filter(Session.session_status == SessionStatus.FINISHED)
-             .filter(func.extract('month', Session.end_time) == current_date.date().month)
-             .filter(func.extract('year', Session.end_time) == current_date.date().year))
+             .filter(func.extract('year', Session.end_time) == current_date.year))
 
-    if time_unit == 'week':
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+    elif time_unit == 'week':
         query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
     elif time_unit == 'day':
-        query = query.filter(func.extract('day', Session.end_time) == current_date.date().day)
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
-    return query.first()[0]
+    result = query.first()[0]
+    return result if result is not None else 0
 
 def revenue_by_time(time_unit='day'):
     total_amount = get_total_amount(time_unit)
@@ -105,14 +104,17 @@ def revenue_by_room_name(time_unit='day'):
                                         ReceiptDetails.total_service_fee))
               .join(Receipt, Session.id == Receipt.session_id)
               .join(ReceiptDetails, ReceiptDetails.id == Receipt.id)
-              .join(Room, Room.id == Session.room_id))
-             .filter(func.extract('month', Receipt.created_date) == current_date.date().month)
-             .filter(func.extract('year', Receipt.created_date) == current_date.date().year))
+              .join(Room, Room.id == Session.room_id)
+              .filter(Session.session_status == SessionStatus.FINISHED)
+              .filter(func.extract('year', Session.end_time) == current_date.year)))
 
-    if time_unit == 'week':
-        query = query.filter(func.week(Receipt.created_date, 3) == current_date.date().isocalendar()[1])
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+    elif time_unit == 'week':
+        query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
     elif time_unit == 'day':
-        query = query.filter(func.extract('day', Receipt.created_date) == current_date.date().day)
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
     return query.group_by(Session.room_id).all()
 
@@ -125,15 +127,18 @@ def revenue_by_room_type(time_unit='day'):
                                         ReceiptDetails.total_service_fee))
               .join(Receipt, ReceiptDetails.id == Receipt.id)
               .join(Session, Session.id == Receipt.session_id)
-              .join(Room, Room.id == Session.room_id))
+              .join(Room, Room.id == Session.room_id)
+              .filter(Session.session_status == SessionStatus.FINISHED))
              .join(RoomType, RoomType.id == Room.room_type)
-             .filter(func.extract('month', Receipt.created_date) == current_date.date().month)
-             .filter(func.extract('year', Receipt.created_date) == current_date.date().year))
+             .filter(func.extract('year', Session.end_time) == current_date.year))
 
-    if time_unit == 'week':
-        query = query.filter(func.week(Receipt.created_date, 3) == current_date.date().isocalendar()[1])
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+    elif time_unit == 'week':
+        query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
     elif time_unit == 'day':
-        query = query.filter(func.extract('day', Receipt.created_date) == current_date.date().day)
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
     return query.group_by(RoomType.name).all()
 
@@ -147,13 +152,15 @@ def revenue_by_product(time_unit='day'):
               .join(Order, Order.id == ProductOrder.order_id)
               .join(Session, Session.id == Order.session_id))
              .filter(Session.session_status == SessionStatus.FINISHED)
-             .filter(func.extract('month', Session.end_time) == current_date.date().month)
-             .filter(func.extract('year', Session.end_time) == current_date.date().year))
+             .filter(func.extract('year', Session.end_time) == current_date.year))
 
-    if time_unit == 'week':
+    if time_unit == 'month':
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+    elif time_unit == 'week':
         query = query.filter(func.week(Session.end_time, 3) == current_date.date().isocalendar()[1])
     elif time_unit == 'day':
-        query = query.filter(func.extract('day', Session.end_time) == current_date.date().day)
+        query = query.filter(func.extract('month', Session.end_time) == current_date.month)
+        query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
     return query.group_by(Product.name).all()
 
