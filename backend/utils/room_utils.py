@@ -1,6 +1,7 @@
 from sqlalchemy import desc, asc
+from backend import db
 from backend.daos.room_daos import get_rooms
-from backend.models import Room, RoomType
+from backend.models import Room, RoomStatus, RoomType
 
 def filter_rooms(room_id=None, kw=None, price_min=None, price_max=None
                  , sort_by=None, status=None, capacity=None):
@@ -22,3 +23,14 @@ def filter_rooms(room_id=None, kw=None, price_min=None, price_max=None
     else:
         rooms_price = rooms_price.order_by(asc(Room.name))
     return rooms_price
+
+def reset_room_status(room_id):
+    room = Room.query.get(room_id)
+    if room:
+        room.status = RoomStatus.AVAILABLE
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Lỗi lưu DB: {e}")

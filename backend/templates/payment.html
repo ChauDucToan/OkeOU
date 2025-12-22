@@ -1,132 +1,336 @@
-{% extends 'layout/base.html' %}
-
-{% block title %}Thanh toán đặt phòng{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h2 class="fw-bold text-primary">Xác nhận thanh toán</h2>
-        <p class="text-white">Vui lòng hoàn tất thanh toán để giữ phòng</p>
-    </div>
-
-    <div class="row g-4 justify-content-center">
-        <div class="col-lg-7">
-            <div class="card shadow-sm glass-effect border-0 h-100">
-                <div class="card-header border-bottom-0 pt-4 px-4">
-                    <h5 class="text-white mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Chi tiết đặt phòng</h5>
-                </div>
-                <div class="card-body px-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <img src="{{ room.image }}" alt="Room" class="rounded" 
-                             style="width: 100px; height: 70px; object-fit: cover;">
-                        <div class="ms-3">
-                            <h4 class="mb-0 text-white">{{ room.name }}</h4>
-                            <span class="badge bg-info text-dark">Sức chứa: {{ booking.head_count }} người</span>
-                        </div>
-                    </div>
-
-                    <hr class="text-white opacity-25">
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-6 text-white">Mã đơn:</div>
-                        <div class="col-6 fw-bold text-white text-end">#{{ booking.id }}</div>
-
-                        <div class="col-6 text-white">Khách hàng:</div>
-                        <div class="col-6 fw-bold text-white text-end">{{ current_user.name if current_user.is_authenticated else 'Khách vãng lai' }}</div>
-
-                        <div class="col-6 text-white">Bắt đầu:</div>
-                        <div class="col-6 fw-bold text-end text-primary">
-                            {{ booking.scheduled_start_time.strftime('%H:%M %d/%m/%Y') }}
-                        </div>
-
-                        <div class="col-6 text-white">Kết thúc:</div>
-                        <div class="col-6 fw-bold text-end text-primary">
-                            {{ booking.scheduled_end_time.strftime('%H:%M %d/%m/%Y') }}
-                        </div>
-                    </div>
-
-                    <hr class="text-white opacity-25">
-
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <h5 class="text-white mb-0">Tổng thanh toán:</h5>
-                        <h3 class="fw-bold text-danger mb-0">
-                            {{ "{:,.0f}".format(room.type.hourly_price * (booking.scheduled_end_time - booking.scheduled_start_time).total_seconds() / 3600) }} VNĐ
-                        </h3>
-                    </div>
-                </div>
-            </div>
+{% extends 'layout/base.html' %} {% block title %} Trang Thanh toán {% endblock
+%} {% block content %}
+<div class="container">
+  <input
+    type="hidden"
+    id="currentSessionId"
+    value="{{ bill_detail.session_id }}"
+  />
+  <div class="row vh-100 bg-light">
+    <div class="col-md-4 mb-4" id="invoice-area">
+      <div class="bg-white p-3 border rounded-3 d-flex flex-column min-vh-100">
+        <div
+          class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3"
+        >
+          <h6 class="text-muted mb-0">TÊN KHÁCH HÀNG</h6>
+          <p class="fw-bold mb-0 text-primary">{{bill_detail.customer_name}}</p>
         </div>
 
-        <div class="col-lg-5">
-            <div class="card shadow-sm glass-effect border-0 mb-4">
-                <div class="card-body text-center py-4">
-                    <p class="mb-2 text-white fw-bold">THỜI GIAN GIỮ CHỖ CÒN LẠI</p>
-                    <div class="display-4 fw-bold text-primary" id="countdown-timer">
-                        Loading...
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm glass-effect border-0">
-                <div class="card-header pt-4 px-4 border-bottom-0">
-                    <h5 class="text-white mb-0 fw-bold">Chọn phương thức thanh toán</h5>
-                </div>
-                <div class="card-body px-4 pb-4">
-                    <form id="paymentForm" action="/api/payment/create_payment" method="POST">
-                        <input type="hidden" name="booking_id" value="{{ booking.id }}">
-                        
-                        <div class="payment-option mb-3">
-                            <input class="form-check-input" type="radio" name="payment_method" id="vnpay" value="VNPAY" checked>
-                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="vnpay">
-                                <span><i class="bi bi-credit-card-2-front me-2"></i>Ví VNPAY / Ngân hàng</span>
-                                <img src="https://vnpay.vn/assets/images/logo-icon/logo-primary.svg" height="24" alt="VNPay">
-                            </label>
-                        </div>
-
-                        <div class="payment-option mb-3">
-                            <input class="form-check-input" type="radio" name="payment_method" id="momo" value="MOMO">
-                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="momo">
-                                <span><i class="bi bi-phone me-2"></i>Ví MoMo</span>
-                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" height="24" alt="Momo">
-                            </label>
-                        </div>
-
-                        <div class="payment-option mb-4">
-                            <input class="form-check-input" type="radio" name="payment_method" id="cash" value="CASH">
-                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="cash">
-                                <span><i class="bi bi-cash-coin me-2"></i>Thanh toán tại quầy</span>
-                            </label>
-                        </div>
-
-                        <input type="hidden" id="remain_time" value="{{ remain_time }}">
-
-                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-5 shadow-sm">
-                            THANH TOÁN NGAY
-                        </button>
-                    </form>
-                </div>
-            </div>
+        <div class="table-responsive flex-grow-1">
+          <table class="table table-sm text-end">
+            <thead>
+              <tr class="table-light">
+                <th class="text-start">TÊN HÀNG HÓA</th>
+                <th>SL</th>
+                <th>ĐƠN GIÁ</th>
+                <th>THÀNH TIỀN</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in bill_detail.service_details %}
+              <tr>
+                <td class="text-start">{{s.name}}</td>
+                <td>{{s.amount}}</td>
+                <td>{{s.price}}</td>
+                <td>{{s.total}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+
+        <div class="pt-2 border-top mt-auto">
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Tổng dịch vụ:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.service_fee}}</p>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Tổng tiền hát:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.room_fee}}</p>
+          </div>
+
+          {% if bill_detail.discount > 0 %}
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Giảm giá KHTT:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.discount}}</p>
+          </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Thuế VAT:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.vat}}</p>
+          </div>
+          <div class="d-flex justify-content-between">
+            <p class="text-muted mb-1">Tiền cọc:</p>
+            <p class="fw-semibold mb-1">{{bill_detail.deposit_amount}}</p>
+          </div>
+
+          <div class="d-flex justify-content-between border-top pt-2 mt-2">
+            <h5 class="mb-0 text-dark">TỔNG HÓA ĐƠN:</h5>
+            <h5 class="mb-0 text-danger fw-bolder">
+              {{bill_detail.final_total}}
+            </h5>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="col-md-8">
+      <div class="container my-4">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="paidAmount" class="form-label text-muted small"
+                >TIỀN KHÁCH ĐƯA</label
+              >
+              <input
+                type="text"
+                oninput="validateNumberOnly(this)"
+                class="form-control form-control-lg text-end"
+                id="paidAmount"
+              />
+            </div>
+
+            <label class="form-label text-muted small mb-2"
+              >CHỌN TIỀN THEO MỆNH GIÁ</label
+            >
+            <div class="row g-2 mb-4">
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="5000000"
+                >
+                  5.000.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="2000000"
+                >
+                  2.000.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="1000000"
+                >
+                  1.000.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="500000"
+                >
+                  500.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="200000"
+                >
+                  200.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="100000"
+                >
+                  100.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="50000"
+                >
+                  50.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="20000"
+                >
+                  20.000
+                </button>
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-outline-secondary w-100 btn-price"
+                  data-value="10000"
+                >
+                  10.000
+                </button>
+              </div>
+            </div>
+
+            <label class="form-label text-muted small mt-4 mb-2"
+              >HÌNH THỨC THANH TOÁN</label
+            >
+            <div class="d-flex flex-wrap gap-2">
+              {% for method in payment_methods %} {% if method.name == "CASH"%}
+              <button class="btn-payment btn btn-primary fw-bold">
+                {{method.name}}
+              </button>
+              {% else %}
+              <button class="btn-payment btn btn-secondary fw-bold">
+                {{method.name}}
+              </button>
+              {% endif %} {% endfor %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="border rounded-3 p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-dark fw-bold">Còn phải thu</span>
+                <h4 class="text-success fw-bolder mb-0">
+                  {{bill_detail.final_total}}
+                </h4>
+              </div>
+
+              <div
+                class="d-flex justify-content-between align-items-center mt-2"
+              >
+                <span class="text-muted">Tiền mặt</span>
+                <span class="text-danger small paid-amount"
+                  ><i class="bi bi-trash"></i
+                ></span>
+              </div>
+            </div>
+
+            <div class="border rounded-3 p-3 bg-light">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-dark fw-bold">Trả lại khách</span>
+                <h3 class="fw-bolder mb-0 change-money">0,00</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary" onclick="window.print()">
+          Xuất hóa đơn
+        </button>
+        {% if current_user.is_authenticated and (current_user.role.name ==
+        'STAFF' or current_user.role.name ==
+        'ADMIN')%}
+        <button class="btn btn-success" onclick="pay('CHECKOUT')">Thanh toán</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="modal modal-bg-dark fade" id="timeoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content glass-modal text-center p-4">
-            <div class="modal-body text-white">
-                <div class="mb-3 text-danger">
-                    <i class="bi bi-alarm-fill" style="font-size: 3rem;"></i>
-                </div>
-                <h3 class="fw-bold">Hết thời gian giữ chỗ!</h3>
-                <p>Đã quá 15 phút thanh toán. Đơn đặt phòng này đã bị hủy tự động để nhường chỗ cho khách hàng khác.</p>
-                <div class="d-grid gap-2 mt-4">
-                    <a href="/rooms/{{ room.id }}" class="btn btn-primary">Đặt lại phòng này</a>
-                    <a href="/" class="btn btn-outline-secondary">Về trang chủ</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+  .btn-selected {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+  }
+
+  @media print {
+    /* 1. Ẩn tất cả mọi thứ trên trang web */
+    body * {
+      visibility: hidden;
+    }
+
+    /* 2. Chỉ hiện vùng hóa đơn (invoice-area) và nội dung bên trong nó */
+    #invoice-area,
+    #invoice-area * {
+      visibility: visible;
+    }
+
+    /* 3. Định vị vùng hóa đơn về góc trên cùng bên trái của khổ giấy */
+    #invoice-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%; /* In full khổ giấy */
+      margin: 0;
+      padding: 0;
+      border: none !important; /* Bỏ viền khi in */
+    }
+
+    /* 4. Tinh chỉnh giao diện in */
+    .bg-light {
+      background-color: white !important; /* Bỏ nền xám */
+    }
+
+    /* Bootstrap class hỗ trợ in: Hiện cái cần hiện, Ẩn cái cần ẩn */
+    .d-print-none {
+      display: none !important;
+    }
+    .d-print-block {
+      display: block !important;
+    }
+
+    /* Ẩn các nút bấm hoặc thanh cuộn nếu còn sót */
+    button,
+    .btn {
+      display: none !important;
+    }
+
+    /* Nếu in máy in nhiệt (Bill nhỏ), có thể set width cố định */
+    /* #invoice-area { width: 80mm; } */
+  }
+</style>
 
 <script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+
+<script>
+
+  function validateNumberOnly(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+    }
+  window.onload = () => {
+      const btnPrices = document.querySelectorAll('.btn-price');
+      const btnPayments = document.querySelectorAll('.btn-payment');
+      const paidAmountInput = document.getElementById('paidAmount');
+      const totalAmount = {{bill_detail.final_total}};
+
+      const changeMoney = document.querySelector('.change-money');
+
+      btnPrices.forEach(button => {
+          button.addEventListener('click', function() {
+              btnPrices.forEach(btn => {
+                  btn.classList.remove('btn-selected');
+              });
+
+              this.classList.add('btn-selected');
+
+              const dataValue = parseInt(this.getAttribute('data-value'));
+
+              paidAmountInput.value = dataValue;
+              document.querySelector('.paid-amount').textContent = dataValue;
+
+              const change = dataValue - totalAmount;
+              if (change < 0) {
+                  changeMoney.previousElementSibling.textContent = 'Khách thiếu'
+              } else  {
+                  changeMoney.previousElementSibling.textContent = 'Trả lại khách'
+              }
+
+              changeMoney.textContent = Math.abs(change);
+          });
+      });
+
+    btnPayments.forEach(button => {
+        button.addEventListener('click', function() {
+              btnPayments.forEach(btn => {
+                  btn.classList.remove('btn-primary');
+                  btn.classList.add('btn-secondary');
+              });
+
+              this.classList.remove('btn-secondary');
+              this.classList.add('btn-primary');
+          });
+    });
+  }
+</script>
 {% endblock %}

@@ -100,7 +100,7 @@ def booking_payment_preview(booking_id):
     
     room = get_rooms(room_id=booking.room_id)[0]
 
-    return render_template('payment.html', booking=booking,
+    return render_template('booking_payment.html', booking=booking,
                             room=room,
                             remain_time=remain_time)
 
