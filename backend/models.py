@@ -245,6 +245,7 @@ class Receipt(BaseModel):
     id = Column(String(100), primary_key=True)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
+    status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
 
     created_date = Column(DateTime, default=datetime.now())
     details = relationship('ReceiptDetails', backref='receipt', lazy=True)
