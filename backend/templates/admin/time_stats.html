@@ -1,0 +1,219 @@
+{% extends 'admin/master.html' %} 
+{% block body %}
+<div>
+    <div class="d-flex justify-content-between align-items-center bg-white rounded-3 p-3 mt-3 shadow-sm">
+        <h5 class="m-0 font-weight-bold text-dark">Thống kê báo cáo</h5>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 text-muted small text-uppercase font-weight-bold">Doanh thu</p>
+                        <h4 class="font-weight-bold text-success mb-0">
+                            {{ "{:,.0f}".format(revenue_by_time.total_amount)|replace(",", ".") }}đ
+                        </h4>
+                    </div>
+                    <i class="fa fa-money fa-2x text-success opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 text-muted small text-uppercase font-weight-bold">Đơn hàng</p>
+                        <h4 class="font-weight-bold text-danger mb-0">{{revenue_by_time.count_orders}}</h4>
+                    </div>
+                    <i class="fa fa-shopping-cart fa-2x text-danger opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 text-muted small text-uppercase font-weight-bold">Khách hàng</p>
+                        <h4 class="font-weight-bold text-primary mb-0">{{revenue_by_time.count_customers}}</h4>
+                    </div>
+                    <i class="fa fa-users fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 text-muted small text-uppercase font-weight-bold">Số lần hát</p>
+                        <h4 class="font-weight-bold text-warning mb-0">{{revenue_by_time.count_sessions}}</h4>
+                    </div>
+                    <i class="fa fa-microphone fa-2x text-warning opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-3" style="height: 300px;">
+                <div class="card-header bg-white font-weight-bold border-0">
+                    Chi tiết doanh thu phòng
+                </div>
+                <div class="card-body p-0" style="overflow-y: auto;">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="bg-light">
+                        <tr style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 1;">
+                            <th class="border-top-0">Id</th>
+                            <th class="border-top-0">Tên phòng</th>
+                            <th class="border-top-0 text-right">Doanh thu</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for r in revenue_by_room_name %}
+                        <tr>
+                            <td>{{r[0]}}</td>
+                            <td>{{r[1]}}</td>
+                            <td class="text-right font-weight-bold text-dark">
+                                {{ "{:,.0f}".format(r[2])|replace(",", ".") }}đ
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm" style="height: 300px;">
+                <div class="card-body">
+                    <canvas id="myChartTime"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white font-weight-bold border-0">
+                    Tỷ lệ loại phòng
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <div style="width: 80%;">
+                        <canvas id="myChartRoom"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <div class="d-flex justify-content-between align-items-center bg-white rounded-3 p-3 mb-2 shadow-sm">
+            <h5 class="m-0 font-weight-bold">Doanh thu dịch vụ</h5>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body" style="height: 400px;">
+                <canvas id="myChartService"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+        };
+
+        function drawChart(ctx, labels, data, type = "bar") {
+            const isPie = type === 'pie' || type === 'doughnut';
+            
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += formatCurrency(context.parsed.y || context.parsed);
+                                } else {
+                                     label += formatCurrency(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (!isPie) {
+                options.scales = {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => formatCurrency(value),
+                        },
+                    },
+                };
+            }
+
+            new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Doanh thu",
+                            data: data,
+                            borderWidth: 1,
+                            backgroundColor: [
+                                "rgba(255, 99, 132, 0.7)",
+                                "rgba(54, 162, 235, 0.7)",
+                                "rgba(255, 206, 86, 0.7)",
+                                "rgba(75, 192, 192, 0.7)",
+                                "rgba(153, 102, 255, 0.7)",
+                                "rgba(255, 159, 64, 0.7)",
+                            ],
+                            borderColor: "rgba(255, 255, 255, 1)",
+                            borderRadius: 4,
+                        },
+                    ],
+                },
+                options: options,
+            });
+        }
+
+        const labelTimes = [];
+        const dataTimes = [];
+        const labelRoomType = [];
+        const dataRoomType = [];
+        const labelProduct = [];
+        const dataProduct = [];
+
+        {% for r in revenue_by_room_name %}
+            labelTimes.push('{{r[1]}}');
+            dataTimes.push({{r[2]}});
+        {% endfor %}
+
+        {% for r in revenue_by_room_type %}
+            labelRoomType.push('{{r[0]}}');
+            dataRoomType.push({{r[1]}});
+        {% endfor %}
+
+        {% for r in revenue_by_product %}
+            labelProduct.push('{{r[0]}}');
+            dataProduct.push({{r[1]}});
+        {% endfor %}
+
+        const ctx1 = document.getElementById("myChartTime").getContext('2d');
+        const ctx2 = document.getElementById("myChartRoom").getContext('2d');
+        const ctx3 = document.getElementById("myChartService").getContext('2d');
+
+        drawChart(ctx1, labelTimes, dataTimes, "bar");
+        drawChart(ctx2, labelRoomType, dataRoomType, "pie");
+        drawChart(ctx3, labelProduct, dataProduct, "bar");
+    </script>
+</div>
+{% endblock %}

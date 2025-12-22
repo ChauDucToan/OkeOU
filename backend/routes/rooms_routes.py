@@ -54,7 +54,7 @@ def room_occupies_preview(room_id):
         end_date_obj = start_date_obj + timedelta(days=1)
 
         occ_bookings = get_bookings(room_id=room_id,
-                                    booking_status=[BookingStatus.CONFIRMED,
+                                    status=[BookingStatus.CONFIRMED,
                                                     BookingStatus.PENDING,
                                                     BookingStatus.COMPLETED],
                                     scheduled_start_time=start_date_obj,
@@ -84,14 +84,14 @@ def booking_payment_preview(booking_id):
     if booking.user_id != current_user.id:
         return redirect_to_error(403, "You do not have permission to access this booking.")
     
-    if booking.booking_status != BookingStatus.PENDING:
+    if booking.status != BookingStatus.PENDING:
         return redirect_to_error(400, "Booking is not pending payment.")
     
     expire_time = booking.booking_date + timedelta(minutes=15)
     remain_time = int((expire_time - datetime.now()).total_seconds())
 
     if remain_time <= 0:
-        booking.booking_status = BookingStatus.CANCELLED
+        booking.status = BookingStatus.CANCELLED
         try:
             db.session.commit()
         except Exception as ex:

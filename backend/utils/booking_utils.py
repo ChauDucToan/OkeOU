@@ -8,9 +8,9 @@ from backend.models import Booking, BookingStatus, Room, RoomStatus, Session, Se
 def cancel_pending_booking():
     limit_time = datetime.now() - timedelta(minutes=15)
 
-    pending_booking = get_bookings(booking_status=[BookingStatus.PENDING]).filter(Booking.booking_date < limit_time)
+    pending_booking = get_bookings(status=[BookingStatus.PENDING]).filter(Booking.booking_date < limit_time)
 
-    pending_booking.update({Booking.booking_status: BookingStatus.CANCELLED}, synchronize_session=False)
+    pending_booking.update({Booking.status: BookingStatus.CANCELLED}, synchronize_session=False)
 
     try:
         db.session.commit()
@@ -23,7 +23,7 @@ def create_booking(scheduled_start_time, scheduled_end_time, head_count, user_id
     cancel_pending_booking()
 
     existing_booking = get_bookings(room_id=room_id,
-                                    booking_status=[BookingStatus.CONFIRMED, BookingStatus.PENDING]).filter(
+                                    status=[BookingStatus.CONFIRMED, BookingStatus.PENDING]).filter(
                                         Booking.scheduled_start_time < scheduled_end_time,
                                         Booking.scheduled_end_time > scheduled_start_time
                                     ).with_for_update().first()
@@ -61,10 +61,10 @@ def confirm_booking(booking_id):
         
         room.status = RoomStatus.BOOKED
 
-        if booking.booking_status != BookingStatus.PENDING:
+        if booking.status != BookingStatus.PENDING:
             raise Exception("Only pending bookings")
 
-        booking.booking_status = BookingStatus.CONFIRMED
+        booking.status = BookingStatus.CONFIRMED
         try:
             db.session.commit()
             return booking
@@ -76,7 +76,7 @@ def confirm_booking(booking_id):
 def convert_booking_to_session(booking_id):
     booking = Booking.query.get(booking_id)
     if booking:
-        if booking.booking_status != BookingStatus.CONFIRMED:
+        if booking.status != BookingStatus.CONFIRMED:
             raise Exception("Only confirmed bookings")
 
         session = Session(
@@ -87,7 +87,7 @@ def convert_booking_to_session(booking_id):
             session_status=SessionStatus.ACTIVE,
             deposit_amount=booking.deposit_amount
         )
-        booking.booking_status = BookingStatus.COMPLETED
+        booking.status = BookingStatus.COMPLETED
 
         db.session.add(session)
         try:

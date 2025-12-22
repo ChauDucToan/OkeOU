@@ -249,8 +249,8 @@ if __name__ == '__main__':
         bookings = []
 
         for room in rooms:
-            for day_offset in range(-2, 3):
-                if random.random() > 0.3:
+            for day_offset in range(-60, 1):
+                if random.random() > 0.4:
                     
                     start_hour = random.randint(10, 20) 
                     start_minute = random.choice([0, 15, 30, 45])
@@ -258,11 +258,16 @@ if __name__ == '__main__':
                     base_date = datetime.now().date() + timedelta(days=day_offset)
                     start_time = datetime.combine(base_date, datetime.min.time()) + timedelta(hours=start_hour, minutes=start_minute)
                     
-                    duration_hours = random.randint(1, 2)
+                    # Thời lượng từ 1-5 giờ để có doanh thu đa dạng
+                    duration_hours = random.randint(1, 5)
                     end_time = start_time + timedelta(hours=duration_hours)
 
                     if end_time < datetime.now():
-                        status = BookingStatus.COMPLETED
+                        # 80% hoàn thành, 15% hủy, 5% pending cho dữ liệu trong quá khứ
+                        status = random.choices(
+                            [BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.PENDING],
+                            weights=[80, 15, 5]
+                        )[0]
                     else:
                         status = random.choice([BookingStatus.CANCELLED, BookingStatus.PENDING, BookingStatus.CONFIRMED])
 
@@ -275,7 +280,7 @@ if __name__ == '__main__':
                         scheduled_end_time=end_time,
                         head_count=random.randint(2, room.capacity),
                         
-                        booking_status=status,
+                        status=status,
                         
                         deposit_amount=deposit,
                         
@@ -288,7 +293,7 @@ if __name__ == '__main__':
         db.session.commit()
 
 
-        confirmed_bookings = [b for b in bookings if b.booking_status == BookingStatus.COMPLETED]
+        confirmed_bookings = [b for b in bookings if b.status == BookingStatus.COMPLETED]
         sessionss = []
 
         for booking in confirmed_bookings:
@@ -353,7 +358,8 @@ if __name__ == '__main__':
 
         prod_ord = []
         for order in orders:
-            num_orders = random.randint(0, 5)
+            # Tăng số lượng đơn hàng dịch vụ để có doanh thu đa dạng
+            num_orders = random.randint(2, 7)
             ordered_products = random.sample(products, k=min(num_orders, len(products)))
             for prod in ordered_products:
                 amount = random.randint(1, 3)
@@ -377,11 +383,17 @@ if __name__ == '__main__':
             room = Room.query.get(session.room_id)
             room_type = RoomType.query.get(room.room_type)
             total_room_fee = room_type.hourly_price * duration
+            
+            # Tính tổng phí dịch vụ cho session cụ thể này
+            session_service_fee = 0.0
+            for order in Order.query.filter_by(session_id=session.id).all():
+                for po in ProductOrder.query.filter_by(order_id=order.id).all():
+                    session_service_fee += po.amount * po.price_at_time
 
             receipt_details = ReceiptDetails(
                 id=receipt.id,
                 total_room_fee=total_room_fee,
-                total_service_fee=total_service_fee
+                total_service_fee=session_service_fee
             )
             receipt_details_list.append(receipt_details)
 
