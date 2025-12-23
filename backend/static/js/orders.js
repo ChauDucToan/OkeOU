@@ -30,6 +30,7 @@ function addToOrder(id, image, name, price, amount){
     .then(result => {
         if (result.status === 200){
             updateOrderBadge(result.body.total_quantity)
+            location.reload()
         }
         else {
             alert(result.body.err_msg || 'Lỗi hệ thống')
