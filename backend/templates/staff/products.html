@@ -132,7 +132,7 @@ Trang chủ
                         Filter
                     </button>
                     <ul class="dropdown-menu" data-bs-theme="dark">
-                        <li><a class="dropdown-item" href="/staffs/{{ session.id }}/products">Tất cả</a></li>
+                        <li><a class="dropdown-item" href="/staffs/{{ session.id }}/order">Tất cả</a></li>
                         {% for c in categories %}
                         <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
                         {% endfor %}
@@ -169,7 +169,7 @@ Trang chủ
                 {% if pages > 1 %}
                 <ul class="pagination mt-2">
                     {% for i in range(1, pages + 1) %}
-                    <li class="page-item"><a class="page-link glass-effect" href="/staffs/{{ ss.id }}/products?page={{i}}">{{ i }}</a></li>
+                    <li class="page-item"><a class="page-link glass-effect" href="/staffs/{{ ss.id }}/order?page={{i}}">{{ i }}</a></li>
                     {% endfor %}
                 </ul>
                 {% endif %}

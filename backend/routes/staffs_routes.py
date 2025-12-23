@@ -29,6 +29,12 @@ def staff_preview():
                            pages=math.ceil(count / page_size), current_page=page)
 
 
+@app.route('/staffs/orders')
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
+def staff_orders_preview():
+    return render_template('/staff/orders.html')
+
+
 @app.route('/staffs/sessions')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_sessions_preview():
@@ -63,7 +69,7 @@ def staff_payments_preview():
                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
-@app.route('/staffs/<int:session_id>/products')
+@app.route('/staffs/<int:session_id>/order')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_products_preview(session_id):
     products = load_products(kw=request.args.get('kw'),

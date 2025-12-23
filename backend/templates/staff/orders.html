@@ -1,113 +1,125 @@
 {% extends 'layout/base.html' %}
 
 {% block title %}
-Orders
+Danh sách đơn hàng
 {% endblock %}
 
 {% block content %}
-<div class="fw-bold m-3 p-3 fs-4">
-    Đặt dịch vụ (
-    <span class="text-black-50 order-counter"> {{ stats_order.total_quantity }} </span>
-    <span class="text-black-50">dịch vụ </span>
-    )
-</div>
+<div class="container mt-4">
+    <div class="fw-bold mb-4 fs-4">
+        Danh sách các phiên cần đặt
+        <span class="badge bg-danger rounded-pill fs-6 align-top order-counter">
+            {{ stats_order.total_quantity }}
+        </span>
+    </div>
 
-{% if 'order' in session %}
+    {% if session.get('order') %}
+        
+        {% for session_id, items in session['order'].items() %}
+        
+        {% set current_stats = items | cart_stats %}
 
-<div class="d-flex gap-3 m-3">
-    <div style="width:75%">
-        <table class="table align-middle">
-            <thead class="table-light">
-            <tr>
-                <th>Dịch vụ</th>
-                <th>Giá tiền</th>
-                <th class="text-center">Số lượng</th>
-                <th>Thành tiền</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for o in session['order'].values() %}
-            <tr id="cart{{ o.id }}">
-                <td>
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <img src="{{ o.image }}" alt="..." style="width:90px; height:90px; object-fit:cover;">
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            {{ o.name }}
+        <div class="card shadow-sm mb-4 border-primary glass-effect">
+            <div class="card-header bg-primary-subtle d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-primary">Phiên làm việc #{{ session_id }}</span>
+                <span class="badge bg-primary">Tạm tính: {{ '{:,.0f}'.format(current_stats.total_amount) }} VND</span>
+            </div>
+            
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="w-100 overflow-y-scroll" style="max-height: 400px;">
+                            <table class="table align-middle table-hover">
+                                <thead class="table sticky-top">
+                                    <tr>
+                                        <th class="text-white">Sản phẩm</th>
+                                        <th class="text-white">Đơn giá</th>
+                                        <th class="text-white text-center">SL</th>
+                                        <th class="text-white">Thành tiền</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for o in items.values() %}
+                                    <tr id="cart{{ o.id }}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ o.image }}" class="rounded me-2" 
+                                                     style="width:50px; height:50px; object-fit:cover;">
+                                                <span class="text-white fw-medium">{{ o.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-white">{{ '{:,.0f}'.format(o.price) }}</td>
+                                        <td class="text-center">
+                                            <input type="number" value="{{ o.quantity }}"
+                                                class="form-control form-control-sm mx-auto text-center"
+                                                style="width:60px" min="1" max="30"
+                                                oninput="limitQuantity(this)"
+                                                onblur="updateOrder({{ session_id }}, {{ o.id }}, this)">
+                                        </td>
+                                        <td class="fw-bold text-success order-product-amount" data-price="{{ o.price }}">
+                                            {{ '{:,.0f}'.format(o.price * o.quantity) }}
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-outline-danger btn-sm border-0"
+                                                    onclick="deleteOrder({{ session_id }}, {{ o.id }})">
+                                                <i class="bi bi-trash3-fill"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </td>
-                <td>{{ '{:,.0f}'.format(o.price) }}</td>
-                <td class="text-center">
-                    <input type="number"
-                           value="{{ o.quantity }}"
-                           class="form-control form-control-sm mx-auto"
-                           style="width:70px"
-                           min="1"
-                           max="30"
-                           oninput="limitQuantity(this)"
-                           onblur="updateOrder({{ o.id }}, this)">
-                </td>
-                <td class="order-product-amount" data-price="{{ o.price }}">{{ '{:,.0f}'.format(o.price * o.quantity) }}</td>
-                <td class="text-center">
-                    <button class="btn btn-outline-danger btn-sm"
-                            onclick="deleteOrder({{ o.id }})">
-                        <i class="bi bi-trash3"></i>
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <a class="p-3 fs-5 text-decoration-none" href="/products">
-            <i class="bi bi-box-arrow-in-left"></i>
-            Tiếp tục đặt dịch vụ
-        </a>
-    </div>
 
-    <div class="p-3 w-25 border rounded">
-        <div class="fw-bold mb-2">Tổng tiền dịch vụ</div>
+                    <div class="col-md-4 d-flex flex-column gap-2">
+                        <div class="p-3 rounded border h-100 d-flex flex-column glass-effect justify-content-between">
+                            <div>
+                                <h5 class="card-title text-center mb-3">Thông tin thanh toán</h5>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tổng số lượng:</span>
+                                    <span class="fw-bold">{{ current_stats.total_quantity }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tổng tiền:</span>
+                                    <span class="fw-bold text-danger fs-5">{{ '{:,.0f}'.format(current_stats.total_amount) }} VND</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="/staffs/{{ session_id }}/products" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Tiếp tục thêm món
+                                </a>
 
-        <div>
-            <div class="d-flex justify-content-between py-2">
-                <span>Tạm tính:</span>
-                <span class="order-amount">{{ '{:,.0f}'.format(stats_order.total_amount) }} VND</span>
+                                {% if current_user.is_authenticated %}
+                                <button class="btn btn-success" type="button" onclick="orderProcess({{ session_id }})">
+                                    <i class="bi bi-check-circle me-2"></i>Chốt đơn & Gửi bếp
+                                </button>
+                                {% else %}
+                                <a href="/login?next=/orders" class="btn btn-secondary">Đăng nhập để đặt</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="d-flex justify-content-between py-2">
-                <span>Giảm giá:</span>
-                <span>0 VND</span>
-            </div>
-
-            <hr>
-
-            <div class="d-flex justify-content-between fw-bold py-2">
-                <span>Tổng cộng:</span>
-                <span class="order-amount">{{ '{:,.0f}'.format(stats_order.total_amount) }} VND</span>
-            </div>
-            {% if current_user.is_authenticated %}
-            <button class="btn btn-primary w-100 mt-2" type="button" onclick="orderProcess()">
-                Tiến hành đặt
-            </button>
-            {% else %}
-            <div>
-                Vui lòng <a href="/login?next=/orders">đăng nhập</a> để thanh toán
-            </div>
-            {% endif %}
         </div>
-    </div>
-</div>
-{% else %}
-<div class="text-center m-3 p-3">
-    <div class="mb-3 fs-1 text-secondary">
-        <i class="bi bi-bag-plus"></i>
-    </div>
-    <p class="fs-5">Chưa có dịch vụ được đặt</p>
-    <a href="/products"><button class="btn btn-primary px-4" type="button">Tiếp tục đặt dịch vụ</button></a>
+        {% endfor %}
 
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-3 text-secondary" style="font-size: 4rem;">
+                <i class="bi bi-cart-x"></i>
+            </div>
+            <h4>Hiện không có đơn hàng nào đang chờ xử lý</h4>
+            <p class="text-muted">Vui lòng vào màn hình "Sessions" để chọn phòng và đặt món.</p>
+            <a href="/staffs/sessions" class="btn btn-primary px-4 mt-2">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách phòng
+            </a>
+        </div>
+    {% endif %}
 </div>
-{% endif %}
+
 <script src="{{ url_for('static', filename='js/orders.js') }}"></script>
 {% endblock %}

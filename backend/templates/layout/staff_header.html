@@ -1,4 +1,4 @@
-<nav>
+<nav id="navbar">
     <div class="px-3 py-2 bg-primary-subtle border-bottom" data-bs-theme="dark">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -13,7 +13,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/orders" class="nav-link flex-row {{ 'active' if request.path == '/orders' else '' }}">
+                        <a href="/staffs/orders" class="nav-link flex-row {{ 'active' if request.path == '/staffs/orders' else '' }}">
                             Orders
                             <span class="position-absolute top-30 right-0 translate-middle badge rounded-pill bg-danger order-counter"
                                       style="display: {{ 'inline-block' if stats_order.total_quantity != 0 else 'none' }}">

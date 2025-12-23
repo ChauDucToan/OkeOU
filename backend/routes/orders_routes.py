@@ -1,12 +1,9 @@
 from backend import app
-from flask import render_template, request, jsonify, session
+from flask import request, jsonify, session
 from flask_login import current_user, login_required
 from backend.daos import order_daos
 from backend.utils import order_utils
 
-@app.route('/orders')
-def orders_preview():
-    return render_template('orders.html')
 
 @app.route('/api/orders', methods=['post'])
 def add_to_order():
@@ -84,20 +81,20 @@ def update_order(id):
     session_id = str(data.get('session_id'))
     quantity = int(data.get('quantity'))
 
-    order = session.get('order', {})
+    cart = session.get('order', {})
 
-    if session_id in order and id in order[session_id]:
-        current_order = order[session_id]
+    if session_id in cart and id in cart[session_id]:
+        order = cart[session_id]
 
         if quantity > 30:
             return jsonify({'err_msg': 'Số lượng giới hạn là 30'}), 400
-        product = order_utils.check_amount_product(current_order[id]['id'])
+        product = order_utils.check_amount_product(order[id]['id'])
         if product.amount < quantity:
             return jsonify({'err_msg': 'Dịch vụ đặt vượt quá số lượng còn lại'}), 400
-        current_order[id]['quantity'] = quantity
+        order[id]['quantity'] = quantity
 
-        session['order'] = order
-        return jsonify(order_utils.stats_order(current_order)), 200
+        session['order'] = cart
+        return jsonify(order_utils.stats_order(order)), 200
     return jsonify({'err_msg': 'Không tìm thấy sản phẩm'}), 400
 
 @app.route('/api/orders/<id>', methods=['delete'])
@@ -105,17 +102,17 @@ def delete_order(id):
     data = request.json 
     session_id = str(data.get('session_id'))
 
-    order = session.get('order', {})
+    cart = session.get('order', {})
 
-    if session_id in order and id in order[session_id]:
-        del order[session_id][id]
+    if session_id in cart and id in cart[session_id]:
+        del cart[session_id][id]
 
-        stats = order_utils.stats_order(order[session_id])
+        stats = order_utils.stats_order(cart[session_id])
 
-        if not order[session_id]:
-            del order[session_id]
+        if not cart[session_id]:
+            del cart[session_id]
 
-        session['order'] = order
+        session['order'] = cart
         return jsonify(stats), 200
 
     return jsonify({'total_quantity': 0, 'total_amount': 0})
