@@ -74,7 +74,7 @@ def staff_products_preview(session_id):
     s = get_sessions(session_id=session_id).first()
 
     return render_template('/staff/products.html', products=products,
-                           categories=categories, session=s,
+                           categories=categories, ss=s,
                            pages=math.ceil(count_products() / app.config['PAGE_SIZE']))
 
 
