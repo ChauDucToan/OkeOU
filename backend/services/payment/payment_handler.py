@@ -3,7 +3,7 @@ from backend import db
 
 from backend.models import BookingStatus, PaymentStatus, Booking, Receipt
 from backend.utils import payment_utils
-from daos import session_daos
+from backend.daos import session_daos
 
 
 class PaymentHandler(ABC):

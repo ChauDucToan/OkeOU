@@ -7,7 +7,7 @@ import hashlib
 from abc import abstractmethod, ABC
 from datetime import datetime
 from backend.models import PaymentMethod
-from backend.service.payment.payment_handler import PaymentHandlerFactory
+from backend.services.payment.payment_handler import PaymentHandlerFactory
 
 
 class PaymentStrategy(ABC):

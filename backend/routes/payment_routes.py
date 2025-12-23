@@ -3,10 +3,12 @@ from flask import render_template, request, jsonify, session, redirect
 from flask_login import current_user, login_required
 from backend.daos.room_daos import load_rooms
 from backend.daos.session_daos import get_sessions
-from backend.daos.payment_daos import get_bill_before_pay, count_payments
-from backend.models import UserRole
+from backend.daos.payment_daos import count_payments
+from backend.models import PaymentMethod, UserRole
+from backend.services.payment.payment_handler import PaymentHandlerFactory
+from backend.services.payment.payment_strategy import PaymentStrategyFactory
 from backend.utils.general_utils import user_role_required
-from backend.utils.payment_utils import PaymentMethod, PaymentStrategyFactory, PaymentHandlerFactory
+from backend.utils.payment_utils import get_bill_before_pay
 from backend.utils.session_utils import SessionStatus
 import math
 
@@ -120,4 +122,4 @@ def payment_page():
     if current_user.role != UserRole.STAFF  and current_user.role != UserRole.ADMIN:
         return redirect("/rooms-dashboard")
     data = session.get('bill_detail')
-    return render_template('payment/payment.html', bill_detail=data, payment_methods=PaymentMethod)
+    return render_template('payment.html', bill_detail=data, payment_methods=PaymentMethod)
