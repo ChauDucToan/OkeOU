@@ -10,14 +10,32 @@ def orders_preview():
 
 @app.route('/api/orders', methods=['post'])
 def add_to_order():
+    '''
+    {
+        '<int:session_id>': {
+            '<int:product_id>': {
+                'image': 'link',
+                'name': 'name',
+                'price': price,
+                'amount': amount
+            }
+        } 
+    }
+    '''
+
     if current_user.is_authenticated:
         data = request.json
 
-        order = session.get('order')
+        session_id = str(data.get('session_id'))
+        if not session_id:
+            return jsonify({'err_msg': 'Thiếu thông tin làm việc'}), 400
 
-        if not order:
-            order = {}
+        cart = session.get('order', {})
+        if session_id not in cart:
+            cart[session_id] = {}
 
+        order = cart[session_id]
+        
         id = str(data.get('id'))
         image = data.get('image')
         name = data.get('name')
@@ -40,65 +58,105 @@ def add_to_order():
                 'price': price,
                 'amount': amount
             }
-        session['order'] = order
+        
+        cart[session_id] = order
+        session['order'] = cart
         return jsonify(order_utils.stats_order(order)), 200
     else:
         return jsonify({'err_msg': 'Vui lòng đăng nhập trước khi đặt dịch vụ'}), 400
 
 @app.route('/api/orders/<id>', methods=['put'])
 def update_order(id):
-    order = session.get('order')
+    data = request.json
+    session_id = str(data.get('session_id'))
+    quantity = int(data.get('quantity'))
 
-    if order and id in order:
-        quantity = int(request.json.get('quantity'))
+    order = session.get('order', {})
+
+    if session_id in order and id in order[session_id]:
+        current_order = order[session_id]
+
         if quantity > 30:
             return jsonify({'err_msg': 'Số lượng giới hạn là 30'}), 400
-        product = order_utils.check_amount_product(order[id]['id'])
+        product = order_utils.check_amount_product(current_order[id]['id'])
         if product.amount < quantity:
             return jsonify({'err_msg': 'Dịch vụ đặt vượt quá số lượng còn lại'}), 400
-        order[id]['quantity'] = quantity
+        current_order[id]['quantity'] = quantity
 
-    session['order'] = order
-    return jsonify(order_utils.stats_order(order)), 200
+        session['order'] = order
+        return jsonify(order_utils.stats_order(current_order)), 200
+    return jsonify({'err_msg': 'Không tìm thấy sản phẩm'}), 400
 
 @app.route('/api/orders/<id>', methods=['delete'])
 def delete_order(id):
-    order = session.get('order')
+    data = request.json 
+    session_id = str(data.get('session_id'))
 
-    if order and id in order:
-        del order[id]
+    order = session.get('order', {})
 
-    session['quantity'] = order
+    if session_id in order and id in order[session_id]:
+        del order[session_id][id]
 
-    if session.get('order') == {}:
-        del session['order']
+        stats = order_utils.stats_order(order[session_id])
 
-    return jsonify(order_utils.stats_order(order))
+        if not order[session_id]:
+            del order[session_id]
 
-@app.context_processor
-def common_responses():
-    return{
-        'stats_order': order_utils.stats_order(session.get('order'))
-    }
+        session['order'] = order
+        return jsonify(stats), 200
+
+    return jsonify({'total_quantity': 0, 'total_amount': 0})
+
 
 @app.route('/api/order_process', methods=['post'])
 @login_required
 def order_process():
-    sess = order_utils.get_verify_session(current_user.id)
-    if not sess:
-        return jsonify({'err_msg': 'Bạn chưa đặt phòng hát'}), 400
+    data = request.json
+    session_id = data.get('session_id')
 
-    order = session.get('order')
-    if not order:
-        return jsonify({'err_msg': 'Bạn chưa đặt dịch vụ'}), 400
+    if not session_id:
+         return jsonify({'err_msg': 'Không xác định được phiên làm việc'}), 400
 
+    order = session.get('order', {})
+    current_order = order.get(str(session_id))
+
+    if not current_order:
+        return jsonify({'err_msg': 'Bạn chưa thêm dịch vụ vào giỏ hàng'}), 400
+    
     try:
-        ord = order_daos.create_order(session_id=sess.id)
-        order_utils.add_order(order=session.get('order'), ord=ord)
-        del session['order']
+        ord = order_daos.create_order(session_id=int(session_id))
+        order_utils.add_order(current_order, ord)
 
-        return jsonify({'message': 'Đặt dịch vụ thành công'}), 200
-    except ValueError as ex:
-        return jsonify({'err_msg': str(ex)}), 400
-    except Exception as ex:
-        return jsonify({'err_msg': str(ex)}), 500
+        del order[str(session_id)]
+        session['order'] = order
+
+        return jsonify({'msg': 'Đặt dịch vụ thành công'}), 200
+    except ValueError as ve:
+        return jsonify({'err_msg': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'err_msg': str(e)}), 500
+    
+
+@app.template_filter('cart_stats')
+def cart_stats_filter(cart_dict):
+    return order_utils.stats_order(cart_dict)
+
+
+@app.context_processor
+def common_responses():
+    cart = session.get('order', {})
+    total_quantity = 0
+    total_amount = 0
+
+    if cart:
+        for session_cart in cart.values():
+            stats = order_utils.stats_order(session_cart)
+            total_quantity += stats['total_quantity']
+            total_amount += stats['total_amount']
+
+    return {
+        'stats_order': {
+            'total_quantity': total_quantity,
+            'total_amount': total_amount
+        }
+    }

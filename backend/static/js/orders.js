@@ -11,10 +11,11 @@ function updateOrderBadge(total_quantity) {
         }
 }
 
-function addToOrder(id, image, name, price, amount){
+function addToOrder(sessionId, id, image, name, price, amount){
     fetch('/api/orders',{
         method: 'post',
         body: JSON.stringify({
+            'session_id': sessionId,
             'id': id,
             'image': image,
             'name': name,
@@ -39,10 +40,11 @@ function addToOrder(id, image, name, price, amount){
 }
 
 // ==================Update Order==================
-function updateOrder(id, obj){
+function updateOrder(sessionId, id, obj){
     fetch(`/api/orders/${id}`, {
         method: 'put',
         body: JSON.stringify({
+            'session_id': sessionId,
             'quantity': obj.value
         }),
         headers: {
@@ -77,10 +79,16 @@ function limitQuantity(input){
     if (input.value < 0) input.value = 1
 }
 
-function deleteOrder(id) {
+function deleteOrder(sessionId, id) {
     if(confirm("Bạn có muốn xoá không?") === true){
         fetch(`/api/orders/${id}`, {
-            method: 'delete'
+            method: 'delete',
+            body: JSON.stringify({
+                'session_id': sessionId
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }).then(res => res.json()).then(data => {
             let counter = document.getElementsByClassName('order-counter');
             for ( let e of counter)
@@ -99,10 +107,16 @@ function deleteOrder(id) {
     }
 }
 
-function orderProcess(){
+function orderProcess(sessionId){
     if (confirm('Bạn có chắc chắn là đặt các dịch vụ này không?') === true){
         fetch('/api/order_process', {
             method: 'post',
+            body: JSON.stringify({
+                'session_id': sessionId
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
         .then(res => res.json()
         .then(data => ({ status: res.status, body: data })))
