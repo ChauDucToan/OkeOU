@@ -9,6 +9,7 @@ def get_orders(session_id=None, status=None):
         r = r.filter(Order.status.in_(status))
     return r.count()
 
+
 def create_order(session_id):
     ord = Order.query.filter(
         Order.session_id == session_id,

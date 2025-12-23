@@ -5,7 +5,7 @@ from flask_login import current_user, logout_user
 
 from backend import app, db
 from backend.daos.revenue_daos import revenue_by_product, revenue_by_room_name, revenue_by_room_type, revenue_by_time
-from backend.models import Room, Product, Staff
+from backend.models import Order, OrderStatus, Room, Product, Staff
 
 
 class AdminView(ModelView):
@@ -52,15 +52,11 @@ class LogoutView(BaseView):
 
 
 class MyAdminIndexView(AdminIndexView):
-    stats = {
-        'rooms': 10, # Thay bằng: Room.query.count()
-        'products': 55, # Thay bằng: Product.query.count()
-        'staff': 5
-    }
-
     @expose('/')
     def index(self):
-        return self.render('admin/index.html', stats=self.stats)
+        pending_count = Order.query.filter(Order.status == OrderStatus.PENDING).count()
+        return self.render('admin/index.html', pending_count=pending_count)
+
     
 class StatsView(BaseView):
     @expose('/')
