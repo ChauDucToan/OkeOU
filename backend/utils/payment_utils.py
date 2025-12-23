@@ -13,9 +13,6 @@ from backend.utils.room_utils import reset_room_status
 from backend.utils.session_utils import finish_session, get_session_price
 
 
-def sum_monthly_revenue(year):
-    pass
-
 def create_receipt(session_id, staff_id, payment_method):
     receipt = Receipt(session_id=session_id, staff_id=staff_id)
     db.session.add(receipt)

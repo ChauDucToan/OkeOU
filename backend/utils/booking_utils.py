@@ -84,7 +84,7 @@ def convert_booking_to_session(booking_id):
             end_time=booking.scheduled_end_time,
             user_id=booking.user_id,
             room_id=booking.room_id,
-            status=SessionStatus.ACTIVE,
+            status=SessionStatus.BOOKED,
             deposit_amount=booking.deposit_amount
         )
         booking.status = BookingStatus.COMPLETED

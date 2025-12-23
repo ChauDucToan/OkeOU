@@ -74,29 +74,23 @@
                 <div class="card-body px-4 pb-4">
                     <form id="paymentForm" action="/api/payment/create_payment" method="POST">
                         <input type="hidden" name="booking_id" value="{{ booking.id }}">
-                        
-                        <div class="payment-option mb-3">
-                            <input class="form-check-input" type="radio" name="payment_method" id="vnpay" value="VNPAY" checked>
-                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="vnpay">
-                                <span><i class="bi bi-credit-card-2-front me-2"></i>Ví VNPAY / Ngân hàng</span>
-                                <img src="https://vnpay.vn/assets/images/logo-icon/logo-primary.svg" height="24" alt="VNPay">
-                            </label>
-                        </div>
 
                         <div class="payment-option mb-3">
                             <input class="form-check-input" type="radio" name="payment_method" id="momo" value="MOMO">
                             <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="momo">
-                                <span><i class="bi bi-phone me-2"></i>Ví MoMo</span>
-                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" height="24" alt="Momo">
+                                <span><i class="bi bi-phone me-2"></i>Chuyển khoản thông qua MoMo</span>
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MoMo_Logo_App.svg/250px-MoMo_Logo_App.svg.png" height="24" alt="Momo">
                             </label>
                         </div>
 
+                        {% if current_user.is_authenticated and (current_user.is_staff or current_user.is_admin) %}
                         <div class="payment-option mb-4">
                             <input class="form-check-input" type="radio" name="payment_method" id="cash" value="CASH">
                             <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="cash">
                                 <span><i class="bi bi-cash-coin me-2"></i>Thanh toán tại quầy</span>
                             </label>
                         </div>
+                        {% endif %}
 
                         <input type="hidden" id="remain_time" value="{{ remain_time }}">
 
