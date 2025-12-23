@@ -13,6 +13,8 @@ secret_key = os.getenv("CLOUDINARY_SECRET_KEY")
 cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
 cloud_api_key = os.getenv("CLOUDINARY_API_KEY")
 database_url = os.environ.get("DATABASE_URI")
+momo_access_key = os.getenv("MOMO_ACCESS_KEY")
+momo_secret_key = os.getenv("MOMO_SECRET_KEY")
 
 if secret_key is None:
     print("Lỗi: Không tìm thấy CLOUDINARY_SECRET_KEY")
@@ -27,6 +29,8 @@ app.secret_key = 'OkeOU_ChauDucToan_NguyenNgocLinh_NgoDoThanh'
 app.config["SQLALCHEMY_DATABASE_URI"] = f"{database_url}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 6
+app.config["MOMO_ACCESS_KEY"] = momo_access_key
+app.config["MOMO_SECRET_KEY"] = momo_secret_key
 
 db = SQLAlchemy(app=app)
 login = LoginManager(app=app)

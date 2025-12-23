@@ -6,20 +6,36 @@ from backend import app, db
 from backend.daos.category_daos import get_categories
 from backend.daos.payment_daos import count_payments
 from backend.daos.product_daos import count_products, load_products
-from backend.daos.room_daos import count_rooms, load_rooms
-from backend.models import StaffWorkingHour, UserRole
+from backend.daos.session_daos import get_sessions
+from backend.models import SessionStatus, StaffWorkingHour, User, UserRole, Session
 from backend.utils.general_utils import user_role_required
 from backend.utils.room_utils import filter_rooms
 
 @app.route('/staffs')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_preview():
-    rooms = load_rooms(room_id=request.args.get('room_id'),
-                           kw=request.args.get('kw'),
-                           page=int(request.args.get('page', 1)))
+    data = request.args
+    page = int(data.get("page", 1))
+    page_size = app.config['PAGE_SIZE']
 
-    return render_template('/staff/index.html', rooms=rooms,
-                           pages=math.ceil(count_rooms() / app.config['PAGE_SIZE']))
+    sessions = get_sessions(start_date=data.get("start_date"), end_date=data.get("end_date"))
+    
+    status = data.get('status')
+    if status:
+        status_enum = SessionStatus[status]
+        sessions = sessions.filter(Session.status == status_enum)
+
+    user_name = data.get('kw')
+    if user_name:
+        sessions = sessions.join(User).filter(User.name.contains(user_name))
+
+    count = sessions.count()
+    if page:
+        start = (page - 1) * page_size
+        sessions = sessions.slice(start, start + page_size)
+
+    return render_template('/staff/index.html', sessions=sessions.all(),
+                           pages=math.ceil(count / page_size), current_page=page)
 
 
 @app.route('/staffs/payments')

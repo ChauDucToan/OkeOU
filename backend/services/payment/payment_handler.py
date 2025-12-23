@@ -33,7 +33,6 @@ class BookingHandler(PaymentHandler):
         else:
             return BookingStatus.CANCELLED
 
-    # Xử lý cập nhật db sau khi booking ở đây
     def update_db(self, ref, status):
         pass
 

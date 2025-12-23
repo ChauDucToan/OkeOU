@@ -31,9 +31,6 @@ Trang chủ
             <div class="row">
                 <div class="col-md-8 mb-3">
                     <h4>Bộ lọc nâng cao:</h4>
-                    <div class="d-flex flex-wrap gap-3">
-                        
-                    </div>
                     <label for="range2" class="form-label">Giá tối đa theo giờ: &lt; <span id="rangeValue2">{{ request.args.get('price_max', 500000) }}</span> VND</label>
                     <input type="range" class="form-range" min="0" max="500000" value="{{ request.args.get('price_max', 500000) }}" step="25000" id="range2"
                            oninput="handleSliderChange(this, 'rangeValue2')">

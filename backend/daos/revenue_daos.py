@@ -30,7 +30,7 @@ def count_orders(time_unit='day'):
 
     query = (db.session.query(func.count(Order.id))
                     .join(Session, Order.session_id == Session.id)
-                    .filter(Session.session_status == SessionStatus.FINISHED)
+                    .filter(Session.status == SessionStatus.FINISHED)
                     .filter(func.extract('year', Session.end_time) == current_date.year))
     
     if time_unit == 'month':
@@ -47,7 +47,7 @@ def count_orders(time_unit='day'):
 def count_sessions(time_unit='day'):
     current_date = datetime.now()
     query = (db.session.query(func.count(Session.id))
-                      .filter(Session.session_status == SessionStatus.FINISHED)
+                      .filter(Session.status == SessionStatus.FINISHED)
                       .filter(func.extract('year', Session.end_time) == current_date.year))
 
     if time_unit == 'month':
@@ -65,7 +65,7 @@ def count_customers(time_unit='day'):
     current_date = datetime.now()
 
     query = (db.session.query(func.count(Session.user_id))
-             .filter(Session.session_status == SessionStatus.FINISHED)
+             .filter(Session.status == SessionStatus.FINISHED)
              .filter(func.extract('year', Session.end_time) == current_date.year))
 
     if time_unit == 'month':
@@ -104,7 +104,7 @@ def revenue_by_room_name(time_unit='day'):
               .join(Receipt, Session.id == Receipt.session_id)
               .join(ReceiptDetails, ReceiptDetails.id == Receipt.id)
               .join(Room, Room.id == Session.room_id)
-              .filter(Session.session_status == SessionStatus.FINISHED)
+              .filter(Session.status == SessionStatus.FINISHED)
               .filter(func.extract('year', Session.end_time) == current_date.year)))
 
     if time_unit == 'month':
@@ -127,7 +127,7 @@ def revenue_by_room_type(time_unit='day'):
               .join(Receipt, ReceiptDetails.id == Receipt.id)
               .join(Session, Session.id == Receipt.session_id)
               .join(Room, Room.id == Session.room_id)
-              .filter(Session.session_status == SessionStatus.FINISHED))
+              .filter(Session.status == SessionStatus.FINISHED))
              .join(RoomType, RoomType.id == Room.room_type)
              .filter(func.extract('year', Session.end_time) == current_date.year))
 
@@ -150,7 +150,7 @@ def revenue_by_product(time_unit='day'):
               .join(Product, ProductOrder.product_id == Product.id)
               .join(Order, Order.id == ProductOrder.order_id)
               .join(Session, Session.id == Order.session_id))
-             .filter(Session.session_status == SessionStatus.FINISHED)
+             .filter(Session.status == SessionStatus.FINISHED)
              .filter(func.extract('year', Session.end_time) == current_date.year))
 
     if time_unit == 'month':

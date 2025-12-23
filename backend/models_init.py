@@ -305,7 +305,7 @@ if __name__ == '__main__':
                     start_time=booking.scheduled_start_time,
                     end_time=booking.scheduled_end_time,
                     deposit_amount=booking.deposit_amount,
-                    session_status=SessionStatus.FINISHED
+                    status=SessionStatus.FINISHED
                 )
             else:
                 session = Session(
@@ -314,7 +314,7 @@ if __name__ == '__main__':
                     start_time=booking.scheduled_start_time,
                     end_time=booking.scheduled_end_time,
                     deposit_amount=booking.deposit_amount,
-                    session_status=SessionStatus.BOOKED
+                    status=SessionStatus.BOOKED
                 )
             sessionss.append(session)
 
@@ -324,7 +324,7 @@ if __name__ == '__main__':
         receipts = []
         for session in sessionss:
             id = str(uuid.uuid4())
-            if session.session_status == SessionStatus.FINISHED:
+            if session.status == SessionStatus.FINISHED:
                 receipt = Receipt(
                     id = id,
                     session_id=session.id,

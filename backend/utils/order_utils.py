@@ -13,7 +13,7 @@ def get_order_price(order_id):
 def get_verify_session(user_id):
     sessionn = Session.query.filter(
         Session.user_id == user_id,
-        Session.session_status == SessionStatus.ACTIVE
+        Session.status == SessionStatus.ACTIVE
     ).first()
 
     return sessionn

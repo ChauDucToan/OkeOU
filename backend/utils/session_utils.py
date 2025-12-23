@@ -26,7 +26,7 @@ def finish_session(session_id):
     session = get_sessions(session_id=session_id, status=[SessionStatus.ACTIVE]).first()
     if session and not session.end_time:
         session.end_time = datetime.now()
-        session.session_status = SessionStatus.FINISHED
+        session.status = SessionStatus.FINISHED
 
         try:
             db.session.commit()

@@ -5,39 +5,110 @@ Trang chủ cho nhân viên
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    {% if rooms %}
+<div class="container flex-grow-1">
+    <div class="row m-2 mb-4 mt-3">
+        <div class="col-8">
+            <input type="text" id="searchInput" class="form-control w-100" placeholder="Nhập tên người dùng..."
+                   value="{{ request.args.get('kw', '') }}" onkeyup="handleSearchInput()" onchange="searchSessions()">
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-primary w-100"
+                data-bs-toggle="collapse" data-bs-target="#filter"
+                aria-expanded="false" aria-controls="filter">
+                <i class="bi bi-filter"></i>
+                Lọc
+            </button>
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-primary w-100" onclick="searchSessions()">
+                <i class="bi bi-search"></i>
+                Tìm kiếm
+            </button>
+        </div>
+    </div>
+    <div class="collapse" id="filter" data-bs-theme="dark">
+        <div class="card card-body glass-effect mb-4">
+            <div class="row">
+                <div class="col-8 p-3 glass-effect rounded">
+                    <h4 class="text-info">Bộ lọc nâng cao:</h4>
+                    <div class="d-flex justify-content-between">
+                        <label for="startDate" class="form-label">Thời gian bắt đầu:</label>
+                        <input id="startDate" type="datetime-local" name="start_date"/>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <label for="endDate" class="form-label">Thời gian kết thúc:</label>
+                        <input id="endDate" type="datetime-local" name="end_date"/>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <h4 class="text-info">Trạng thái:</h4>
+                    <select id="statusSelect" class="form-select select-anim" onchange="searchSessions()">
+                        <option value="ACTIVE" {% if request.args.get('status') == 'ACTIVE' %}selected{% endif %}>ACTIVE</option>
+                        <option value="BOOKED" {% if request.args.get('status') == 'BOOKED' %}selected{% endif %}>BOOKED</option>
+                        <option value="FINISHED" {% if request.args.get('status') == 'FINISHED' %}selected{% endif %}>FINISHED</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-6 mb-3">
+                    <button class="btn btn-secondary w-100" type="button" onclick="resetFilters()">Đặt lại bộ lọc</button>
+                </div>
+                <div class="col-6 mb-3">
+                    <button class="btn btn-primary w-100" type="button" onclick="searchSessions()">Áp dụng bộ lọc</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if sessions %}
     <div class="row">
-        {% for r in rooms %}
+        {% for s in sessions %}
         <div class="col-md-4 col-6 p-2">
-            <div class="card">
-                <img class="card-img-top"
-                     src="{{ r.image }}"
-                     style="height: 200px; object-fit: cover;"
-                     alt="{{ r.name }}">
+            <div class="card transition-card glass-effect text-white">
                 <div class="card-body">
-                    <h4 class="card-title">{{ r.name }}</h4>
-                    <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
-                    <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ r.id }}, '{{ r.name }}', {{ r.type.hourly_price }})">Đặt phòng ngay
-                    </button>
+                    <h4 class="card-title text-success">{{ s.room.name }}#{{ s.id }}</h4>
+                    <p class="card-text">Người dùng: {{ 'Vãng lai' if s.user.id == 1 else s.user.name }}</p>
+                    {% if s.status.name == 'ACTIVE' %}
+                    <p class="card-text">Trạng thái: <span class="alert alert-success">{{ s.status.name }}</span></p>
+                    {% elif s.status.name == 'FINISHED' %}
+                    <p class="card-text">Trạng thái: <span class="alert alert-danger">{{ s.status.name }}</span></p>
+                    {% else %}
+                    <p class="card-text">Trạng thái: <span class="alert alert-warning">{{ s.status.name }}</span></p>
+                    {% endif %}
+                    <p class="card-text"> Thời gian bắt đầu: {{ s.start_time.strftime('%H:%M:%S %d-%m-%Y') }}</p>
+                    <p class="card-text"> Thời gian kết thúc: {{ s.end_time.strftime('%H:%M:%S %d-%m-%Y') }}</p>
+                    <a href="/rooms/{{ s.room.id }}" class="btn btn-primary">Xem phòng</a>
+                    <a href="/api/sessions/{{ s.id }}/end_session" class="btn btn-danger">Kết thúc phiên</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-danger mt-2">Không có phòng nào!</div>
+    <div class="alert alert-danger mt-2">Không có phiên làm việc nào!</div>
     {% endif %}
 </div>
 <div class="d-flex justify-content-center">
     {% if pages > 1 %}
     <ul class="pagination mt-2">
-        {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link" href="/static?page={{i}}">{{ i }}</a></li>
+        {% if current_page > 1 %}
+        <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page - 1}}"> Previous </a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link glass-effect"> Previous </span></li>
+        {% endif %}
+        
+        {% for i in range(current_page, current_page + 3) %}
+        <li class="page-item {% if i == current_page %}active{% endif %}">
+            <a class="page-link glass-effect" href="/staffs?page={{i}}">{{ i }}</a>
+        </li>
         {% endfor %}
+        
+        {% if current_page < pages %}
+        <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page + 1}}"> Next </a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link glass-effect"> Next </span></li>
+        {% endif %}
     </ul>
     {% endif %}
 </div>
+<script src="{{ url_for('static', filename='js/sessions.js') }}"></script>
 {% endblock %}
