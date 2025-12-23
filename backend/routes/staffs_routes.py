@@ -1,6 +1,6 @@
 import math
 from datetime import datetime
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, session
 from flask_login import current_user, logout_user
 from backend import app, db
 from backend.daos.category_daos import get_categories
@@ -14,6 +14,24 @@ from backend.utils.room_utils import filter_rooms
 @app.route('/staffs')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_preview():
+    data = request.args
+    page = int(data.get("page", 1))
+    page_size = app.config['PAGE_SIZE']
+
+    sessions = get_sessions(status=[SessionStatus.ACTIVE])
+
+    count = sessions.count()
+    if page:
+        start = (page - 1) * page_size
+        sessions = sessions.slice(start, start + page_size)
+
+    return render_template('/staff/index.html', sessions=sessions.all(),
+                           pages=math.ceil(count / page_size), current_page=page)
+
+
+@app.route('/staffs/sessions')
+@user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
+def staff_sessions_preview():
     data = request.args
     page = int(data.get("page", 1))
     page_size = app.config['PAGE_SIZE']
@@ -34,7 +52,7 @@ def staff_preview():
         start = (page - 1) * page_size
         sessions = sessions.slice(start, start + page_size)
 
-    return render_template('/staff/index.html', sessions=sessions.all(),
+    return render_template('/staff/sessions.html', sessions=sessions.all(),
                            pages=math.ceil(count / page_size), current_page=page)
 
 
@@ -45,16 +63,18 @@ def staff_payments_preview():
                            pages=math.ceil(count_payments(user_id=current_user.id) / app.config['PAGE_SIZE']))
 
 
-@app.route('/staffs/products')
+@app.route('/staffs/<int:session_id>/products')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
-def staff_products_preview():
+def staff_products_preview(session_id):
     products = load_products(kw=request.args.get('kw'),
                                 category_id=request.args.get('category_id'),
                                 page=int(request.args.get('page', 1)))
     categories = get_categories()
 
+    s = get_sessions(session_id=session_id).first()
+
     return render_template('/staff/products.html', products=products,
-                           categories=categories,
+                           categories=categories, session=s,
                            pages=math.ceil(count_products() / app.config['PAGE_SIZE']))
 
 

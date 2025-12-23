@@ -6,56 +6,82 @@ Trang chủ
 
 {% block content %}
 <div class="container flex-grow-1">
-    <form method="get" action="/products" class="d-flex align-items-center gap-2 mt-3 mb-4">
-        <input class="form-control me-2 w-50" type="text" placeholder="Từ khóa" name="kw">
-        <button class="btn btn-success" type="submit">Tìm</button>
-        <div class="dropdown">
-            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
-                Filter
-            </button>
-            <ul class="dropdown-menu" data-bs-theme="dark">
-                <li><a class="dropdown-item" href="/products">Tất cả</a></li>
-                {% for c in categories %}
-                <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-    </form>
-    {% if products %}
     <div class="row">
-        {% for p in products %}
-        <div class="col-md-4 col-6 p-2">
+        <div class="col-4">
+            <h4 class="mt-3 mb-4">Phiên làm việc</h4>
+            {% if session %}
             <div class="card transition-card glass-effect text-white">
-                <img class="card-img-top"
-                     src="{{ p.image }}"
-                     style="height: 200px; object-fit: cover;"
-                     alt="{{ p.name }}">
                 <div class="card-body">
-                    <h4 class="card-title">{{ p.name }}</h4>
-                    <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
-                    <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
-                    <a href="#" class="btn btn-primary">Xem chi tiết</a>
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
-                        Đặt hàng ngay
-                    </button>
+                    <h4 class="card-title text-success">{{ session.room.name }}#{{ session.id }}</h4>
+                    <p class="card-text">Người dùng: {{ 'Vãng lai' if session.user.id == 1 else session.user.name }}</p>
+                    {% if session.status.name == 'ACTIVE' %}
+                    <p class="card-text">Trạng thái: <span class="alert alert-success">{{ session.status.name }}</span></p>
+                    {% elif session.status.name == 'FINISHED' %}
+                    <p class="card-text">Trạng thái: <span class="alert alert-danger">{{ session.status.name }}</span></p>
+                    {% else %}
+                    <p class="card-text">Trạng thái: <span class="alert alert-warning">{{ session.status.name }}</span></p>
+                    {% endif %}
+                    <p class="card-text"> Thời gian bắt đầu: {{ session.start_time.strftime('%H:%M:%S %d-%m-%Y') }}</p>
+                    <p class="card-text"> Thời gian kết thúc: {{ session.end_time.strftime('%H:%M:%S %d-%m-%Y') }}</p>
                 </div>
             </div>
+            {% else %}
+            <div class="alert alert-danger mt-2 w-100">Lỗi: Không có phiên làm việc nào!</div>
+            {% endif %}
         </div>
-        {% endfor %}
+        <div class="col-8">
+            <form method="get" action="/products" class="d-flex align-items-center gap-2 mt-3 mb-4">
+                <input class="form-control me-2 w-50" type="text" placeholder="Từ khóa" name="kw">
+                <button class="btn btn-success" type="submit">Tìm</button>
+                <div class="dropdown">
+                    <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                        Filter
+                    </button>
+                    <ul class="dropdown-menu" data-bs-theme="dark">
+                        <li><a class="dropdown-item" href="/products">Tất cả</a></li>
+                        {% for c in categories %}
+                        <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </form>
+            {% if products %}
+            <div class="row">
+                {% for p in products %}
+                <div class="col-md-4 col-6 p-2">
+                    <div class="card transition-card glass-effect text-white">
+                        <img class="card-img-top"
+                            src="{{ p.image }}"
+                            style="height: 200px; object-fit: cover;"
+                            alt="{{ p.name }}">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ p.name }}</h4>
+                            <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
+                            <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
+                            <a href="#" class="btn btn-primary">Xem chi tiết</a>
+                            <button class="btn btn-danger"
+                                    onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
+                                Đặt hàng ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-danger mt-2">Không có sản phẩm nào!</div>
+            {% endif %}
+            <div class="d-flex justify-content-center">
+                {% if pages > 1 %}
+                <ul class="pagination mt-2">
+                    {% for i in range(1, pages + 1) %}
+                    <li class="page-item"><a class="page-link glass-effect" href="/staffs/{{ session.id }}/products?page={{i}}">{{ i }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    {% else %}
-    <div class="alert alert-danger mt-2">Không có sản phẩm nào!</div>
-    {% endif %}
-</div>
-<div class="d-flex justify-content-center">
-    {% if pages > 1 %}
-    <ul class="pagination mt-2">
-        {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link glass-effect" href="/products?page={{i}}">{{ i }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
 </div>
 <script src="{{ url_for('static', filename='js/orders.js') }}"></script>
 {% endblock %}

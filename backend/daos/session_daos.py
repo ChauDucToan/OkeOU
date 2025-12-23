@@ -7,7 +7,7 @@ def get_sessions(user_id=None, status=None, start_date=None, end_date=None, room
     if user_id:
         s = s.filter(Session.user_id == user_id)
     if status:
-        s = s.filter(Session.session_status.in_(status))
+        s = s.filter(Session.status.in_(status))
     if start_date:
         s = s.filter(Session.start_time >= start_date)
     if end_date:
