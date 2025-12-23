@@ -21,19 +21,32 @@ def add_to_order():
             }
         } 
     }
+
+    So the working is:
+    1. Get the current cart from session_id
+    2. If session_id not in cart, create an empty dict for it
+    3. Check if product_id is already in the cart for that session_id
+        - If yes, increase the quantity by 1
+        - If no, add the product with quantity 1
+    4. Save the updated cart back to session
+    5. Return the stats of the current cart for that session_id
     '''
 
     if current_user.is_authenticated:
         data = request.json
 
+        # Get session_id from request
         session_id = str(data.get('session_id'))
         if not session_id:
             return jsonify({'err_msg': 'Thiếu thông tin làm việc'}), 400
 
+        # Get the cart from session
         cart = session.get('order', {})
         if session_id not in cart:
             cart[session_id] = {}
 
+        # Get the order for the current session_id
+        # which is containing all products added in the session
         order = cart[session_id]
         
         id = str(data.get('id'))
@@ -114,6 +127,8 @@ def order_process():
     data = request.json
     session_id = data.get('session_id')
 
+    # Removed user verification as the staff are the one placing orders
+
     if not session_id:
          return jsonify({'err_msg': 'Không xác định được phiên làm việc'}), 400
 
@@ -136,12 +151,21 @@ def order_process():
     except Exception as e:
         return jsonify({'err_msg': str(e)}), 500
     
-
+# This is used in Jinja templates
+# for getting cart stats
+# you can use it like this:
+# {{ cart_dict | cart_stats }}
+# Or you can pass the cart dict directly to the function
+# like this:
+# {{ stats_order(cart_dict) }}
 @app.template_filter('cart_stats')
 def cart_stats_filter(cart_dict):
     return order_utils.stats_order(cart_dict)
 
-
+# This is used to inject common responses
+# into all templates (especially for header)
+# so that we can use stats_order in header
+# without passing it explicitly in each render_template call
 @app.context_processor
 def common_responses():
     cart = session.get('order', {})
