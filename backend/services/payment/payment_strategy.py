@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 import urllib
@@ -225,8 +226,7 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
         self.key2 = os.getenv("ZLP_MERCHANT_KEY2")
         self.endpoint = os.getenv("ZLP_MERCHANT_ENDPOINT")
         self.gateway_endpoint = os.getenv("ZLP_MERCHANT_GATEWAY_ENDPOINT")
-        self.callback_url = os.getenv("ZLP_MERCHANT_CALLBACK_URL") + payment_type
-        self.redirect_url = os.getenv("ZLP_REDIRECT_URL")
+        self.redirect_url = os.getenv("ZLP_REDIRECT_URL") + payment_type
 
     def get_mac(self, data, key):
         mac = hmac.new(
@@ -238,6 +238,11 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
         return mac
 
     def create_payment(self, amount, ref):
+        embed_data = {
+            "preferred_payment_method": ["zalopay_wallet"],
+            "redirecturl": self.redirect_url
+        }
+
         inputData = {
             "app_id": int(self.app_id),
             "app_user": "OkeOU",
@@ -247,9 +252,8 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
             "description": f"Giao dịch thanh toán cho {ref}",
             "amount": amount,
             "bank_code": "",
-            "embed_data": "{\"preferred_payment_method\": [\"zalopay_wallet\"]" + f",\"redirecturl\": \"{self.redirect_url}\"" +"}",
+            "embed_data": json.dumps(embed_data),
             "item": '[]',
-            "callback_url": self.callback_url,
         }
 
         data = "|".join([

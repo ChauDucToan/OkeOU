@@ -36,15 +36,6 @@ def load_user(pk):
     user = get_users(user_id=pk).first()
     return user
 
-@app.route('/api/callback', methods=['POST', 'GET'])
-def payment_callback():
-    data = {}
-    if request.method == 'POST':
-        data = request.json.get('data', {})
-    else:
-        data = request.args.to_dict()
-    print("Payment callback data:", data)
-    return "Callback received", 200
 
 if __name__ == '__main__':
     from backend import admin
