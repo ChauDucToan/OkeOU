@@ -166,6 +166,9 @@ class Booking(BaseModel):
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
+    room = relationship('Room', backref='bookings', lazy=True)
+    user = relationship('User', backref='bookings', lazy=True)
+
 
 # If the user want to transfer room then set the SessionStatus.FINISHED
 # and create new session
@@ -176,7 +179,6 @@ class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
     status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
-    deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
@@ -238,12 +240,18 @@ class PaymentStatus(GenericEnum):
     FAILED = 3
 
 
+class TransactionStatus(GenericEnum):
+    PENDING = 1
+    COMPLETED = 2
+    FAILED = 3
+    REFUNDED = 4
+
+
 class PaymentMethod(GenericEnum):
     CASH = 1
     MOMO = 2
     VNPAY = 3
     ZALOPAY = 4
-
 
 class Receipt(BaseModel):
     id = Column(String(100), primary_key=True)
@@ -251,16 +259,17 @@ class Receipt(BaseModel):
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
 
-    created_date = Column(DateTime, default=datetime.now())
+    created_date = Column(DateTime, default=datetime.now)
     details = relationship('ReceiptDetails', backref='receipt', lazy=True)
     transactions = relationship('Transaction', backref='receipt', lazy=True)
 
 
 class Transaction(BaseModel):
+    id = Column(String(100), primary_key=True)
     receipt_id = Column(String(100), ForeignKey(Receipt.id), nullable=False)
-    transaction_code = Column(String(100), unique=True)
 
     amount = Column(Float, nullable=False)
+    status = Column(Enum(TransactionStatus), default=TransactionStatus.PENDING)
 
     created_date = Column(DateTime, default=datetime.now)
     completed_date = Column(DateTime)

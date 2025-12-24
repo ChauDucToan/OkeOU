@@ -85,13 +85,12 @@ def convert_booking_to_session(booking_id):
             user_id=booking.user_id,
             room_id=booking.room_id,
             status=SessionStatus.BOOKED,
-            deposit_amount=booking.deposit_amount
         )
         booking.status = BookingStatus.COMPLETED
 
         db.session.add(session)
         try:
-            db.session.commit()
+            db.session.flush()
             return session
         except IntegrityError as ie:
             db.session.rollback()

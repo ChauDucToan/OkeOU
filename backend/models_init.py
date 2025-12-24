@@ -306,7 +306,6 @@ if __name__ == '__main__':
                     room_id=booking.room_id,
                     start_time=booking.scheduled_start_time,
                     end_time=booking.scheduled_end_time,
-                    deposit_amount=booking.deposit_amount,
                     status=SessionStatus.FINISHED
                 )
             else:
@@ -315,7 +314,6 @@ if __name__ == '__main__':
                     room_id=booking.room_id,
                     start_time=booking.scheduled_start_time,
                     end_time=booking.scheduled_end_time,
-                    deposit_amount=booking.deposit_amount,
                     status=SessionStatus.BOOKED
                 )
             sessionss.append(session)

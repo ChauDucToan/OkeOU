@@ -53,7 +53,7 @@ def create_payment(method, payment_type):
         print(ex)
         return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
 
-    amount = handler.init_payment_and_get_amount(request_data=request.json, session_data=session,
+    amount = handler.init_payment_and_get_amount(request_data=request.form, session_data=session,
                                                  payment_method=strategy.get_payment_method(), ref=ref)
     result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
 

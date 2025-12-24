@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 import math
+
 from backend import app, db
 from backend.daos.booking_daos import get_bookings
 from backend.daos.room_daos import get_rooms, load_rooms
-from backend.models import Booking, BookingStatus
-from backend.utils.booking_utils import cancel_pending_booking, create_booking
+from backend.models import Booking, BookingStatus, Session, SessionStatus
+from backend.utils.booking_utils import cancel_pending_booking, convert_booking_to_session, create_booking
 from backend.utils.general_utils import redirect_to_error
 from backend.utils.room_utils import filter_rooms
 from flask import render_template, redirect, request, jsonify
@@ -135,3 +136,36 @@ def confirm_booking():
 
     except Exception as ex:
         return redirect_to_error(500, str(ex))
+    
+
+@app.route('/api/booking/update_status', methods=['POST'])
+def update_booking_status():
+    data = request.json
+    booking_id = data.get('booking_id')
+    new_status = data.get('status')
+    booking = Booking.query.get(booking_id)
+
+    if not booking:
+        return jsonify({'err_msg': 'Booking not found'}), 404
+
+    booking.status = BookingStatus[new_status]
+
+    session = Session(
+        start_time=booking.scheduled_start_time,
+        end_time=booking.scheduled_end_time,
+        user_id=booking.user_id,
+        room_id=booking.room_id,
+        status= SessionStatus.BOOKED,
+    )
+
+    try:
+        db.session.add(session)
+        db.session.commit()
+
+        time_del = booking.scheduled_end_time - booking.scheduled_start_time
+        amount = time_del.total_seconds() / 3600 * session.room.type.hourly_price
+
+        return jsonify({'status': 200, 'msg': 'Booking status updated successfully', 'session_id': session.id, 'amount': amount}), 200
+    except Exception as ex:
+        db.session.rollback()
+        return jsonify({'err_msg': str(ex)}), 500

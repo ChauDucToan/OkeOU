@@ -7,8 +7,9 @@ import hmac
 import hashlib
 from abc import abstractmethod, ABC
 from datetime import datetime
-from backend import app
-from backend.models import PaymentMethod
+
+from backend import app, db
+from backend.models import PaymentMethod, TransactionStatus, Transaction
 from backend.services.payment.payment_handler import PaymentHandlerFactory
 
 
@@ -238,26 +239,21 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
         return mac
 
     def create_payment(self, amount, ref):
-        embed_data = {
-            "preferred_payment_method": ["zalopay_wallet"],
-            "redirecturl": self.redirect_url
-        }
-
         inputData = {
             "app_id": int(self.app_id),
             "app_user": "OkeOU",
-            "app_trans_id": f"{datetime.now().strftime('%y%m%d')}_{ref}",
+            "app_trans_id": f"{datetime.now().strftime('%y%m%d')}_{ref.replace('-', '')}",
             "app_time": int(datetime.now().timestamp() * 1000),
             "expire_duration_seconds": 900,
             "description": f"Giao dịch thanh toán cho {ref}",
-            "amount": amount,
+            "amount": int(amount),
             "bank_code": "",
-            "embed_data": json.dumps(embed_data),
+            "embed_data": "{\"preferred_payment_method\": [\"zalopay_wallet\"], \"redirecturl\": \"" + self.redirect_url + "\"}",
             "item": '[]',
         }
 
         data = "|".join([
-            inputData["app_id"],
+            str(inputData["app_id"]),
             inputData["app_trans_id"],
             inputData["app_user"],
             str(inputData["amount"]),
@@ -268,7 +264,19 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
         
         inputData["mac"] = self.get_mac(data, self.key1)
 
+        print(inputData)
+
+        transaction = Transaction(
+            id = inputData["app_trans_id"],
+            receipt_id = ref,
+            amount = float(amount),
+            status = TransactionStatus.PENDING
+        )
+
         try:
+            db.session.add(transaction)
+            db.session.commit()
+
             response = requests.post(self.endpoint + "/create", json=inputData)
             if response.status_code == 200:
                 return response.json()
@@ -298,7 +306,7 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
         ref = data['apptransid'].split('_')[1]
 
         if data['status'] == '1':
-            return ref, "SUCCESS"
+            return ref, "COMPLETED"
         else:
             return ref, "FAILED"
 

@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
+
+from flask_login import current_user
+
 from backend import db
 
-from backend.models import BookingStatus, PaymentStatus, Booking, Receipt
+from backend.models import BookingStatus, PaymentStatus, Receipt, Transaction, TransactionStatus
 
 from backend.utils import payment_utils
 from backend.daos import session_daos
-from backend.utils.booking_utils import convert_booking_to_session
 
 
 class PaymentHandler(ABC):
@@ -24,22 +26,34 @@ class PaymentHandler(ABC):
 
 class BookingHandler(PaymentHandler):
     def init_payment_and_get_amount(self, request_data, session_data, payment_method, ref):
-        booking_id = request_data.get('booking_id')
-        booking = Booking.query.filter_by(id=booking_id).first()
-        booking.ref = ref
-        db.session.commit()
-        amount = booking.deposit_amount
-        return amount
+        receipt = Receipt(
+            id=ref,
+            session_id=request_data.get('session_id'),
+            status=PaymentStatus.PENDING,
+        )
+        db.session.add(receipt)
+        try:
+            db.session.commit()
+        except Exception as ex:
+            db.session.rollback()
+            raise ex
+        return request_data.get('amount')
 
     def get_payment_status(self, status):
         if status == "SUCCESS":
-            return BookingStatus.CONFIRMED
+            return TransactionStatus.COMPLETED
         else:
-            return BookingStatus.CANCELLED
+            return TransactionStatus.FAILED
 
     def update_db(self, ref, status):
-        pass
+        transaction = Transaction.query.filter_by(receipt_id=ref).first()
+        transaction.status = TransactionStatus.COMPLETED if status == "COMPLETED" else TransactionStatus.FAILED
 
+        try:
+            db.session.commit()
+        except Exception as ex:
+            db.session.rollback()
+            print(str(ex))
 
 class CheckoutHandler(PaymentHandler):
     def init_payment_and_get_amount(self, request_data, session_data, payment_method, ref):
