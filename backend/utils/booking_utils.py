@@ -24,9 +24,9 @@ def create_booking(scheduled_start_time, scheduled_end_time, head_count, user_id
 
     existing_booking = get_bookings(room_id=room_id,
                                     status=[BookingStatus.CONFIRMED, BookingStatus.PENDING]).filter(
-                                        Booking.scheduled_start_time < scheduled_end_time,
-                                        Booking.scheduled_end_time > scheduled_start_time
-                                    ).with_for_update().first()
+        Booking.scheduled_start_time < scheduled_end_time,
+        Booking.scheduled_end_time > scheduled_start_time
+    ).with_for_update().first()
     if existing_booking:
         raise Exception("Room is already booked for the selected time slot.")
 
@@ -50,7 +50,7 @@ def create_booking(scheduled_start_time, scheduled_end_time, head_count, user_id
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
-    
+
 
 def confirm_booking(booking_id):
     booking = Booking.query.get(booking_id)
@@ -58,7 +58,7 @@ def confirm_booking(booking_id):
         room = Room.query.get(booking.room_id)
         if not room:
             raise Exception("Room not found")
-        
+
         room.status = RoomStatus.BOOKED
 
         if booking.status != BookingStatus.PENDING:
@@ -71,8 +71,8 @@ def confirm_booking(booking_id):
         except IntegrityError as ie:
             db.session.rollback()
             raise Exception(str(ie.orig))
-        
-        
+
+
 def convert_booking_to_session(booking_id):
     booking = Booking.query.get(booking_id)
     if booking:

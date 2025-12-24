@@ -29,7 +29,7 @@ function searchRooms() {
     const sort = document.getElementById('sortSelect').value;
 
     const url = new URL(window.location.href);
-    
+
     if (keyword) url.searchParams.set('kw', keyword);
     else url.searchParams.delete('kw');
 

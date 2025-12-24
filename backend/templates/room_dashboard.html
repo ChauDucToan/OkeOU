@@ -3,80 +3,80 @@ endblock %} {% block content %}
 <h1>Quản lý phòng hát</h1>
 
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-primary">
-      <i class="bi bi-grid-3x3-gap-fill"></i> Sơ đồ phòng hát
-    </h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-grid-3x3-gap-fill"></i> Sơ đồ phòng hát
+        </h2>
 
-    <div class="d-flex gap-2">
-      <select class="form-select w-auto" id="filterStatus">
-        <option value="ALL">Tất cả trạng thái</option>
-        <option value="AVAILABLE">Phòng Trống</option>
-        <option value="OCCUPIED">Đang có khách</option>
-      </select>
+        <div class="d-flex gap-2">
+            <select class="form-select w-auto" id="filterStatus">
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="AVAILABLE">Phòng Trống</option>
+                <option value="OCCUPIED">Đang có khách</option>
+            </select>
 
-      <input
-        type="text"
-        class="form-control w-auto"
-        placeholder="Tìm tên phòng..."
-      />
-    </div>
-  </div>
-
-  <div class="row g-3">
-    {% for r in get_rooms() %}
-    <div class="col-md-4 room-item" data-status="{{r.status.name}}">
-      <div class="rounded-3 border border-secondary p-3">
-        <div class="row">
-          <div class="col-md-6">
-            <p class="mb-1">Mã phòng</p>
-            <p class="fw-bold mb-1">{{r.id}}</p>
-            <p class="mb-2">{{r.name}}</p>
-          </div>
-          <div class="col-md-6">
-            <p class="text-muted small mb-1">Trạng thái</p>
-            <p class="text-primary fw-bold mb-0">{{r.status.name}}</p>
-          </div>
+            <input
+                    type="text"
+                    class="form-control w-auto"
+                    placeholder="Tìm tên phòng..."
+            />
         </div>
-        <hr class="my-2" />
-        <div class="d-flex justify-content-between">
-          <button class="btn btn-outline-secondary">Xem chi tiết</button>
-          {% if r.status.name == "OCCUPIED" and (current_user.role.name ==
-          "STAFF" or current_user.role.name ==
-          "ADMIN") %}
-          <button class="btn btn-primary" onclick="caculateBill({{r.id}})">
-            Trả phòng
-          </button>
-          {% endif %}
-        </div>
-      </div>
     </div>
-    {% endfor %}
-  </div>
+
+    <div class="row g-3">
+        {% for r in get_rooms() %}
+        <div class="col-md-4 room-item" data-status="{{r.status.name}}">
+            <div class="rounded-3 border border-secondary p-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1">Mã phòng</p>
+                        <p class="fw-bold mb-1">{{r.id}}</p>
+                        <p class="mb-2">{{r.name}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-1">Trạng thái</p>
+                        <p class="text-primary fw-bold mb-0">{{r.status.name}}</p>
+                    </div>
+                </div>
+                <hr class="my-2"/>
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-outline-secondary">Xem chi tiết</button>
+                    {% if r.status.name == "OCCUPIED" and (current_user.role.name ==
+                    "STAFF" or current_user.role.name ==
+                    "ADMIN") %}
+                    <button class="btn btn-primary" onclick="caculateBill({{r.id}})">
+                        Trả phòng
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/payment.js') }}"></script>
 
 <script>
-  window.onload = () => {
-    const filterSelect = document.getElementById("filterStatus");
-    const roomItems = document.querySelectorAll(".room-item");
+    window.onload = () => {
+        const filterSelect = document.getElementById("filterStatus");
+        const roomItems = document.querySelectorAll(".room-item");
 
-    filterSelect.addEventListener("change", function () {
-      const selectedStatus = this.value;
+        filterSelect.addEventListener("change", function () {
+            const selectedStatus = this.value;
 
-      roomItems.forEach((item) => {
-        const roomStatus = item.getAttribute("data-status");
+            roomItems.forEach((item) => {
+                const roomStatus = item.getAttribute("data-status");
 
-        if (selectedStatus === "ALL" || roomStatus === selectedStatus) {
-          item.classList.remove("d-none");
-          item.classList.add("d-block");
-        } else {
-          item.classList.remove("d-block");
-          item.classList.add("d-none");
-        }
-      });
-    });
-  };
+                if (selectedStatus === "ALL" || roomStatus === selectedStatus) {
+                    item.classList.remove("d-none");
+                    item.classList.add("d-block");
+                } else {
+                    item.classList.remove("d-block");
+                    item.classList.add("d-none");
+                }
+            });
+        });
+    };
 </script>
 {% endblock %}

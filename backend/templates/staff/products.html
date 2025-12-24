@@ -50,7 +50,8 @@ Trang chủ
                             <td>
                                 <div class="d-flex">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ o.image }}" alt="..." style="width:90px; height:90px; object-fit:cover;">
+                                        <img src="{{ o.image }}" alt="..."
+                                             style="width:90px; height:90px; object-fit:cover;">
                                     </div>
                                     <div class="flex-grow-1 ms-3 text-white">
                                         {{ o.name }}
@@ -60,13 +61,13 @@ Trang chủ
                             <td class="text-white">{{ '{:,.0f}'.format(o.price) }}</td>
                             <td class="text-center text-white">
                                 <input type="number"
-                                    value="{{ o.quantity }}"
-                                    class="form-control form-control-sm mx-auto"
-                                    style="width:70px"
-                                    min="1"
-                                    max="30"
-                                    oninput="limitQuantity(this)"
-                                    onblur="updateOrder({{ ss.id }}, {{ o.id }}, this)">
+                                       value="{{ o.quantity }}"
+                                       class="form-control form-control-sm mx-auto"
+                                       style="width:70px"
+                                       min="1"
+                                       max="30"
+                                       oninput="limitQuantity(this)"
+                                       onblur="updateOrder({{ ss.id }}, {{ o.id }}, this)">
                             </td>
                             <td class="text-center">
                                 <button class="btn btn-outline-danger btn-sm"
@@ -118,7 +119,9 @@ Trang chủ
                     <i class="bi bi-bag-plus"></i>
                 </div>
                 <p class="fs-5">Chưa có dịch vụ được đặt</p>
-                <a href="/staffs/products"><button class="btn btn-primary px-4" type="button">Tiếp tục đặt dịch vụ</button></a>
+                <a href="/staffs/products">
+                    <button class="btn btn-primary px-4" type="button">Tiếp tục đặt dịch vụ</button>
+                </a>
 
             </div>
             {% endif %}
@@ -145,14 +148,13 @@ Trang chủ
                 <div class="col-md-4 col-6 p-2">
                     <div class="card transition-card glass-effect text-white">
                         <img class="card-img-top"
-                            src="{{ p.image }}"
-                            style="height: 200px; object-fit: cover;"
-                            alt="{{ p.name }}">
+                             src="{{ p.image }}"
+                             style="height: 200px; object-fit: cover;"
+                             alt="{{ p.name }}">
                         <div class="card-body">
                             <h4 class="card-title">{{ p.name }}</h4>
                             <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
                             <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
-                            <a href="#" class="btn btn-primary">Xem chi tiết</a>
                             <button class="btn btn-danger"
                                     onclick="addToOrder({{ ss.id }}, {{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
                                 Đặt hàng ngay
@@ -169,7 +171,8 @@ Trang chủ
                 {% if pages > 1 %}
                 <ul class="pagination mt-2">
                     {% for i in range(1, pages + 1) %}
-                    <li class="page-item"><a class="page-link glass-effect" href="/staffs/{{ ss.id }}/order?page={{i}}">{{ i }}</a></li>
+                    <li class="page-item"><a class="page-link glass-effect" href="/staffs/{{ ss.id }}/order?page={{i}}">{{
+                        i }}</a></li>
                     {% endfor %}
                 </ul>
                 {% endif %}

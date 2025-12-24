@@ -13,10 +13,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/staffs/orders" class="nav-link flex-row {{ 'active' if request.path == '/staffs/orders' else '' }}">
+                        <a href="/staffs/orders"
+                           class="nav-link flex-row {{ 'active' if request.path == '/staffs/orders' else '' }}">
                             Orders
                             <span class="position-absolute top-30 right-0 translate-middle badge rounded-pill bg-danger order-counter"
-                                      style="display: {{ 'inline-block' if stats_order.total_quantity != 0 else 'none' }}">
+                                  style="display: {{ 'inline-block' if stats_order.total_quantity != 0 else 'none' }}">
                                     {{ stats_order.total_quantity }}
                             </span>
                         </a>

@@ -2,7 +2,7 @@
     <div class="container">
         <div class="d-flex align-items-center justify-content-center w-100">
             <a href="/"
-                class="my-2 my-lg-0 me-lg-auto">
+               class="my-2 my-lg-0 me-lg-auto">
                 <img width="115" height="75" src="/static/images/logo.png" alt="OkeOU">
             </a>
             <div class="collapse navbar-collapse justify-content-end">
@@ -20,30 +20,33 @@
                     </li>
                     <li class="nav-item">
                         <a href="/products"
-                            class="nav-link flex-row {{ 'active' if request.path.startswith('/products') else '' }}">
+                           class="nav-link flex-row {{ 'active' if request.path.startswith('/products') else '' }}">
                             Products
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            href="#"
-                            role="button"
-                            aria-expanded="false">
+                           data-bs-toggle="dropdown"
+                           href="#"
+                           role="button"
+                           aria-expanded="false">
                             Xin chào!
                             <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" width="28" height="28"
-                                    class="rounded-circle">
+                                 class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-glass dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user"></i> Thông tin hồ sơ</a></li>
+                            <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user"></i> Thông tin hồ
+                                sơ</a></li>
                             {% if current_user.is_admin %}
-                            <li><a class="dropdown-item" href="/admin"><i class="fa-solid fa-gear"></i> Trang quản trị</a></li>
+                            <li><a class="dropdown-item" href="/admin"><i class="fa-solid fa-gear"></i> Trang quản
+                                trị</a></li>
                             {% endif %}
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a></li>
+                            <li><a class="dropdown-item" href="/logout"><i
+                                    class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a></li>
                         </ul>
                     </li>
                     {% else %}

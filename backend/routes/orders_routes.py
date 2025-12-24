@@ -45,7 +45,7 @@ def add_to_order():
         # Get the order for the current session_id
         # which is containing all products added in the session
         order = cart[session_id]
-        
+
         id = str(data.get('id'))
         image = data.get('image')
         name = data.get('name')
@@ -68,12 +68,13 @@ def add_to_order():
                 'price': price,
                 'amount': amount
             }
-        
+
         cart[session_id] = order
         session['order'] = cart
         return jsonify(order_utils.stats_order(order)), 200
     else:
         return jsonify({'err_msg': 'Vui lòng đăng nhập trước khi đặt dịch vụ'}), 400
+
 
 @app.route('/api/orders/<id>', methods=['put'])
 def update_order(id):
@@ -97,9 +98,10 @@ def update_order(id):
         return jsonify(order_utils.stats_order(order)), 200
     return jsonify({'err_msg': 'Không tìm thấy sản phẩm'}), 400
 
+
 @app.route('/api/orders/<id>', methods=['delete'])
 def delete_order(id):
-    data = request.json 
+    data = request.json
     session_id = str(data.get('session_id'))
 
     cart = session.get('order', {})
@@ -127,14 +129,14 @@ def order_process():
     # Removed user verification as the staff are the one placing orders
 
     if not session_id:
-         return jsonify({'err_msg': 'Không xác định được phiên làm việc'}), 400
+        return jsonify({'err_msg': 'Không xác định được phiên làm việc'}), 400
 
     order = session.get('order', {})
     current_order = order.get(str(session_id))
 
     if not current_order:
         return jsonify({'err_msg': 'Bạn chưa thêm dịch vụ vào giỏ hàng'}), 400
-    
+
     try:
         ord = order_daos.create_order(session_id=int(session_id))
         order_utils.add_order(current_order, ord)
@@ -147,7 +149,8 @@ def order_process():
         return jsonify({'err_msg': str(ve)}), 400
     except Exception as e:
         return jsonify({'err_msg': str(e)}), 500
-    
+
+
 # This is used in Jinja templates
 # for getting cart stats
 # you can use it like this:
@@ -158,6 +161,7 @@ def order_process():
 @app.template_filter('cart_stats')
 def cart_stats_filter(cart_dict):
     return order_utils.stats_order(cart_dict)
+
 
 # This is used to inject common responses
 # into all templates (especially for header)

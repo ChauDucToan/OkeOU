@@ -34,17 +34,9 @@ Trang chủ
                     <h4 class="card-title">{{ p.name }}</h4>
                     <p class="card-text">Số lượng: <cite>{{ p.amount }} {{ p.unit }}</cite></p>
                     <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
-                    <a href="#" class="btn btn-primary">Xem chi tiết</a>
-                    {% if p.active == 1 %}
-                    <button class="btn btn-danger"
-                            onclick="addToOrder({{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }}, {{ p.amount }})" >
-                        Đặt hàng ngay
+                    <button class="btn btn-danger" disabled>
+                        Đặt hàng sau khi gọi phòng trực tiếp
                     </button>
-                    {% else %}
-                    <button class="btn btn-secondary" disabled>
-                        Hết hàng
-                    </button>
-                    {% endif %}
                 </div>
             </div>
         </div>

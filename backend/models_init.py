@@ -3,7 +3,8 @@ import random
 import uuid
 
 from backend import app, db
-from backend.models import Booking, BookingStatus, Category, Order, OrderStatus, PaymentStatus, Product, ProductOrder, Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, User, UserRole, Staff, Session
+from backend.models import Booking, BookingStatus, Category, Order, OrderStatus, PaymentStatus, Product, ProductOrder, \
+    Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, User, UserRole, Staff, Session
 from backend.utils.general_utils import hash_password
 
 if __name__ == '__main__':
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         all_customers = [default_user] + dummy_users
         db.session.add_all(all_customers + [admin_user, staff_user])
         db.session.commit()
-        
+
         rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)
         rt_vip = RoomType(name="Phòng VIP", hourly_price=200000)
         rt_party = RoomType(name="Phòng Party", hourly_price=400000)
@@ -251,13 +252,14 @@ if __name__ == '__main__':
         for room in rooms:
             for day_offset in range(-60, 1):
                 if random.random() > 0.4:
-                    
-                    start_hour = random.randint(10, 20) 
+
+                    start_hour = random.randint(10, 20)
                     start_minute = random.choice([0, 15, 30, 45])
-                    
+
                     base_date = datetime.now().date() + timedelta(days=day_offset)
-                    start_time = datetime.combine(base_date, datetime.min.time()) + timedelta(hours=start_hour, minutes=start_minute)
-                    
+                    start_time = datetime.combine(base_date, datetime.min.time()) + timedelta(hours=start_hour,
+                                                                                              minutes=start_minute)
+
                     # Thời lượng từ 1-5 giờ để có doanh thu đa dạng
                     duration_hours = random.randint(1, 5)
                     end_time = start_time + timedelta(hours=duration_hours)
@@ -269,21 +271,22 @@ if __name__ == '__main__':
                             weights=[80, 15, 5]
                         )[0]
                     else:
-                        status = random.choice([BookingStatus.CANCELLED, BookingStatus.PENDING, BookingStatus.CONFIRMED])
+                        status = random.choice(
+                            [BookingStatus.CANCELLED, BookingStatus.PENDING, BookingStatus.CONFIRMED])
 
                     hourly_price = price_map.get(room.room_type, 100000)
-                    
+
                     deposit = int(hourly_price * duration_hours) if status == BookingStatus.CONFIRMED else 0
 
                     booking = Booking(
                         scheduled_start_time=start_time,
                         scheduled_end_time=end_time,
                         head_count=random.randint(2, room.capacity),
-                        
+
                         status=status,
-                        
+
                         deposit_amount=deposit,
-                        
+
                         user_id=random.choice(all_customers).id,
                         room_id=room.id
                     )
@@ -291,7 +294,6 @@ if __name__ == '__main__':
 
         db.session.add_all(bookings)
         db.session.commit()
-
 
         confirmed_bookings = [b for b in bookings if b.status == BookingStatus.COMPLETED]
         sessionss = []
@@ -326,7 +328,7 @@ if __name__ == '__main__':
             id = str(uuid.uuid4())
             if session.status == SessionStatus.FINISHED:
                 receipt = Receipt(
-                    id = id,
+                    id=id,
                     session_id=session.id,
                     staff_id=staff_user.id,
                     status=PaymentStatus.COMPLETED,
@@ -335,7 +337,7 @@ if __name__ == '__main__':
                 receipts.append(receipt)
             else:
                 receipt = Receipt(
-                    id = id,
+                    id=id,
                     session_id=session.id,
                     staff_id=None,
                     status=PaymentStatus.COMPLETED,
@@ -350,9 +352,9 @@ if __name__ == '__main__':
         total_service_fee = 0.0
         for session in sessionss:
             order = Order(
-                    session_id=session.id,
-                    status=OrderStatus.SERVED
-                )
+                session_id=session.id,
+                status=OrderStatus.SERVED
+            )
             orders.append(order)
 
         db.session.add_all(orders)
@@ -378,14 +380,13 @@ if __name__ == '__main__':
         db.session.add_all(prod_ord)
         db.session.commit()
 
-
         receipt_details_list = []
         for receipt, session in zip(receipts, sessionss):
             duration = (session.end_time - session.start_time).total_seconds() / 3600
             room = Room.query.get(session.room_id)
             room_type = RoomType.query.get(room.room_type)
             total_room_fee = room_type.hourly_price * duration
-            
+
             # Tính tổng phí dịch vụ cho session cụ thể này
             session_service_fee = 0.0
             for order in Order.query.filter_by(session_id=session.id).all():

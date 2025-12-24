@@ -11,6 +11,7 @@ from backend.models import SessionStatus, StaffWorkingHour, User, UserRole, Sess
 from backend.utils.general_utils import user_role_required
 from backend.utils.room_utils import filter_rooms
 
+
 @app.route('/staffs')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_preview():
@@ -43,7 +44,7 @@ def staff_sessions_preview():
     page_size = app.config['PAGE_SIZE']
 
     sessions = get_sessions(start_date=data.get("start_date"), end_date=data.get("end_date"))
-    
+
     status = data.get('status')
     if status:
         status_enum = SessionStatus[status]
@@ -73,8 +74,8 @@ def staff_payments_preview():
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_products_preview(session_id):
     products = load_products(kw=request.args.get('kw'),
-                                category_id=request.args.get('category_id'),
-                                page=int(request.args.get('page', 1)))
+                             category_id=request.args.get('category_id'),
+                             page=int(request.args.get('page', 1)))
     categories = get_categories()
 
     s = get_sessions(session_id=session_id).first()
@@ -88,22 +89,22 @@ def staff_products_preview(session_id):
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_rooms_preview():
     r = request.args
-    page=int(r.get('page', 1))
+    page = int(r.get('page', 1))
     page_size = app.config['PAGE_SIZE']
     rooms = filter_rooms(room_id=r.get('room_id'),
-                           status=r.get('status'),
-                           kw=r.get('kw'),
-                           capacity=r.get('capacity'),
-                           price_max=r.get('price_max'),
-                           sort_by=r.get('sort'))
-    
+                         status=r.get('status'),
+                         kw=r.get('kw'),
+                         capacity=r.get('capacity'),
+                         price_max=r.get('price_max'),
+                         sort_by=r.get('sort'))
+
     count = rooms.count()
 
     if page:
         start = (page - 1) * app.config["PAGE_SIZE"]
         rooms = rooms.slice(start, start + app.config["PAGE_SIZE"])
 
-    return render_template('/staff/rooms.html', 
+    return render_template('/staff/rooms.html',
                            rooms=rooms.all(),
                            pages=math.ceil(count / page_size))
 
@@ -112,7 +113,7 @@ def staff_rooms_preview():
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_logincheck():
     is_logout = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
-                                                ,StaffWorkingHour.logout_date is None).first()
+                                              , StaffWorkingHour.logout_date is None).first()
     if not is_logout:
         check = StaffWorkingHour(staff_id=current_user.id)
 
@@ -126,7 +127,7 @@ def staff_logincheck():
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_logoutcheck():
     check = StaffWorkingHour.query.filter(StaffWorkingHour.staff_id == current_user.id
-                                            ,StaffWorkingHour.logout_date is None).first()
+                                          , StaffWorkingHour.logout_date is None).first()
     if check:
         check.logout_date = datetime.now()
 

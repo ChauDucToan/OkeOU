@@ -13,8 +13,8 @@ Trang chủ cho nhân viên
         </div>
         <div class="col-2">
             <button type="button" class="btn btn-primary w-100"
-                data-bs-toggle="collapse" data-bs-target="#filter"
-                aria-expanded="false" aria-controls="filter">
+                    data-bs-toggle="collapse" data-bs-target="#filter"
+                    aria-expanded="false" aria-controls="filter">
                 <i class="bi bi-filter"></i>
                 Lọc
             </button>
@@ -43,18 +43,23 @@ Trang chủ cho nhân viên
                 <div class="col-4">
                     <h4 class="text-info">Trạng thái:</h4>
                     <select id="statusSelect" class="form-select select-anim" onchange="searchSessions()">
-                        <option value="ACTIVE" {% if request.args.get('status') == 'ACTIVE' %}selected{% endif %}>ACTIVE</option>
-                        <option value="BOOKED" {% if request.args.get('status') == 'BOOKED' %}selected{% endif %}>BOOKED</option>
-                        <option value="FINISHED" {% if request.args.get('status') == 'FINISHED' %}selected{% endif %}>FINISHED</option>
+                        <option value="ACTIVE" {% if request.args.get(
+                        'status') == 'ACTIVE' %}selected{% endif %}>ACTIVE</option>
+                        <option value="BOOKED" {% if request.args.get(
+                        'status') == 'BOOKED' %}selected{% endif %}>BOOKED</option>
+                        <option value="FINISHED" {% if request.args.get(
+                        'status') == 'FINISHED' %}selected{% endif %}>FINISHED</option>
                     </select>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-6 mb-3">
-                    <button class="btn btn-secondary w-100" type="button" onclick="resetFilters()">Đặt lại bộ lọc</button>
+                    <button class="btn btn-secondary w-100" type="button" onclick="resetFilters()">Đặt lại bộ lọc
+                    </button>
                 </div>
                 <div class="col-6 mb-3">
-                    <button class="btn btn-primary w-100" type="button" onclick="searchSessions()">Áp dụng bộ lọc</button>
+                    <button class="btn btn-primary w-100" type="button" onclick="searchSessions()">Áp dụng bộ lọc
+                    </button>
                 </div>
             </div>
         </div>
@@ -91,17 +96,18 @@ Trang chủ cho nhân viên
     {% if pages > 1 %}
     <ul class="pagination mt-2">
         {% if current_page > 1 %}
-        <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page - 1}}"> Previous </a></li>
+        <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page - 1}}"> Previous </a>
+        </li>
         {% else %}
         <li class="page-item disabled"><span class="page-link glass-effect"> Previous </span></li>
         {% endif %}
-        
+
         {% for i in range(current_page, current_page + 3) %}
         <li class="page-item {% if i == current_page %}active{% endif %}">
             <a class="page-link glass-effect" href="/staffs?page={{i}}">{{ i }}</a>
         </li>
         {% endfor %}
-        
+
         {% if current_page < pages %}
         <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page + 1}}"> Next </a></li>
         {% else %}

@@ -1,6 +1,7 @@
 from backend.models import Order, OrderStatus
 from backend import db
 
+
 def get_orders(session_id=None, status=None):
     r = Order.query
     if session_id:

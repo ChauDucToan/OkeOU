@@ -39,6 +39,7 @@ def calculate_payment():
     session['bill_detail'] = bill_detail
     return jsonify(bill_detail)
 
+
 @app.route('/api/payment/create/<method>/<payment_type>', methods=['post'])
 @login_required
 def create_payment(method, payment_type):
@@ -53,7 +54,7 @@ def create_payment(method, payment_type):
         return jsonify({'err_msg': 'Phương thức thanh toán không đc hỗ trợ.'}), 400
 
     amount = handler.init_payment_and_get_amount(request_data=request.json, session_data=session,
-                                                payment_method=strategy.get_payment_method(), ref=ref)
+                                                 payment_method=strategy.get_payment_method(), ref=ref)
     result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
 
     if strategy.get_payment_method() == PaymentMethod.CASH:
@@ -90,9 +91,10 @@ def create_payment(method, payment_type):
     #     print(ex)
     #     return jsonify({'err_msg': 'Lỗi hệ thống.'}), 500
 
+
 @app.route('/api/ipn/<method>/<payment_type>', methods=['post', 'get'])
 def return_ipn(method, payment_type):
-    try :
+    try:
         if request.method == 'POST':
             data = request.json
         else:
@@ -112,14 +114,16 @@ def return_ipn(method, payment_type):
         # return render_template('xxx', success=False)
         return jsonify({'err_msg': "Lỗi hệ thống!!!"}), 500
 
+
 @app.route('/rooms-dashboard/')
 def rooms():
     return render_template('dashboard/rooms_dashboard.html',
                            get_rooms=load_rooms)
 
+
 @app.route('/payment/')
 def payment_page():
-    if current_user.role != UserRole.STAFF  and current_user.role != UserRole.ADMIN:
+    if current_user.role != UserRole.STAFF and current_user.role != UserRole.ADMIN:
         return redirect("/rooms-dashboard")
     data = session.get('bill_detail')
     return render_template('payment.html', bill_detail=data, payment_methods=PaymentMethod)

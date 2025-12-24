@@ -9,7 +9,7 @@ Trang chủ
     <div class="row g-4">
         <div class="col-lg-5">
             <div class="card glass-effect text-white shadow-sm border-0 h-100">
-                <img src="{{ room.image }}" class="card-img-top" alt="{{ room.name }}" 
+                <img src="{{ room.image }}" class="card-img-top" alt="{{ room.name }}"
                      style="height: 350px; object-fit: cover;">
                 <div class="card-body">
                     <h2 class="card-title fw-bold text-primary">{{ room.name }}</h2>
@@ -30,7 +30,7 @@ Trang chủ
                     <h4 class="mb-0">Kiểm tra lịch & Đặt phòng</h4>
                 </div>
                 <div class="card-body">
-                    
+
                     <div class="mb-4">
                         <label for="selectedDate" class="form-label fw-bold">Chọn ngày xem lịch:</label>
                         <input type="date" id="selectedDate" class="form-control" onchange="loadTimeline()">
@@ -38,11 +38,16 @@ Trang chủ
 
                     <div class="mb-4 text-white">
                         <label class="form-label small">Trạng thái phòng trong ngày (0h - 24h)</label>
-                        <div class="position-relative w-100 bg-light bg-opacity-10 rounded border" style="height: 40px;">
-                            <div class="position-absolute start-0 top-0 h-100 border-end" style="width: 25%;"><span class="small ps-1">0h</span></div>
-                            <div class="position-absolute start-25 top-0 h-100 border-end" style="width: 25%; left: 25%;"><span class="small ps-1">6h</span></div>
-                            <div class="position-absolute start-50 top-0 h-100 border-end" style="width: 25%; left: 50%;"><span class="small ps-1">12h</span></div>
-                            <div class="position-absolute start-75 top-0 h-100 border-end" style="width: 25%; left: 75%;"><span class="small ps-1">18h</span></div>
+                        <div class="position-relative w-100 bg-light bg-opacity-10 rounded border"
+                             style="height: 40px;">
+                            <div class="position-absolute start-0 top-0 h-100 border-end" style="width: 25%;"><span
+                                    class="small ps-1">0h</span></div>
+                            <div class="position-absolute start-25 top-0 h-100 border-end"
+                                 style="width: 25%; left: 25%;"><span class="small ps-1">6h</span></div>
+                            <div class="position-absolute start-50 top-0 h-100 border-end"
+                                 style="width: 25%; left: 50%;"><span class="small ps-1">12h</span></div>
+                            <div class="position-absolute start-75 top-0 h-100 border-end"
+                                 style="width: 25%; left: 75%;"><span class="small ps-1">18h</span></div>
                             <span class="position-absolute end-0 top-0 small pe-1">24h</span>
                             <div id="timeline-tracks" class="position-absolute top-0 start-0 w-100 h-100"></div>
                         </div>
@@ -56,20 +61,21 @@ Trang chủ
 
                     <form id="bookingForm" class="row g-3" data-room-id="{{ room.id }}">
                         <input type="hidden" name="room_id" value="{{ room.id }}">
-                        
+
                         <div class="col-md-6">
                             <label class="form-label">Bắt đầu:</label>
                             <input type="time" class="form-control" name="start_time" step="900" required>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label class="form-label">Kết thúc:</label>
                             <input type="time" class="form-control" name="end_time" step="900" required>
                         </div>
-                        
+
                         <div class="col-md-12">
                             <label class="form-label">Số khách (Tối đa {{ room.capacity }}):</label>
-                            <input type="number" class="form-control" name="head_count" value="1" min="1" max="{{ room.capacity }}" required>
+                            <input type="number" class="form-control" name="head_count" value="1" min="1"
+                                   max="{{ room.capacity }}" required>
                         </div>
 
                         <div class="col-12">
@@ -79,7 +85,8 @@ Trang chủ
                         </div>
 
                         <div class="col-12">
-                            <button type="button" onclick="validateAndSubmit()" class="btn btn-primary w-100 py-2 fw-bold">
+                            <button type="button" onclick="validateAndSubmit()"
+                                    class="btn btn-primary w-100 py-2 fw-bold">
                                 Đặt phòng ngay
                             </button>
                         </div>

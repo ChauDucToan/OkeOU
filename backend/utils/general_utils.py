@@ -26,5 +26,7 @@ def user_role_required(roles):
             if not current_user.is_authenticated or current_user.role not in roles:
                 return redirect_to_error(403, "You do not have permission to access this page.")
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator

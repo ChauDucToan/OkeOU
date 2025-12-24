@@ -1,6 +1,7 @@
 from backend.models import Receipt, Session
 from backend import app
 
+
 def get_payments(session_id=None):
     r = Receipt.query
 

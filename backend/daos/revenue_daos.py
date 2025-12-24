@@ -1,6 +1,6 @@
 from sqlalchemy import func
 
-from backend.models import  Product,  Room,  Session, SessionStatus, Order, \
+from backend.models import Product, Room, Session, SessionStatus, Order, \
     RoomType, Receipt, ReceiptDetails, ProductOrder
 from backend import db, app
 
@@ -10,9 +10,9 @@ from datetime import datetime
 def get_total_amount(time_unit='day'):
     current_date = datetime.now()
     query = (db.session.query(func.sum(ReceiptDetails.total_room_fee + ReceiptDetails.total_service_fee))
-                    .join(Receipt, ReceiptDetails.id == Receipt.id)
-                    .join(Session, Session.id == Receipt.session_id)
-                    .filter(func.extract('year', Session.end_time) == current_date.year))
+             .join(Receipt, ReceiptDetails.id == Receipt.id)
+             .join(Session, Session.id == Receipt.session_id)
+             .filter(func.extract('year', Session.end_time) == current_date.year))
 
     if time_unit == 'month':
         query = query.filter(func.extract('month', Session.end_time) == current_date.month)
@@ -25,14 +25,15 @@ def get_total_amount(time_unit='day'):
     result = query.first()[0]
     return int(result) if result is not None else 0
 
+
 def count_orders(time_unit='day'):
     current_date = datetime.now()
 
     query = (db.session.query(func.count(Order.id))
-                    .join(Session, Order.session_id == Session.id)
-                    .filter(Session.status == SessionStatus.FINISHED)
-                    .filter(func.extract('year', Session.end_time) == current_date.year))
-    
+             .join(Session, Order.session_id == Session.id)
+             .filter(Session.status == SessionStatus.FINISHED)
+             .filter(func.extract('year', Session.end_time) == current_date.year))
+
     if time_unit == 'month':
         query = query.filter(func.extract('month', Session.end_time) == current_date.month)
     elif time_unit == 'week':
@@ -43,12 +44,13 @@ def count_orders(time_unit='day'):
 
     result = query.first()[0]
     return result if result is not None else 0
+
 
 def count_sessions(time_unit='day'):
     current_date = datetime.now()
     query = (db.session.query(func.count(Session.id))
-                      .filter(Session.status == SessionStatus.FINISHED)
-                      .filter(func.extract('year', Session.end_time) == current_date.year))
+             .filter(Session.status == SessionStatus.FINISHED)
+             .filter(func.extract('year', Session.end_time) == current_date.year))
 
     if time_unit == 'month':
         query = query.filter(func.extract('month', Session.end_time) == current_date.month)
@@ -60,6 +62,7 @@ def count_sessions(time_unit='day'):
 
     result = query.first()[0]
     return result if result is not None else 0
+
 
 def count_customers(time_unit='day'):
     current_date = datetime.now()
@@ -79,6 +82,7 @@ def count_customers(time_unit='day'):
     result = query.first()[0]
     return result if result is not None else 0
 
+
 def revenue_by_time(time_unit='day'):
     total_amount = get_total_amount(time_unit)
 
@@ -94,6 +98,7 @@ def revenue_by_time(time_unit='day'):
         "count_sessions": cnt_sessions,
         "count_customers": cnt_customers,
     }
+
 
 def revenue_by_room_name(time_unit='day'):
     current_date = datetime.now()
@@ -162,6 +167,7 @@ def revenue_by_product(time_unit='day'):
         query = query.filter(func.extract('day', Session.end_time) == current_date.day)
 
     return query.group_by(Product.name).all()
+
 
 if __name__ == '__main__':
     current_date = datetime.now()

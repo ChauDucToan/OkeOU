@@ -17,7 +17,7 @@
                 </div>
                 <div class="card-body px-4">
                     <div class="d-flex align-items-center mb-4">
-                        <img src="{{ room.image }}" alt="Room" class="rounded" 
+                        <img src="{{ room.image }}" alt="Room" class="rounded"
                              style="width: 100px; height: 70px; object-fit: cover;">
                         <div class="ms-3">
                             <h4 class="mb-0 text-white">{{ room.name }}</h4>
@@ -32,7 +32,9 @@
                         <div class="col-6 fw-bold text-white text-end">#{{ booking.id }}</div>
 
                         <div class="col-6 text-white">Khách hàng:</div>
-                        <div class="col-6 fw-bold text-white text-end">{{ current_user.name if current_user.is_authenticated else 'Khách vãng lai' }}</div>
+                        <div class="col-6 fw-bold text-white text-end">{{ current_user.name if
+                            current_user.is_authenticated else 'Khách vãng lai' }}
+                        </div>
 
                         <div class="col-6 text-white">Bắt đầu:</div>
                         <div class="col-6 fw-bold text-end text-primary">
@@ -50,7 +52,8 @@
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <h5 class="text-white mb-0">Tổng thanh toán:</h5>
                         <h3 class="fw-bold text-danger mb-0">
-                            {{ "{:,.0f}".format(room.type.hourly_price * (booking.scheduled_end_time - booking.scheduled_start_time).total_seconds() / 3600) }} VNĐ
+                            {{ "{:,.0f}".format(room.type.hourly_price * (booking.scheduled_end_time -
+                            booking.scheduled_start_time).total_seconds() / 3600) }} VNĐ
                         </h3>
                     </div>
                 </div>
@@ -77,16 +80,19 @@
 
                         <div class="payment-option mb-3">
                             <input class="form-check-input" type="radio" name="payment_method" id="momo" value="MOMO">
-                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="momo">
+                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer"
+                                   for="momo">
                                 <span><i class="bi bi-phone me-2"></i>Chuyển khoản thông qua MoMo</span>
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MoMo_Logo_App.svg/250px-MoMo_Logo_App.svg.png" height="24" alt="Momo">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MoMo_Logo_App.svg/250px-MoMo_Logo_App.svg.png"
+                                     height="24" alt="Momo">
                             </label>
                         </div>
 
                         {% if current_user.is_authenticated and (current_user.is_staff or current_user.is_admin) %}
                         <div class="payment-option mb-4">
                             <input class="form-check-input" type="radio" name="payment_method" id="cash" value="CASH">
-                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer" for="cash">
+                            <label class="form-check-label text-white w-100 p-3 rounded d-flex align-items-center justify-content-between cursor-pointer"
+                                   for="cash">
                                 <span><i class="bi bi-cash-coin me-2"></i>Thanh toán tại quầy</span>
                             </label>
                         </div>
@@ -104,7 +110,8 @@
     </div>
 </div>
 
-<div class="modal modal-bg-dark fade" id="timeoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal modal-bg-dark fade" id="timeoutModal" data-bs-backdrop="static" data-bs-keyboard="false"
+     tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content glass-modal text-center p-4">
             <div class="modal-body text-white">

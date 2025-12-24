@@ -1,33 +1,33 @@
 {% extends 'admin/master.html' %} {% block body %}
 <div class="min-vh-100 p-4">
-  <h1 class="text-center text-success">Báo cáo & Thống kê</h1>
-  <div class="p-4 bg-white rounded shadow-sm">
-    <div class="d-flex align-items-baseline mb-2">
-      <h5 class="fs-4 fw-bold mb-0 me-2">Báo cáo Doanh thu -</h5>
-      <span class="pl-1 text-secondary small">Báo cáo doanh thu theo</span>
+    <h1 class="text-center text-success">Báo cáo & Thống kê</h1>
+    <div class="p-4 bg-white rounded shadow-sm">
+        <div class="d-flex align-items-baseline mb-2">
+            <h5 class="fs-4 fw-bold mb-0 me-2">Báo cáo Doanh thu -</h5>
+            <span class="pl-1 text-secondary small">Báo cáo doanh thu theo</span>
+        </div>
+        <hr class="mt-0"/>
+        <div class="row g-3 mb-4">
+            {% for period in ['day', 'week', 'month', 'year'] %}
+            <div class="col-3">
+                <a
+                        href="{{ url_for('statsview.time_stats', period=period) }}"
+                        class="card shadow-sm text-decoration-none"
+                        onclick=""
+                >
+                    <div class="card-body text-center p-3">
+                        <span class="fw-bold text-uppercase">{{ period }}</span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    <hr class="mt-0" />
-    <div class="row g-3 mb-4">
-      {% for period in ['day', 'week', 'month', 'year'] %}
-      <div class="col-3">
-        <a
-          href="{{ url_for('statsview.time_stats', period=period) }}"
-          class="card shadow-sm text-decoration-none"
-          onclick=""
-        >
-          <div class="card-body text-center p-3">
-            <span class="fw-bold text-uppercase">{{ period }}</span>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
 </div>
 
 <style>
-  body {
-    background-color: #f8f9fa;
-  }
+    body {
+        background-color: #f8f9fa;
+    }
 </style>
 {% endblock %}

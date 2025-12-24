@@ -23,7 +23,7 @@ def create_receipt(session_id, staff_id, payment_method):
     total_room_fee = get_session_price(session_id, datetime.now())
     total_order_price = get_order_price(order.id) if order else 0.0
 
-    user = get_users(user_id = session.user_id).first()
+    user = get_users(user_id=session.user_id).first()
     discount_rate = 0.0
     loyal = LoyalCustomer.query.get(user.id) if user else None
     if loyal:
@@ -50,7 +50,7 @@ def create_receipt(session_id, staff_id, payment_method):
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
-    
+
 
 def change_receipt_status(ref, status):
     receipt = Receipt.query.filter(Receipt.ref == ref).first()
@@ -61,6 +61,7 @@ def change_receipt_status(ref, status):
         db.session.rollback()
         print(f"Lỗi lưu DB: {e}")
 
+
 def update_receipt_ref(id, ref):
     receipt = Receipt.query.get(id)
     receipt.ref = ref
@@ -69,6 +70,7 @@ def update_receipt_ref(id, ref):
     except Exception as e:
         db.session.rollback()
         print(f"Lỗi lưu DB: {e}")
+
 
 def get_bill_before_pay(session_id):
     session = get_sessions(session_id=session_id).first()

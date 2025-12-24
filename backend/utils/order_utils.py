@@ -1,6 +1,7 @@
 from backend.models import Order, OrderStatus, Session, SessionStatus, ProductOrder, Product
 from backend import db
 
+
 def get_order_price(order_id):
     order = Order.query.get(order_id)
     if order:
@@ -10,6 +11,7 @@ def get_order_price(order_id):
         return total_price
     return 0
 
+
 def get_verify_session(user_id):
     sessionn = Session.query.filter(
         Session.user_id == user_id,
@@ -18,8 +20,10 @@ def get_verify_session(user_id):
 
     return sessionn
 
+
 def check_amount_product(id):
     return Product.query.get(id)
+
 
 def add_order(order, ord):
     if order:
@@ -30,15 +34,16 @@ def add_order(order, ord):
             product.amount -= o['quantity']
 
             r = ProductOrder(
-                order_id = ord.id,
-                product_id = o['id'],
-                amount = o['quantity'],
-                price_at_time = o['price']
+                order_id=ord.id,
+                product_id=o['id'],
+                amount=o['quantity'],
+                price_at_time=o['price']
             )
             db.session.add(r)
             if product.amount == 0:
                 product.active = False
         db.session.commit()
+
 
 def stats_order(order):
     total_quantity, total_amount = 0, 0
@@ -48,7 +53,7 @@ def stats_order(order):
             total_quantity += o['quantity']
             total_amount += o['quantity'] * o['price']
 
-    return{
+    return {
         'total_quantity': total_quantity,
         'total_amount': total_amount
     }

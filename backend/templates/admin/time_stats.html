@@ -1,4 +1,4 @@
-{% extends 'admin/master.html' %} 
+{% extends 'admin/master.html' %}
 {% block body %}
 <div>
     <div class="d-flex justify-content-between align-items-center bg-white rounded-3 p-3 mt-3 shadow-sm">
@@ -119,19 +119,19 @@
 
     <script>
         const formatCurrency = (value) => {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+            return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(value);
         };
 
         function drawChart(ctx, labels, data, type = "bar") {
             const isPie = type === 'pie' || type === 'doughnut';
-            
+
             const options = {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -139,7 +139,7 @@
                                 if (context.parsed.y !== null) {
                                     label += formatCurrency(context.parsed.y || context.parsed);
                                 } else {
-                                     label += formatCurrency(context.parsed);
+                                    label += formatCurrency(context.parsed);
                                 }
                                 return label;
                             }
@@ -192,20 +192,47 @@
         const labelProduct = [];
         const dataProduct = [];
 
-        {% for r in revenue_by_room_name %}
-            labelTimes.push('{{r[1]}}');
-            dataTimes.push({{r[2]}});
-        {% endfor %}
+        {%
+            for r in revenue_by_room_name %
+        }
+        labelTimes.push('{{r[1]}}');
+        dataTimes.push({
+        {
+            r[2]
+        }
+        })
+        ;
+        {%
+            endfor %
+        }
 
-        {% for r in revenue_by_room_type %}
-            labelRoomType.push('{{r[0]}}');
-            dataRoomType.push({{r[1]}});
-        {% endfor %}
+        {%
+            for r in revenue_by_room_type %
+        }
+        labelRoomType.push('{{r[0]}}');
+        dataRoomType.push({
+        {
+            r[1]
+        }
+        })
+        ;
+        {%
+            endfor %
+        }
 
-        {% for r in revenue_by_product %}
-            labelProduct.push('{{r[0]}}');
-            dataProduct.push({{r[1]}});
-        {% endfor %}
+        {%
+            for r in revenue_by_product %
+        }
+        labelProduct.push('{{r[0]}}');
+        dataProduct.push({
+        {
+            r[1]
+        }
+        })
+        ;
+        {%
+            endfor %
+        }
 
         const ctx1 = document.getElementById("myChartTime").getContext('2d');
         const ctx2 = document.getElementById("myChartRoom").getContext('2d');

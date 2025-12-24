@@ -10,11 +10,11 @@ def serve_all_orders():
     try:
         pending_orders = Order.query.filter(Order.status == OrderStatus.PENDING)
         pending_orders = pending_orders.update({Order.status: OrderStatus.SERVED})
-        
+
         db.session.commit()
-        
+
         return jsonify({
-            'status': 200, 
+            'status': 200,
             'message': "All pending orders have been marked as served.",
         }), 200
     except Exception as e:

@@ -57,7 +57,7 @@ class MyAdminIndexView(AdminIndexView):
         pending_count = Order.query.filter(Order.status == OrderStatus.PENDING).count()
         return self.render('admin/index.html', pending_count=pending_count)
 
-    
+
 class StatsView(BaseView):
     @expose('/')
     def index(self):
@@ -73,7 +73,7 @@ class StatsView(BaseView):
 
     def is_accessible(self) -> bool:
         return current_user.is_authenticated and current_user.is_admin
-    
+
 
 class ReturnHomeView(BaseView):
     @expose('/')

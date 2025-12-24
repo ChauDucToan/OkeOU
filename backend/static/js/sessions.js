@@ -24,7 +24,7 @@ function searchSessions() {
     const status = document.getElementById('statusSelect').value;
 
     const url = new URL(window.location.href);
-    
+
     if (keyword) url.searchParams.set('kw', keyword);
     else url.searchParams.delete('kw');
 

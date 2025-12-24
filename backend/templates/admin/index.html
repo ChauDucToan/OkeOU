@@ -5,31 +5,31 @@
 {% if current_user.is_authenticated and current_user.is_admin %}
 <h1 class="text-center text-success">Kiểm tra hệ thống</h1>
 <div class="row">
-	<div class="col-md-4">
-		<div class="card text-white bg-info mb-3">
-			<div class="card-header">Đơn hàng đang chờ xử lý</div>
-			<div class="card-body">
-				<h5 class="card-title">{{ pending_count }}</h5>
-				<p class="card-text">Số đơn hàng đang chờ xử lý trong hệ thống.</p>
-				<button onclick="servedAll()" class="btn btn-light">Chuyển thành served</button>
-			</div>
-		</div>
-	</div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Đơn hàng đang chờ xử lý</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ pending_count }}</h5>
+                <p class="card-text">Số đơn hàng đang chờ xử lý trong hệ thống.</p>
+                <button onclick="servedAll()" class="btn btn-light">Chuyển thành served</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% else %}
 <h2 class="text-success text-center">ĐĂNG NHẬP QUẢN TRỊ</h2>
 
 <form method="post" action="/login?next=/admin">
-	<div class="form-group">
-		<label for="name">Tên đăng nhập:</label>
-		<input type="text" class="form-control" placeholder="Tên đăng nhập" id="name" name="username" required />
-	</div>
-	<div class="form-group">
-		<label for="pwd">Mật khẩu:</label>
-		<input type="password" class="form-control" placeholder="Mật khẩu" id="pwd" name="password" required />
-	</div>
-	<button type="submit" class="btn btn-primary">Đăng nhập</button>
+    <div class="form-group">
+        <label for="name">Tên đăng nhập:</label>
+        <input type="text" class="form-control" placeholder="Tên đăng nhập" id="name" name="username" required/>
+    </div>
+    <div class="form-group">
+        <label for="pwd">Mật khẩu:</label>
+        <input type="password" class="form-control" placeholder="Mật khẩu" id="pwd" name="password" required/>
+    </div>
+    <button type="submit" class="btn btn-primary">Đăng nhập</button>
 </form>
 {% endif %}
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>

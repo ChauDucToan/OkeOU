@@ -4,6 +4,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from backend.daos.user_daos import create_user, get_users
 from backend.utils.user_utils import auth_user
 
+
 @app.route('/login')
 def loginView():
     return render_template('login.html')
@@ -62,10 +63,10 @@ def register_process():
 
     try:
         create_user(name=data.get('name'),
-                     username=data.get('username'),
-                     password=password,
-                     email=email,
-                     phoneNumber=phoneNumber)
+                    username=data.get('username'),
+                    password=password,
+                    email=email,
+                    phoneNumber=phoneNumber)
         return redirect('/login')
     except Exception as ex:
         return render_template('register.html', err_msg=str(ex))

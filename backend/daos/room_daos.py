@@ -1,6 +1,7 @@
 from backend.models import Room
 from backend import app
 
+
 def get_rooms(room_id=None, status=None, kw=None):
     r = Room.query
     if kw:

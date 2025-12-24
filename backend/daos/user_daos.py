@@ -4,13 +4,14 @@ from backend import db
 from backend.utils.general_utils import hash_password
 from sqlalchemy.exc import IntegrityError
 
+
 def get_users(user_id=None, name=None, username=None,
               phone=None, email=None, role=None):
     u = User.query
 
     if user_id:
         u = u.filter(User.id.__eq__(user_id))
-    
+
     if name:
         u = u.filter(User.name.contains(name.strip()))
 
@@ -30,8 +31,8 @@ def get_users(user_id=None, name=None, username=None,
 
 
 def create_user(name, username, password, email,
-             phoneNumber,
-             avatar="https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
+                phoneNumber,
+                avatar="https://res.cloudinary.com/dtcjixfyd/image/upload/v1765710152/no-profile-picture-15257_kw9uht.png"):
     u = User(name=name,
              username=username.strip(),
              password=hash_password(password),
@@ -49,8 +50,8 @@ def create_user(name, username, password, email,
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
-            
+
 
 def get_user_from_session(session_id):
-    return get_users(user_id = Session.query.get(session_id)
-                        .user_id).first()
+    return get_users(user_id=Session.query.get(session_id)
+                     .user_id).first()

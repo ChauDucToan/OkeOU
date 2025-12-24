@@ -18,12 +18,12 @@ function loadTimeline() {
     occupiedIntervals = [];
 
     fetch(`/api/bookings/occupies/${roomId}?date=${dateInput}`)
-    .then(res => res.json())
-    .then(data => {
-        occupiedRoomData = data;
-        drawOccupiedSlots(data);
-    })
-    .catch(err => console.error(err));
+        .then(res => res.json())
+        .then(data => {
+            occupiedRoomData = data;
+            drawOccupiedSlots(data);
+        })
+        .catch(err => console.error(err));
 }
 
 function drawOccupiedSlots(data) {
@@ -35,7 +35,7 @@ function drawOccupiedSlots(data) {
         const start = new Date(range[0]);
         const end = new Date(range[1]);
 
-        occupiedIntervals.push({ start: start, end: end });
+        occupiedIntervals.push({start: start, end: end});
 
         const dayStart = new Date(dateInput + 'T00:00:00');
         const dayEnd = new Date(dateInput + 'T23:59:59');
@@ -48,7 +48,7 @@ function drawOccupiedSlots(data) {
         const totalMinutesInDay = 24 * 60;
         const startMinutes = drawStart.getHours() * 60 + drawStart.getMinutes();
         const endMinutes = drawEnd.getHours() * 60 + drawEnd.getMinutes();
-        
+
         const leftPercent = (startMinutes / totalMinutesInDay) * 100;
         const widthPercent = ((endMinutes - startMinutes) / totalMinutesInDay) * 100;
 
@@ -56,10 +56,10 @@ function drawOccupiedSlots(data) {
         bar.className = 'occupied-bar';
         bar.style.left = leftPercent + '%';
         bar.style.width = widthPercent + '%';
-        
+
         const timeString = `${drawStart.getHours()}:${String(drawStart.getMinutes()).padStart(2, '0')} - ${drawEnd.getHours()}:${String(drawEnd.getMinutes()).padStart(2, '0')}`;
         bar.setAttribute('title', 'Đã đặt: ' + timeString);
-    
+
         tracksContainer.appendChild(bar);
     }
 }
@@ -93,8 +93,8 @@ function validateAndSubmit() {
     }
 
     if (userStart < new Date()) {
-            showError("Không thể đặt phòng trong quá khứ.");
-            return;
+        showError("Không thể đặt phòng trong quá khứ.");
+        return;
     }
 
     let conflict = false;
@@ -111,7 +111,7 @@ function validateAndSubmit() {
     }
 
 
-    submitBookingAPI(); 
+    submitBookingAPI();
 }
 
 function showError(msg) {
@@ -123,34 +123,34 @@ function showError(msg) {
 
 function submitBookingAPI() {
     const formData = new FormData(document.getElementById('bookingForm'));
-    
+
     const dateStr = document.getElementById('selectedDate').value;
-    
-    const timeStart = formData.get('start_time'); 
+
+    const timeStart = formData.get('start_time');
     const timeEnd = formData.get('end_time');
 
 
-    const fullStartTime = `${dateStr} ${timeStart}:00`; 
+    const fullStartTime = `${dateStr} ${timeStart}:00`;
     const fullEndTime = `${dateStr} ${timeEnd}:00`;
 
     formData.set('start_time', fullStartTime);
     formData.set('end_time', fullEndTime);
-    
-    fetch('/api/bookings/confirm', { 
+
+    fetch('/api/bookings/confirm', {
         method: 'POST',
         body: formData
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 200) {
-            window.location.href = `/bookings/${data.booking_id}/payment`;
-        } else {
-            showError(data.msg || "Có lỗi xảy ra từ hệ thống.");
-        }
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 200) {
+                window.location.href = `/bookings/${data.booking_id}/payment`;
+            } else {
+                showError(data.msg || "Có lỗi xảy ra từ hệ thống.");
+            }
+        });
 }
 
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('selectedDate').value = today;
     loadTimeline();

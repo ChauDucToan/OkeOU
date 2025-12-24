@@ -6,11 +6,12 @@
     background-color: var(--bs-danger);
     opacity: 0.85;
     top: 0;
-    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
     background-size: 1rem 1rem;
     cursor: not-allowed;
     transition: all 0.3s;
 }
+
 .occupied-bar:hover {
     opacity: 1;
     transform: scaleY(1.1);
@@ -23,15 +24,18 @@
 .payment-option input[type="radio"] {
     display: none;
 }
+
 .payment-option label {
     transition: all 0.2s;
     border: 1px solid #dee2e6;
 }
+
 .payment-option input[type="radio"]:checked + label {
     border-color: #0d6efd;
     background-color: transparent;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
+
 .cursor-pointer {
     cursor: pointer;
 }
@@ -41,9 +45,10 @@
 .transition-card {
     transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .transition-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
 }
 
 /* Select Animation Styles */
@@ -53,10 +58,12 @@
     border: 2px solid #eee;
     cursor: pointer;
 }
+
 .select-anim:hover {
     border-color: #0d6efd;
     background-color: #f8f9fa;
 }
+
 .select-anim:focus {
     border-color: #0d6efd;
     box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
@@ -101,10 +108,21 @@ body {
     overflow-x: hidden;
 }
 
-.text-brand-neon { color: var(--brand-neon) !important; }
-.text-brand-pink { color: var(--brand-pink) !important; }
-.text-brand-purple { color: var(--brand-purple) !important; }
-.bg-brand-dark { background-color: var(--brand-dark); }
+.text-brand-neon {
+    color: var(--brand-neon) !important;
+}
+
+.text-brand-pink {
+    color: var(--brand-pink) !important;
+}
+
+.text-brand-purple {
+    color: var(--brand-purple) !important;
+}
+
+.bg-brand-dark {
+    background-color: var(--brand-dark);
+}
 
 .glass-effect {
     background: rgba(255, 255, 255, 0.05);
@@ -150,11 +168,11 @@ body {
 
 .navbar .nav-link.active {
     color: #ffffff !important;
-    
-    background: rgba(255, 255, 255, 0.15) !important; 
+
+    background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    
+
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -174,11 +192,20 @@ body {
 
 /* Animations */
 @keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
 }
+
 .blob {
     position: absolute;
     filter: blur(70px);
@@ -186,9 +213,32 @@ body {
     opacity: 0.4;
     animation: blob 7s infinite;
 }
-.blob-1 { top: 0; left: -10px; width: 300px; height: 300px; background-color: var(--brand-purple); }
-.blob-2 { top: 0; right: -10px; width: 300px; height: 300px; background-color: cyan; animation-delay: 2s; }
-.blob-3 { bottom: -30px; left: 80px; width: 300px; height: 300px; background-color: var(--brand-pink); animation-delay: 4s; }
+
+.blob-1 {
+    top: 0;
+    left: -10px;
+    width: 300px;
+    height: 300px;
+    background-color: var(--brand-purple);
+}
+
+.blob-2 {
+    top: 0;
+    right: -10px;
+    width: 300px;
+    height: 300px;
+    background-color: cyan;
+    animation-delay: 2s;
+}
+
+.blob-3 {
+    bottom: -30px;
+    left: 80px;
+    width: 300px;
+    height: 300px;
+    background-color: var(--brand-pink);
+    animation-delay: 4s;
+}
 
 /* Form Controls Dark Mode Override */
 .form-control, .form-select {
@@ -196,19 +246,21 @@ body {
     border: 1px solid #4b5563;
     color: white;
 }
+
 .form-control:focus, .form-select:focus {
     background-color: rgba(15, 23, 42, 0.8);
     border-color: var(--brand-neon);
     color: white;
     box-shadow: 0 0 0 0.25rem rgba(0, 242, 254, 0.25);
 }
+
 .form-control::placeholder {
     color: #9ca3af;
 }
 
 .dropdown-menu-glass {
     background: rgba(255, 255, 255, 0.15) !important; /* Nền trong suốt */
-    backdrop-filter: blur(15px);        /* Làm mờ hậu cảnh mạnh hơn chút để dễ đọc chữ */
+    backdrop-filter: blur(15px); /* Làm mờ hậu cảnh mạnh hơn chút để dễ đọc chữ */
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.2); /* Viền mỏng */
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Bóng đổ để tách biệt nền */
@@ -239,8 +291,8 @@ body {
 
 /* 1. Class áp dụng cho Table */
 .table-glass {
-    --bs-table-bg: transparent;       /* Xóa nền mặc định của Bootstrap */
-    --bs-table-color: #fff;           /* Chữ màu trắng */
+    --bs-table-bg: transparent; /* Xóa nền mặc định của Bootstrap */
+    --bs-table-color: #fff; /* Chữ màu trắng */
     --bs-table-border-color: rgba(255, 255, 255, 0.2); /* Đường kẻ mờ */
     margin-bottom: 0;
 }
@@ -265,7 +317,7 @@ body {
 }
 
 .form-check-input {
-    background-color: transparent; 
+    background-color: transparent;
     border: 1px solid rgba(255, 255, 255, 0.5); /* Viền trắng mờ */
     width: 1.2em;
     height: 1.2em;
@@ -282,7 +334,7 @@ body {
 
 /* 3. Xóa cái viền focus mặc định xấu xí của Bootstrap */
 .form-check-input:focus {
-    box-shadow: none; 
+    box-shadow: none;
     border-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -345,19 +397,19 @@ body {
 
 .glass-modal {
     /* 1. Gán đè biến màu nền của Bootstrap */
-    --bs-modal-bg: rgba(60, 60, 60, 0.6); 
-    
+    --bs-modal-bg: rgba(60, 60, 60, 0.6);
+
     /* 2. Gán đè biến màu viền */
     --bs-modal-border-color: rgba(255, 255, 255, 0.2);
-    
+
     /* 3. Gán đè biến màu chữ (nếu muốn chắc chắn trắng) */
     --bs-modal-color: #ffffff;
-    
+
     /* 4. Riêng hiệu ứng mờ (blur) thì Bootstrap chưa có biến, 
        nên ta vẫn phải viết thủ công thuộc tính này */
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    
+
     /* Đổ bóng */
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }

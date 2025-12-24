@@ -13,8 +13,8 @@ Trang chủ
         </div>
         <div class="col-2">
             <button type="button" class="btn btn-primary w-100"
-                data-bs-toggle="collapse" data-bs-target="#filter"
-                aria-expanded="false" aria-controls="filter">
+                    data-bs-toggle="collapse" data-bs-target="#filter"
+                    aria-expanded="false" aria-controls="filter">
                 <i class="bi bi-filter"></i>
                 Lọc
             </button>
@@ -32,28 +32,37 @@ Trang chủ
                 <div class="col-md-8 mb-3">
                     <h4>Bộ lọc nâng cao:</h4>
                     <div class="d-flex flex-wrap gap-3">
-                        
+
                     </div>
-                    <label for="range2" class="form-label">Giá tối đa theo giờ: &lt; <span id="rangeValue2">{{ request.args.get('price_max', 500000) }}</span> VND</label>
-                    <input type="range" class="form-range" min="0" max="500000" value="{{ request.args.get('price_max', 500000) }}" step="25000" id="range2"
+                    <label for="range2" class="form-label">Giá tối đa theo giờ: &lt; <span id="rangeValue2">{{ request.args.get('price_max', 500000) }}</span>
+                        VND</label>
+                    <input type="range" class="form-range" min="0" max="500000"
+                           value="{{ request.args.get('price_max', 500000) }}" step="25000" id="range2"
                            oninput="handleSliderChange(this, 'rangeValue2')">
-                    <label for="range3" class="form-label">Sức chứa: &gt; <span id="rangeValue3">{{ request.args.get('capacity', 1) }}</span> người</label>
-                    <input type="range" class="form-range" min="1" max="15" value="{{ request.args.get('capacity', 1) }}" step="1" id="range3"
+                    <label for="range3" class="form-label">Sức chứa: &gt; <span id="rangeValue3">{{ request.args.get('capacity', 1) }}</span>
+                        người</label>
+                    <input type="range" class="form-range" min="1" max="15"
+                           value="{{ request.args.get('capacity', 1) }}" step="1" id="range3"
                            oninput="handleSliderChange(this, 'rangeValue3')">
                 </div>
                 <div class="col-md-4 mb-3">
                     <h4>Sắp xếp theo:</h4>
                     <select id="sortSelect" class="form-select select-anim" onchange="searchRooms()">
-                        <option value="name_asc" {% if request.args.get('sort') == 'name_asc' %}selected{% endif %}>Tên (A-Z)</option>
-                        <option value="name_desc" {% if request.args.get('sort') == 'name_desc' %}selected{% endif %}>Tên (Z-A)</option>
-                        <option value="price_asc" {% if request.args.get('sort') == 'price_asc' %}selected{% endif %}>Giá thấp - cao</option>
-                        <option value="price_desc" {% if request.args.get('sort') == 'price_desc' %}selected{% endif %}>Giá cao - thấp</option>
+                        <option value="name_asc" {% if request.args.get(
+                        'sort') == 'name_asc' %}selected{% endif %}>Tên (A-Z)</option>
+                        <option value="name_desc" {% if request.args.get(
+                        'sort') == 'name_desc' %}selected{% endif %}>Tên (Z-A)</option>
+                        <option value="price_asc" {% if request.args.get(
+                        'sort') == 'price_asc' %}selected{% endif %}>Giá thấp - cao</option>
+                        <option value="price_desc" {% if request.args.get(
+                        'sort') == 'price_desc' %}selected{% endif %}>Giá cao - thấp</option>
                     </select>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-6 mb-3">
-                    <button class="btn btn-secondary w-100" type="button" onclick="resetFilters()">Đặt lại bộ lọc</button>
+                    <button class="btn btn-secondary w-100" type="button" onclick="resetFilters()">Đặt lại bộ lọc
+                    </button>
                 </div>
                 <div class="col-6 mb-3">
                     <button class="btn btn-primary w-100" type="button" onclick="searchRooms()">Áp dụng bộ lọc</button>
@@ -75,7 +84,7 @@ Trang chủ
                     <p class="card-text">Sức chứa: {{ r.capacity }} người</p>
                     <p class="card-text">Giá theo giờ: {{ r.type.hourly_price }} VND</p>
                     <a class="btn btn-danger"
-                        href="/rooms/{{ r.id }}">Đặt phòng ngay
+                       href="/rooms/{{ r.id }}">Đặt phòng ngay
                     </a>
                 </div>
             </div>
