@@ -29,8 +29,6 @@ app.secret_key = 'OkeOU_ChauDucToan_NguyenNgocLinh_NgoDoThanh'
 app.config["SQLALCHEMY_DATABASE_URI"] = f"{database_url}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 6
-app.config["MOMO_ACCESS_KEY"] = momo_access_key
-app.config["MOMO_SECRET_KEY"] = momo_secret_key
 
 db = SQLAlchemy(app=app)
 login = LoginManager(app=app)

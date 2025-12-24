@@ -26,14 +26,7 @@ class BookingHandler(PaymentHandler):
     def init_payment_and_get_amount(self, request_data, session_data, payment_method, ref):
         booking_id = request_data.get('booking_id')
         booking = Booking.query.filter_by(id=booking_id).first()
-
-        if not booking:
-            raise Exception("Booking does not exist")
-
-        booking_status = BookingStatus.CONFIRMED
-
-        new_session = convert_booking_to_session(booking_id)
-
+        booking.ref = ref
         db.session.commit()
         amount = booking.deposit_amount
         return amount

@@ -217,15 +217,95 @@ class VNPayPaymentStrategy(PaymentStrategy):
         return PaymentMethod.VNPAY
 
 
+class ZaloPayPaymentStrategy(PaymentStrategy):
+    def __init__(self, payment_type):
+        super().__init__(payment_type=payment_type)
+        self.app_id = os.getenv("ZLP_MERCHANT_APP_ID")
+        self.key1 = os.getenv("ZLP_MERCHANT_KEY1")
+        self.key2 = os.getenv("ZLP_MERCHANT_KEY2")
+        self.endpoint = os.getenv("ZLP_MERCHANT_ENDPOINT")
+        self.gateway_endpoint = os.getenv("ZLP_MERCHANT_GATEWAY_ENDPOINT")
+        self.callback_url = os.getenv("ZLP_MERCHANT_CALLBACK_URL") + payment_type
+        self.redirect_url = os.getenv("ZLP_REDIRECT_URL")
+
+    def get_mac(self, data, key):
+        mac = hmac.new(
+            key.encode("utf-8"),
+            data.encode("utf-8"),
+            hashlib.sha256
+        ).hexdigest()
+
+        return mac
+
+    def create_payment(self, amount, ref):
+        inputData = {
+            "app_id": int(self.app_id),
+            "app_user": "OkeOU",
+            "app_trans_id": f"{datetime.now().strftime('%y%m%d')}_{ref}",
+            "app_time": int(datetime.now().timestamp() * 1000),
+            "expire_duration_seconds": 900,
+            "description": f"Giao dịch thanh toán cho {ref}",
+            "amount": amount,
+            "bank_code": "",
+            "embed_data": "{\"preferred_payment_method\": [\"zalopay_wallet\"]" + f",\"redirecturl\": \"{self.redirect_url}\"" +"}",
+            "item": '[]',
+            "callback_url": self.callback_url,
+        }
+
+        data = "|".join([
+            inputData["app_id"],
+            inputData["app_trans_id"],
+            inputData["app_user"],
+            str(inputData["amount"]),
+            str(inputData["app_time"]),
+            inputData["embed_data"],
+            inputData["item"],
+        ])
+        
+        inputData["mac"] = self.get_mac(data, self.key1)
+
+        try:
+            response = requests.post(self.endpoint + "/create", json=inputData)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                return {'payUrl': None, 'err_msg': response.text}
+        except Exception as e:
+            return {'payUrl': None, 'err_msg': str(e)}
+
+    def verify_payment(self, data):
+        data = "|".join([
+            data["appid"],
+            data["apptransid"],
+            data["pmcid"],
+            data["bankcode"],
+            data["amount"],
+            data["discountamount"],
+            data["status"],
+        ])
+
+        mac = self.get_mac(data, self.key2)
+        return hmac.compare_digest(mac, data['checksum'])
+
+    def get_payment_method(self):
+        return PaymentMethod.ZALOPAY
+
+    def get_payment_status(self, data):
+        ref = data['apptransid'].split('_')[1]
+
+        if data['status'] == '1':
+            return ref, "SUCCESS"
+        else:
+            return ref, "FAILED"
+
 class PaymentStrategyFactory:
     @staticmethod
     def get_strategy(method_name, payment_type):
         strategies = {
             "CASH": CashPaymentStrategy,
-            # "TRANSFER": TransferPaymentStrategy,
-            # "CARD": CardPaymentStrategy,
             "MOMO": MomoPaymentStrategy,
             "VNPAY": VNPayPaymentStrategy,
+            "ZALOPAY": ZaloPayPaymentStrategy,
         }
 
         strategy = strategies.get(method_name.upper())

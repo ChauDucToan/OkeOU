@@ -105,25 +105,25 @@ def return_ipn(method, payment_type):
         strategy.process_payment(data)
         # Xử lý thêm để hiện giao diện kêt quả thanh toán
         # if request.method == 'GET':
-        #     return render_template('xxx', success=True)
+        #     return render_template('xxx', data=data)
         return jsonify({'msg': 'Thanh toán thành công'}), 204
     except Exception as e:
         print(e)
         # Tng tự
         # if request.method == 'GET':
-        # return render_template('xxx', success=False)
+        # return render_template('xxx', data=data)
         return jsonify({'err_msg': "Lỗi hệ thống!!!"}), 500
 
 
-@app.route('/rooms-dashboard/')
+@app.route('/rooms-dashboard')
 def rooms():
-    return render_template('dashboard/rooms_dashboard.html',
+    return render_template('/room_dashboard.html',
                            get_rooms=load_rooms)
 
 
-@app.route('/payment/')
+@app.route('/payment')
 def payment_page():
     if current_user.role != UserRole.STAFF and current_user.role != UserRole.ADMIN:
-        return redirect("/rooms-dashboard")
+        return redirect("/room-dashboard")
     data = session.get('bill_detail')
     return render_template('payment.html', bill_detail=data, payment_methods=PaymentMethod)

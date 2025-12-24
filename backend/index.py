@@ -1,5 +1,5 @@
 from backend import app, login
-from flask import render_template, redirect, session
+from flask import render_template, redirect, request, session
 from flask_login import current_user
 from backend.daos.product_daos import load_products
 from backend.daos.room_daos import load_rooms
@@ -36,6 +36,15 @@ def load_user(pk):
     user = get_users(user_id=pk).first()
     return user
 
+@app.route('/api/callback', methods=['POST', 'GET'])
+def payment_callback():
+    data = {}
+    if request.method == 'POST':
+        data = request.json.get('data', {})
+    else:
+        data = request.args.to_dict()
+    print("Payment callback data:", data)
+    return "Callback received", 200
 
 if __name__ == '__main__':
     from backend import admin

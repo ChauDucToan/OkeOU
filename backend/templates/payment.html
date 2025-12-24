@@ -53,16 +53,16 @@
                         <p class="fw-semibold mb-1">{{bill_detail.room_fee}}</p>
                     </div>
 
-                    {% if bill_detail.discount > 0 %}
+                    {% if bill_detail.discount_rate > 0 %}
                     <div class="d-flex justify-content-between">
                         <p class="text-muted mb-1">Giảm giá KHTT:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.discount}}</p>
+                        <p class="fw-semibold mb-1">{{bill_detail.discount_rate}}</p>
                     </div>
                     {% endif %}
 
                     <div class="d-flex justify-content-between">
                         <p class="text-muted mb-1">Thuế VAT:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.vat}}</p>
+                        <p class="fw-semibold mb-1">{{bill_detail.vat_rate}}</p>
                     </div>
                     <div class="d-flex justify-content-between">
                         <p class="text-muted mb-1">Tiền cọc:</p>

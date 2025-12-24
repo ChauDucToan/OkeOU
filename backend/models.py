@@ -238,16 +238,11 @@ class PaymentStatus(GenericEnum):
     FAILED = 3
 
 
-class TransactionStatus(GenericEnum):
-    PENDING = 1
-    COMPLETED = 2
-    FAILED = 3
-    REFUNDED = 4
-
-
 class PaymentMethod(GenericEnum):
     CASH = 1
-    TRANSFER = 2
+    MOMO = 2
+    VNPAY = 3
+    ZALOPAY = 4
 
 
 class Receipt(BaseModel):
@@ -263,13 +258,9 @@ class Receipt(BaseModel):
 
 class Transaction(BaseModel):
     receipt_id = Column(String(100), ForeignKey(Receipt.id), nullable=False)
-    amount = Column(Float, nullable=False)
-    payment_method = Column(Enum(PaymentMethod), nullable=False)
-    status = Column(Enum(TransactionStatus), default=TransactionStatus.PENDING)
-
     transaction_code = Column(String(100), unique=True)
-    bank_code = Column(String(50))
-    card_type = Column(String(50))
+
+    amount = Column(Float, nullable=False)
 
     created_date = Column(DateTime, default=datetime.now)
     completed_date = Column(DateTime)
