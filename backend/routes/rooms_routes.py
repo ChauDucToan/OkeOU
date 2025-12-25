@@ -5,7 +5,7 @@ from backend import app, db
 from backend.daos.booking_daos import get_bookings
 from backend.daos.room_daos import get_rooms, load_rooms
 from backend.models import Booking, BookingStatus, Session, SessionStatus
-from backend.utils.booking_utils import cancel_pending_booking, convert_booking_to_session, create_booking
+from backend.utils.booking_utils import cancel_pending_booking, create_booking
 from backend.utils.general_utils import redirect_to_error
 from backend.utils.room_utils import filter_rooms
 from flask import render_template, redirect, request, jsonify

@@ -81,8 +81,12 @@ Trang chủ cho nhân viên
                     {% endif %}
                     <p class="card-text"> Thời gian bắt đầu: {{ s.start_time.strftime('%H:%M:%S %d-%m-%Y') }}</p>
                     <p class="card-text"> Thời gian kết thúc: {{ s.end_time.strftime('%H:%M:%S %d-%m-%Y') }}</p>
-                    <a href="/staffs/{{ s.id }}/order" class="btn btn-primary">Thêm dịch vụ</a>
-                    <a href="/api/sessions/{{ s.id }}/end_session" class="btn btn-danger">Kết thúc phiên</a>
+                    <a href="/staffs/{{ s.id }}/order" class="btn btn-primary {{ 'disabled' if s.status.name != 'ACTIVE' }}">Thêm dịch vụ</a>
+                    {% if s.status.name == 'BOOKED' %}
+                    <a href="/api/sessions/{{ s.id }}/begin_session" class="btn btn-danger">Bắt đầu phiên</a>
+                    {% else %}
+                    <a href="/api/sessions/{{ s.id }}/end_session" class="btn btn-danger {{ 'disabled' if s.status.name != 'ACTIVE' }}">Kết thúc phiên</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -96,20 +100,22 @@ Trang chủ cho nhân viên
     {% if pages > 1 %}
     <ul class="pagination mt-2">
         {% if current_page > 1 %}
-        <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page - 1}}"> Previous </a>
+        <li class="page-item"><a class="page-link glass-effect" href="#" onclick="pageinateSessions({{current_page - 1}})"> Previous </a>
         </li>
         {% else %}
         <li class="page-item disabled"><span class="page-link glass-effect"> Previous </span></li>
         {% endif %}
 
         {% for i in range(current_page, current_page + 3) %}
+        {% if i <= pages %}
         <li class="page-item {% if i == current_page %}active{% endif %}">
-            <a class="page-link glass-effect" href="/staffs?page={{i}}">{{ i }}</a>
+            <a class="page-link glass-effect" href="#" onclick="pageinateSessions({{i}})">{{ i }}</a>
         </li>
+        {% endif %}
         {% endfor %}
 
         {% if current_page < pages %}
-        <li class="page-item"><a class="page-link glass-effect" href="/staffs?page={{current_page + 1}}"> Next </a></li>
+        <li class="page-item"><a class="page-link glass-effect" href="#" onclick="pageinateSessions({{current_page + 1}})"> Next </a></li>
         {% else %}
         <li class="page-item disabled"><span class="page-link glass-effect"> Next </span></li>
         {% endif %}

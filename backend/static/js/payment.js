@@ -37,8 +37,8 @@ document.getElementById('paymentForm').addEventListener('submit', async function
             if (data.order_url) {
                 window.location.href = data.order_url;
             } else {
-                // Hoặc chuyển hướng về trang thành công
-                window.location.href = data.order_url;
+                alert('Thanh toán không thành công, vui lòng thử lại');
+                window.location.href = `/booking/${formData.get('booking_id')}`;
             }
         } else {
             alert(data.message || 'Có lỗi xảy ra');

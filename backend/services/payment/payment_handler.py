@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 
-from flask_login import current_user
-
 from backend import db
 
-from backend.models import BookingStatus, PaymentStatus, Receipt, Transaction, TransactionStatus
+from backend.models import PaymentStatus, Receipt, Transaction, TransactionStatus
 
 from backend.utils import payment_utils
 from backend.daos import session_daos

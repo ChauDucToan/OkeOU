@@ -96,7 +96,7 @@ Trang chủ
     {% if pages > 1 %}
     <ul class="pagination mt-2">
         {% for i in range(1, pages + 1) %}
-        <li class="page-item"><a class="page-link glass-effect" href="{{ url_for('rooms_preview', 
+        <li class="page-item"><a class="page-link glass-effect" href="{{ url_for('staff_rooms_preview', 
                                                     page=i, 
                                                     kw=request.args.get('kw'), 
                                                     price_max=request.args.get('price_max'), 

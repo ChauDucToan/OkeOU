@@ -1,11 +1,11 @@
 let debounceTimer;
-const DEBOUNCE_DELAY = 2000;
+const DEBOUNCE_DELAY = 1000;
 
 function triggerDebounce() {
     clearTimeout(debounceTimer);
 
     debounceTimer = setTimeout(() => {
-        searchRooms();
+        searchSessions();
     }, DEBOUNCE_DELAY);
 }
 
@@ -39,5 +39,11 @@ function searchSessions() {
 
     url.searchParams.set('page', 1);
 
+    window.location.href = url.toString();
+}
+
+function pageinateSessions(page) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
     window.location.href = url.toString();
 }
