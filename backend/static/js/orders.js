@@ -64,6 +64,7 @@ function updateOrder(sessionId, id, obj) {
                 let itemAmount = Number(price) * obj.value;
 
                 row.querySelector('.order-product-amount').innerText = itemAmount.toLocaleString('en');
+                location.reload()
             } else {
                 alert(result.body.err_msg || 'Lỗi hệ thống')
                 obj.value = obj.defaultValue;
@@ -97,7 +98,7 @@ function deleteOrder(sessionId, id) {
 
             let item = document.getElementById(`cart${id}`);
             item.style.display = 'none';
-
+            location.reload()
             if (data.total_quantity === 0)
                 location.reload()
         })
