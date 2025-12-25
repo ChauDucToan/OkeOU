@@ -192,47 +192,20 @@
         const labelProduct = [];
         const dataProduct = [];
 
-        {%
-            for r in revenue_by_room_name %
-        }
+        {% for r in revenue_by_room_name %}
         labelTimes.push('{{r[1]}}');
-        dataTimes.push({
-        {
-            r[2]
-        }
-        })
-        ;
-        {%
-            endfor %
-        }
+        dataTimes.push({{r[2]}});
+        {% endfor %}
 
-        {%
-            for r in revenue_by_room_type %
-        }
+        {% for r in revenue_by_room_type %}
         labelRoomType.push('{{r[0]}}');
-        dataRoomType.push({
-        {
-            r[1]
-        }
-        })
-        ;
-        {%
-            endfor %
-        }
+        dataRoomType.push({{r[1]}});
+        {% endfor %}
 
-        {%
-            for r in revenue_by_product %
-        }
+        {% for r in revenue_by_product %}
         labelProduct.push('{{r[0]}}');
-        dataProduct.push({
-        {
-            r[1]
-        }
-        })
-        ;
-        {%
-            endfor %
-        }
+        dataProduct.push({{r[1]}});
+        {% endfor %}
 
         const ctx1 = document.getElementById("myChartTime").getContext('2d');
         const ctx2 = document.getElementById("myChartRoom").getContext('2d');
