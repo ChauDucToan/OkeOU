@@ -66,7 +66,8 @@ def create_payment(method, payment_type):
     result = strategy.create_payment(amount=str(int(float(amount))), ref=ref)
 
     if strategy.get_payment_method() == PaymentMethod.CASH:
-        paid_amount = float(request.json.get('paid_amount', 0))
+        paid_amount = float(request.form.get('amount', 0))
+        print(paid_amount, amount)
         if paid_amount < float(amount):
             return jsonify({'err_msg': 'Không đủ tiền.'}), 400
         strategy.process_payment({"ref": ref})

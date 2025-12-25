@@ -21,18 +21,15 @@ function pay(payment_type) {
     }
 
     if (confirm("Bạn chắc chắn thanh toán?") === true) {
-        let requestBody = {};
+        let requestBody = new FormData;
 
         if (method === "CASH") {
-            requestBody.paid_amount = paidAmount;
+            requestBody.set("amount", paidAmount);
         }
 
         fetch(`/api/payment/create/${method}/${payment_type}`, {
             method: "post",
-            body: JSON.stringify(requestBody),
-            headers: {
-                "Content-Type": "application/json",
-            },
+            body: requestBody
         })
         .then((res) => res.json().then((data) => ({ status: res.status, body: data})))
         .then((result) => {

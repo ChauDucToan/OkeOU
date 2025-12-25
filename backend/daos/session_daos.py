@@ -1,4 +1,4 @@
-from backend.models import Receipt, Session
+from backend.models import Receipt, Session, Transaction
 from backend import app
 
 
@@ -34,6 +34,11 @@ def load_session(user_id=None, status=None, start_date=None, end_date=None, page
     return s.all()
 
 
-def get_session_by_receipt_ref(ref):
-    receipt = Receipt.query.filter(Receipt.ref == ref).first()
+def get_session_by_transaction_ref(ref):
+    transaction = Transaction.query.filter(Transaction.id == ref).first()
+    if not transaction:
+        return None
+    receipt = Receipt.query.filter(Receipt.id == transaction.receipt_id).first()
+    if not receipt:
+        return None
     return get_sessions(session_id=receipt.session_id).first()

@@ -46,8 +46,7 @@ class BookingHandler(PaymentHandler):
     def update_db(self, ref, status):
         transaction = Transaction.query.filter_by(receipt_id=ref).first()
         if not transaction:
-            print(ref)
-            raise ValueError("Không tìm thấy giao dịch")
+            return
         transaction.status = TransactionStatus.COMPLETED if status == "COMPLETED" else TransactionStatus.FAILED
 
         try:
@@ -63,7 +62,7 @@ class CheckoutHandler(PaymentHandler):
             raise ValueError("Phiên thanh toán hết hạn")
         session_id = bill_detail['session_id']
         receipt_id = Receipt.query.filter(Receipt.session_id == session_id).first().id
-        payment_utils.update_receipt_ref(id=receipt_id, ref=ref)
+        payment_utils.update_transaction_ref(id=receipt_id, ref=ref, amount = bill_detail['final_total'])
         amount = bill_detail['final_total']
         return amount
 
@@ -76,8 +75,8 @@ class CheckoutHandler(PaymentHandler):
     def update_db(self, ref, status):
         status = self.get_payment_status(status)
         if status == PaymentStatus.COMPLETED:
-            payment_utils.process_payment(session_id=session_daos.get_session_by_receipt_ref(ref=ref).id)
-        payment_utils.change_receipt_status(ref=ref, status=status)
+            payment_utils.process_payment(session_id=session_daos.get_session_by_transaction_ref(ref=ref).id)
+        payment_utils.change_transaction_status(ref=ref, status=status)
 
 
 class PaymentHandlerFactory:

@@ -23,6 +23,7 @@ document.getElementById('paymentForm').addEventListener('submit', async function
     });
 
     const url = `/api/payment/create/${method}/booking`;
+    console.log('Submitting to URL:', url);
 
     try {
         const response = await fetch(url, {

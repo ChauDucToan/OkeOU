@@ -59,8 +59,8 @@ class CashPaymentStrategy(PaymentStrategy):
 class MomoPaymentStrategy(PaymentStrategy):
     def __init__(self, payment_type):
         super().__init__(payment_type)
-        self.accessKey = app.config["MOMO_ACCESS_KEY"]
-        self.secretKey = app.config["MOMO_SECRET_KEY"]
+        self.accessKey = os.getenv("MOMO_ACCESS_KEY")
+        self.secretKey = os.getenv("MOMO_SECRET_KEY")
         self.endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
         self.ipnUrl = f"https://uniramous-earline-colorational.ngrok-free.dev/api/ipn/momo/{payment_type}"
         self.redirectUrl = "http://localhost:5000/"

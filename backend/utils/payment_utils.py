@@ -1,10 +1,10 @@
 from flask_login import current_user
 from backend.daos.payment_daos import get_payments
 from backend.daos.session_daos import get_sessions
-from backend.models import Receipt, ReceiptDetails, Session
+from backend.models import Receipt, ReceiptDetails, Session, TransactionStatus
 from backend import db
 from backend.daos.user_daos import get_users
-from backend.models import LoyalCustomer, CustomerCardUsage, OrderStatus, Order
+from backend.models import LoyalCustomer, CustomerCardUsage, OrderStatus, Order, Transaction
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 
@@ -56,8 +56,11 @@ def create_receipt(session_id, staff_id, payment_method):
         raise Exception(str(ie.orig))
 
 
-def change_receipt_status(ref, status):
-    receipt = Receipt.query.filter(Receipt.ref == ref).first()
+def change_transaction_status(ref, status):
+    transaction = Transaction.query.filter(Transaction.id == ref).first()
+    transaction.status = TransactionStatus[str(status.name)]
+
+    receipt = Receipt.query.filter(Receipt.id == transaction.receipt_id).first()
     receipt.status = status
     try:
         db.session.commit()
@@ -66,9 +69,13 @@ def change_receipt_status(ref, status):
         print(f"Lỗi lưu DB: {e}")
 
 
-def update_receipt_ref(id, ref):
-    receipt = Receipt.query.get(id)
-    receipt.ref = ref
+def update_transaction_ref(id, ref, amount):
+    transaction = Transaction(
+        id = ref,
+        receipt_id = id,
+        amount = amount,
+    )
+    db.session.add(transaction)
     try:
         db.session.commit()
     except Exception as e:
