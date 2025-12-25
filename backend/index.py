@@ -1,5 +1,5 @@
 from backend import app, login
-from flask import render_template, redirect, request, session
+from flask import render_template, redirect, session
 from flask_login import current_user
 from backend.daos.product_daos import load_products
 from backend.daos.room_daos import load_rooms

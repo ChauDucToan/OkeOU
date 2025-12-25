@@ -151,7 +151,7 @@ class VNPayPaymentStrategy(PaymentStrategy):
         self.vnp_ReturnUrl = f"http://localhost:5000/api/ipn/vnpay/{payment_type}"
 
     def create_payment(self, amount, ref):
-        ip_addr = '127.0.0.1'  # Chỗ này hình như phải lấy ip của nguoi dùng
+        ip_addr = '127.0.0.1'
         vnp_Amount = int(float(amount) * 100)
         inputData = {
             "vnp_Version": "2.1.0",
