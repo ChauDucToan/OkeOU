@@ -1,6 +1,6 @@
 import math
 from datetime import datetime
-from flask import redirect, render_template, request, session
+from flask import redirect, render_template, request
 from flask_login import current_user, logout_user
 from backend import app, db
 from backend.daos.category_daos import get_categories
@@ -15,19 +15,12 @@ from backend.utils.room_utils import filter_rooms
 @app.route('/staffs')
 @user_role_required(roles=[UserRole.STAFF, UserRole.ADMIN])
 def staff_preview():
-    data = request.args
-    page = int(data.get("page", 1))
-    page_size = app.config['PAGE_SIZE']
-
     sessions = get_sessions(status=[SessionStatus.ACTIVE])
 
-    count = sessions.count()
-    if page:
-        start = (page - 1) * page_size
-        sessions = sessions.slice(start, start + page_size)
+    booking_sessions = get_sessions(status=[SessionStatus.BOOKED])
 
-    return render_template('/staff/index.html', sessions=sessions.all(),
-                           pages=math.ceil(count / page_size), current_page=page)
+    return render_template('/staff/index.html', sessions=sessions.all(), 
+                           booking_sessions=booking_sessions.all())
 
 
 @app.route('/staffs/orders')

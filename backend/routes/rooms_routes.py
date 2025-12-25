@@ -149,6 +149,10 @@ def update_booking_status():
         return jsonify({'err_msg': 'Booking not found'}), 404
 
     booking.status = BookingStatus[new_status]
+    time_del = booking.scheduled_end_time - booking.scheduled_start_time
+    amount = time_del.total_seconds() / 3600 * booking.room.type.hourly_price
+    booking.deposit_amount = amount
+
 
     session = Session(
         start_time=booking.scheduled_start_time,
@@ -161,9 +165,6 @@ def update_booking_status():
     try:
         db.session.add(session)
         db.session.commit()
-
-        time_del = booking.scheduled_end_time - booking.scheduled_start_time
-        amount = time_del.total_seconds() / 3600 * session.room.type.hourly_price
 
         return jsonify({'status': 200, 'msg': 'Booking status updated successfully', 'session_id': session.id, 'amount': amount}), 200
     except Exception as ex:

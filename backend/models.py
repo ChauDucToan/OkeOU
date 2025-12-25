@@ -1,4 +1,3 @@
-from unicodedata import category
 from flask_login import UserMixin
 from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
 from enum import Enum as GenericEnum

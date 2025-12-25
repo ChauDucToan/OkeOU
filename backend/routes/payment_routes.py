@@ -104,14 +104,14 @@ def return_ipn(method, payment_type):
         strategy = PaymentStrategyFactory.get_strategy(method_name=method, payment_type=payment_type)
         strategy.process_payment(data)
         # Xử lý thêm để hiện giao diện kêt quả thanh toán
-        # if request.method == 'GET':
-        #     return render_template('xxx', data=data)
+        if request.method == 'GET':
+            return render_template('payment_result.html', data=data)
         return jsonify({'msg': 'Thanh toán thành công'}), 204
     except Exception as e:
         print(e)
         # Tng tự
-        # if request.method == 'GET':
-        # return render_template('xxx', data=data)
+        if request.method == 'GET':
+            return render_template('payment_result.html', data=data)
         return jsonify({'err_msg': "Lỗi hệ thống!!!"}), 500
 
 
