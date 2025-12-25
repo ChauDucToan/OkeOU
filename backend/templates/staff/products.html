@@ -155,7 +155,7 @@ Trang chủ
                             <h4 class="card-title">{{ p.name }}</h4>
                             <p class="card-text">Số lượng: {{ p.amount }} {{ p.unit }}</p>
                             <p class="card-text">Giá: {{ '{:,.0f}'.format(p.price) }} VND</p>
-                            <button class="btn btn-danger"
+                            <button class="btn btn-danger {{ 'disabled' if p.active == false }}"
                                     onclick="addToOrder({{ ss.id }}, {{ p.id }}, '{{ p.image }}', '{{ p.name }}', {{ p.price }})">
                                 Đặt hàng ngay
                             </button>
