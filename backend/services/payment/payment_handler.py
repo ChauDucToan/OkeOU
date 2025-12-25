@@ -47,6 +47,9 @@ class BookingHandler(PaymentHandler):
 
     def update_db(self, ref, status):
         transaction = Transaction.query.filter_by(receipt_id=ref).first()
+        if not transaction:
+            print(ref)
+            raise ValueError("Không tìm thấy giao dịch")
         transaction.status = TransactionStatus.COMPLETED if status == "COMPLETED" else TransactionStatus.FAILED
 
         try:

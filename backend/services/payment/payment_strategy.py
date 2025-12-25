@@ -286,7 +286,7 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
             return {'payUrl': None, 'err_msg': str(e)}
 
     def verify_payment(self, data):
-        data = "|".join([
+        raw_data = "|".join([
             data["appid"],
             data["apptransid"],
             data["pmcid"],
@@ -296,7 +296,7 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
             data["status"],
         ])
 
-        mac = self.get_mac(data, self.key2)
+        mac = self.get_mac(raw_data, self.key2)
         return hmac.compare_digest(mac, data['checksum'])
 
     def get_payment_method(self):
@@ -304,6 +304,7 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
 
     def get_payment_status(self, data):
         ref = data['apptransid'].split('_')[1]
+        ref = str(uuid.UUID(ref))
 
         if data['status'] == '1':
             return ref, "COMPLETED"
