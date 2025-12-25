@@ -85,14 +85,16 @@ def get_bill_before_pay(session_id):
     order_details = get_order_details(session_id=session_id)
 
     total_room_fee = get_session_price(session_id, session.end_time)
+    deposit_amount = receipt.transactions[0].amount if receipt.transactions else 0.0
+    if deposit_amount > total_room_fee:
+        total_room_fee = deposit_amount
     total_order_price = receipt_detail.total_service_fee
-    sub_total = round(total_room_fee + total_order_price)
+    sub_total = total_room_fee + total_order_price
 
     user = get_users(user_id=session.user_id).first()
-    discount = round(receipt.details[0].discount_rate * sub_total)
+    discount = round(receipt_detail.discount_rate * sub_total)
     vat = round(receipt_detail.vat_rate * (sub_total - discount))
-    deposit_amount = receipt.transactions[0].amount if receipt.transactions else 0.0
-    total_amout = sub_total - discount - deposit_amount + vat
+    total_amout = sub_total - discount - deposit_amount + vat        
 
     return {
         "session_id": session_id,
