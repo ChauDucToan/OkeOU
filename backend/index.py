@@ -40,6 +40,6 @@ def load_user(pk):
 if __name__ == '__main__':
     from backend import admin
     from backend.routes import users_routes, rooms_routes, products_routes, \
-        staffs_routes, orders_routes, payment_routes, admin_routes
+        staffs_routes, orders_routes, payment_routes, admin_routes, sessions_routes
 
     app.run(debug=True)

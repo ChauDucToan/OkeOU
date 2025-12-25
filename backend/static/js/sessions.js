@@ -47,3 +47,25 @@ function pageinateSessions(page) {
     url.searchParams.set('page', page);
     window.location.href = url.toString();
 }
+
+function finishSession(session_id) {
+    fetch(`/api/payment/calculate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ session_id: session_id })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Phiên hát đã được kết thúc thành công.');
+            window.location.href = '/payment';
+        } else {
+            alert('Đã xảy ra lỗi khi kết thúc phiên hát.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Đã xảy ra lỗi khi kết thúc phiên hát.');
+    });
+}

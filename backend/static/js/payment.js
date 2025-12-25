@@ -1,5 +1,5 @@
 document.getElementById('paymentForm').addEventListener('submit', async function (e) {
-    e.preventDefault(); // Chặn form submit mặc định
+    e.preventDefault();
 
     const formData = new FormData(this);
     const method = formData.get('payment_method');
@@ -27,7 +27,7 @@ document.getElementById('paymentForm').addEventListener('submit', async function
     try {
         const response = await fetch(url, {
             method: 'POST',
-            body: formData // Gửi kèm booking_id trong body
+            body: formData
         });
 
         const data = await response.json();

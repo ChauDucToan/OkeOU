@@ -22,9 +22,23 @@ def get_session_price(session_id, end_time):
     return 0
 
 
+def begin_session(session_id):
+    session = get_sessions(session_id=session_id, status=[SessionStatus.BOOKED]).first()
+    if session:
+        session.start_time = datetime.now()
+        session.status = SessionStatus.ACTIVE
+
+        try:
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            redirect_to_error(500, f"Lỗi lưu phiên hát: {e}")
+
+
 def finish_session(session_id):
     session = get_sessions(session_id=session_id, status=[SessionStatus.ACTIVE]).first()
-    if session and not session.end_time:
+    if session:
         session.end_time = datetime.now()
         session.status = SessionStatus.FINISHED
 

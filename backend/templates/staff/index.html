@@ -28,7 +28,7 @@ Trang chủ cho nhân viên
                     {% if s.status.name == 'BOOKED' %}
                     <a href="/api/sessions/{{ s.id }}/begin_session" class="btn btn-danger">Bắt đầu phiên</a>
                     {% else %}
-                    <a href="/api/sessions/{{ s.id }}/end_session" class="btn btn-danger {{ 'disabled' if s.status.name != 'ACTIVE' }}">Kết thúc phiên</a>
+                    <a href="#" onclick="finishSession({{ s.id }})" class="btn btn-danger {{ 'disabled' if s.status.name != 'ACTIVE' }}">Kết thúc phiên</a>
                     {% endif %}
                 </div>
             </div>
@@ -71,4 +71,5 @@ Trang chủ cho nhân viên
     <div class="alert alert-danger mt-2">Không có phiên làm việc nào!</div>
     {% endif %}
 </div>
+<script src="{{ url_for('static', filename='js/sessions.js') }}"></script>
 {% endblock %}

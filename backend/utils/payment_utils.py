@@ -14,9 +14,13 @@ from backend.utils.session_utils import finish_session, get_session_price
 
 
 def create_receipt(session_id, staff_id, payment_method):
-    receipt = Receipt(session_id=session_id, staff_id=staff_id)
-    db.session.add(receipt)
-    db.session.flush()
+    receipt = Receipt.query.filter(Receipt.session_id == session_id).first()
+
+    if not receipt:
+        raise Exception("Không tìm thấy hóa đơn cho phiên hát này.")
+    
+    if receipt.details:
+        return receipt, receipt.details[0].total_room_fee + receipt.details[0].total_service_fee
 
     order = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).first()
     session = Session.query.get(session_id)
@@ -36,17 +40,17 @@ def create_receipt(session_id, staff_id, payment_method):
         db.session.add(card_usage)
 
     receipt_details = ReceiptDetails(
-        receipt_id=receipt.id,
+        id=receipt.id,
         total_room_fee=total_room_fee,
         total_service_fee=total_order_price,
         discount_rate=discount_rate,
         payment_method=payment_method
     )
 
-    db.session.add_all([receipt, receipt_details])
+    db.session.add(receipt_details)
     try:
         db.session.commit()
-        return receipt, session.deposit_amount - total_room_fee - total_order_price
+        return receipt, total_room_fee + total_order_price
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
@@ -77,7 +81,7 @@ def get_bill_before_pay(session_id):
     finish_session(session_id)
 
     receipt = get_payments(session_id=session_id).first()
-    receipt_detail = receipt.details
+    receipt_detail = receipt.details[0]
     order_details = get_order_details(session_id=session_id)
 
     total_room_fee = get_session_price(session_id, session.end_time)
@@ -85,9 +89,9 @@ def get_bill_before_pay(session_id):
     sub_total = round(total_room_fee + total_order_price)
 
     user = get_users(user_id=session.user_id).first()
-    discount = round(receipt.details.discount_rate * sub_total)
+    discount = round(receipt.details[0].discount_rate * sub_total)
     vat = round(receipt_detail.vat_rate * (sub_total - discount))
-    deposit_amount = session.deposit_amount
+    deposit_amount = receipt.transactions[0].amount if receipt.transactions else 0.0
     total_amout = sub_total - discount - deposit_amount + vat
 
     return {

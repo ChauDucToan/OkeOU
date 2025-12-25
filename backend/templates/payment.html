@@ -9,33 +9,33 @@
             id="currentSessionId"
             value="{{ bill_detail.session_id }}"
     />
-    <div class="row vh-100 bg-light">
+    <div class="row flex-grow-1 glass-effect m-4 p-2 text-white rounded">
         <div class="col-md-4 mb-4" id="invoice-area">
-            <div class="bg-white p-3 border rounded-3 d-flex flex-column min-vh-100">
+            <div class="p-3 border rounded-3 d-flex flex-column min-vh-100 glass-effect">
                 <div
                         class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3"
                 >
-                    <h6 class="text-muted mb-0">TÊN KHÁCH HÀNG</h6>
+                    <h6 class="text-primary mb-0 fs-4">TÊN KHÁCH HÀNG</h6>
                     <p class="fw-bold mb-0 text-primary">{{bill_detail.customer_name}}</p>
                 </div>
 
                 <div class="table-responsive flex-grow-1">
                     <table class="table table-sm text-end">
                         <thead>
-                        <tr class="table-light">
-                            <th class="text-start">TÊN HÀNG HÓA</th>
-                            <th>SL</th>
-                            <th>ĐƠN GIÁ</th>
-                            <th>THÀNH TIỀN</th>
+                        <tr class="table glass-effect">
+                            <th class="text-start text-white">TÊN HÀNG HÓA</th>
+                            <th class="text-white">SL</th>
+                            <th class="text-white">ĐƠN GIÁ</th>
+                            <th class="text-white">THÀNH TIỀN</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for s in bill_detail.service_details %}
                         <tr>
-                            <td class="text-start">{{s.name}}</td>
-                            <td>{{s.amount}}</td>
-                            <td>{{s.price}}</td>
-                            <td>{{s.total}}</td>
+                            <td class="text-start text-white">{{s.name}}</td>
+                            <td class="text-white">{{s.amount}}</td>
+                            <td class="text-white">{{s.price}}</td>
+                            <td class="text-white">{{s.total}}</td>
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -44,35 +44,35 @@
 
                 <div class="pt-2 border-top mt-auto">
                     <div class="d-flex justify-content-between">
-                        <p class="text-muted mb-1">Tổng dịch vụ:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.service_fee}}</p>
+                        <p class="text-white mb-1">Tổng dịch vụ:</p>
+                        <p class="fw-semibold mb-1">{{'{:,.0f}'.format(bill_detail.service_fee)}}</p>
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <p class="text-muted mb-1">Tổng tiền hát:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.room_fee}}</p>
+                        <p class="text-white mb-1">Tổng tiền hát:</p>
+                        <p class="fw-semibold mb-1">{{'{:,.0f}'.format(bill_detail.room_fee)}}</p>
                     </div>
 
-                    {% if bill_detail.discount_rate > 0 %}
+                    {% if 0 == 0 or bill_detail.discount_rate > 0 %}
                     <div class="d-flex justify-content-between">
-                        <p class="text-muted mb-1">Giảm giá KHTT:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.discount_rate}}</p>
+                        <p class="text-white mb-1">Giảm giá KHTT:</p>
+                        <p class="fw-semibold mb-1 text-danger"> {{bill_detail.discount}}% </p>
                     </div>
                     {% endif %}
 
                     <div class="d-flex justify-content-between">
-                        <p class="text-muted mb-1">Thuế VAT:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.vat_rate}}</p>
+                        <p class="text-white mb-1">Thuế VAT:</p>
+                        <p class="fw-semibold mb-1">{{'{:,.0f}'.format(bill_detail.vat)}}</p>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <p class="text-muted mb-1">Tiền cọc:</p>
-                        <p class="fw-semibold mb-1">{{bill_detail.deposit_amount}}</p>
+                        <p class="text-white mb-1">Tiền cọc:</p>
+                        <p class="fw-semibold mb-1">{{'{:,.0f}'.format(bill_detail.deposit_amount)}}</p>
                     </div>
 
                     <div class="d-flex justify-content-between border-top pt-2 mt-2">
-                        <h5 class="mb-0 text-dark">TỔNG HÓA ĐƠN:</h5>
+                        <h5 class="mb-0 text-success">TỔNG HÓA ĐƠN:</h5>
                         <h5 class="mb-0 text-danger fw-bolder">
-                            {{bill_detail.final_total}}
+                            {{'{:,.0f}'.format(bill_detail.final_total)}}
                         </h5>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="paidAmount" class="form-label text-muted small"
+                            <label for="paidAmount" class="form-label text-white small"
                             >TIỀN KHÁCH ĐƯA</label
                             >
                             <input
@@ -94,24 +94,23 @@
                             />
                         </div>
 
-                        <label class="form-label text-muted small mb-2"
+                        <label class="form-label text-white small mb-2"
                         >CHỌN TIỀN THEO MỆNH GIÁ</label
                         >
                         <div class="row g-2 mb-4">
-                            {% for denomination in [5000000, 2000000, 1000000, 500000, 200000, 100000, 50000, 20000,
-                            10000] %}
+                            {% for denomination in [500000, 200000, 100000, 50000, 20000, 10000] %}
                             <div class="col-4">
                                 <button
-                                        class="btn btn-outline-secondary w-100 btn-price"
-                                        data-value="{{ denomination }}"
+                                    class="btn btn-outline-secondary w-100 btn-price text-bold text-white"
+                                    data-value="{{ denomination }}"
                                 >
-                                    5.000.000
+                                    {{ '{:,.0f}'.format(denomination) }}
                                 </button>
                             </div>
                             {% endfor %}
                         </div>
 
-                        <label class="form-label text-muted small mt-4 mb-2"
+                        <label class="form-label text-white small mt-4 mb-2"
                         >HÌNH THỨC THANH TOÁN</label
                         >
                         <div class="d-flex flex-wrap gap-2">
@@ -131,7 +130,7 @@
                     <div class="col-md-6">
                         <div class="border rounded-3 p-3 mb-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-dark fw-bold">Còn phải thu</span>
+                                <span class="text-white fw-bold">Còn phải thu</span>
                                 <h4 class="text-success fw-bolder mb-0">
                                     {{bill_detail.final_total}}
                                 </h4>
@@ -140,7 +139,7 @@
                             <div
                                     class="d-flex justify-content-between align-items-center mt-2"
                             >
-                                <span class="text-muted">Tiền mặt</span>
+                                <span class="text-white">Tiền mặt</span>
                                 <span class="text-danger small paid-amount"
                                 ><i class="bi bi-trash"></i
                                 ></span>
@@ -150,13 +149,13 @@
                         <div class="border rounded-3 p-3 bg-light">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-dark fw-bold">Trả lại khách</span>
-                                <h3 class="fw-bolder mb-0 change-money">0,00</h3>
+                                <h3 class="fw-bolder mb-0 text-success change-money">0,00</h3>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div>
+            <div class="d-flex justify-content-end gap-2 mb-4">
                 <button class="btn btn-outline-secondary" onclick="window.print()">
                     Xuất hóa đơn
                 </button>
