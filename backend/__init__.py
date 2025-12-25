@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
-# Read the .env file in order to access to API call
 env_path = Path(__file__).resolve().parent.parent.joinpath('.env')
 load_dotenv()
 secret_key = os.getenv("CLOUDINARY_SECRET_KEY")
