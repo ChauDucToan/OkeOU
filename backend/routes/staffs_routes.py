@@ -121,6 +121,8 @@ def staff_logincheck():
         db.session.commit()
 
         return redirect('/staffs')
+    
+    return redirect('/')
 
 
 @app.route('/api/logoutcheck')

@@ -46,11 +46,18 @@
                                  class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/api/logincheck">Điểm danh</a></li>
+                            {% if current_user.is_admin %}
+                            <li><a class="dropdown-item" href="/"><i class="fa-solid fa-house"></i> Trang chủ</a></li>
+                            <li><a class="dropdown-item" href="/admin"><i class="fa-solid fa-gear"></i> Trang quản trị</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="/api/logincheck"><i class="fa-solid fa-arrow-right-to-bracket"></i> Điểm danh</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a></li>
                         </ul>
                     </li>
                     {% else %}

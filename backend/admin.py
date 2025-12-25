@@ -17,11 +17,20 @@ class ProductView(AdminView):
     column_list = [
         'name',
         'price',
-        'category_id',
+        'categories.name',
         'amount',
         'unit',
         'active'
     ]
+
+    column_labels = {
+        'name': 'Tên sản phẩm',
+        'price': 'Giá',
+        'categories.name': 'Danh mục',
+        'amount': 'Số lượng',
+        'unit': 'Đơn vị',
+        'active': 'Hoạt động'
+    }
 
     column_searchable_list = ['name']
     column_filters = ['id', 'name', 'price', 'active']
@@ -29,15 +38,36 @@ class ProductView(AdminView):
     can_export = True
 
 
+class StaffView(AdminView):
+    column_list = [
+        'name',
+        'email',
+        'phone',
+        'active',
+        'identity_card'
+    ]
+
+    column_searchable_list = ['name', 'email', 'phone']
+    column_filters = ['active']
+    page_size = app.config['PAGE_SIZE']
+
+
 class RoomView(AdminView):
     column_list = [
         'name',
         'status',
-        'room_type',
+        'type.name',
         'capacity'
     ]
 
-    column_filters = ['name', 'status', 'room_type', 'capacity']
+    column_labels = {
+        'name': 'Tên phòng',
+        'status': 'Trạng thái',
+        'type.name': 'Loại phòng',
+        'capacity': 'Sức chứa'
+    }
+
+    column_filters = ['name', 'status', 'type.name', 'capacity']
     page_size = app.config['PAGE_SIZE']
 
 
@@ -86,7 +116,7 @@ class ReturnHomeView(BaseView):
 
 admin = Admin(app=app, name='OkeOU', index_view=MyAdminIndexView())
 
-admin.add_view(AdminView(Staff, db.session))
+admin.add_view(StaffView(Staff, db.session))
 admin.add_view(RoomView(Room, db.session))
 admin.add_view(ProductView(Product, db.session))
 admin.add_view(StatsView(name="Thống kê"))

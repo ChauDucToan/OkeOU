@@ -1,3 +1,4 @@
+from unicodedata import category
 from flask_login import UserMixin
 from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
 from enum import Enum as GenericEnum
@@ -196,7 +197,7 @@ class OrderStatus(GenericEnum):
 
 class Category(BaseModel):
     name = Column(String(80), nullable=False)
-    products = relationship('Product', backref='category', lazy=True)
+    products = relationship('Product', backref='categories', lazy=True)
 
     def __str__(self):
         return self.name

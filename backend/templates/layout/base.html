@@ -22,7 +22,7 @@
 <body class="d-flex flex-column min-vh-100">
 
 {% block header %}
-{% if current_user.is_authenticated and current_user.is_staff %}
+{% if current_user.is_authenticated and (current_user.is_staff or current_user.is_admin) %}
 {% include 'layout/staff_header.html' %}
 {% else %}
 {% include 'layout/header.html' %}
