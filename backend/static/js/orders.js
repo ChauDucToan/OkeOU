@@ -1,4 +1,3 @@
-// ==================Add to Order==================
 function updateOrderBadge(total_quantity) {
     let badges = document.getElementsByClassName('order-counter')
     for (let b of badges)
@@ -37,7 +36,6 @@ function addToOrder(sessionId, id, image, name, price, amount) {
         });
 }
 
-// ==================Update Order==================
 function updateOrder(sessionId, id, obj) {
     fetch(`/api/orders/${id}`, {
         method: 'put',

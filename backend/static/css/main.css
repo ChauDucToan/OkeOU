@@ -1,6 +1,3 @@
-/* =========================================
-   1. VARIABLES & BOOTSTRAP OVERRIDES
-   ========================================= */
 :root {
     --brand-purple: #8b5cf6;
     --brand-pink: #ec4899;
@@ -25,9 +22,6 @@
     --bs-border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* =========================================
-   2. GLOBAL BASE & TYPOGRAPHY
-   ========================================= */
 body {
     font-family: 'Be Vietnam Pro', sans-serif;
     overflow-x: hidden;
@@ -45,10 +39,6 @@ body {
 .text-brand-purple {
     color: var(--brand-purple) !important;
 }
-
-/* =========================================
-   3. SHARED UTILITIES (MODULAR)
-   ========================================= */
 
 .glass-panel, .glass-effect, .login-glass-panel {
     background: var(--glass-bg);
@@ -71,11 +61,6 @@ body {
 .cursor-pointer {
     cursor: pointer;
 }
-
-/* =========================================
-   4. COMPONENTS: FORMS (Universal)
-   ========================================= */
-
 
 .form-control, .form-select, .form-control-glass {
     background-color: rgba(15, 23, 42, 0.5);
@@ -122,9 +107,6 @@ body {
     box-shadow: none;
 }
 
-/* =========================================
-   5. COMPONENTS: NAVBAR
-   ========================================= */
 .navbar {
     transition: all 0.3s ease;
     padding: 0.75rem 0;
@@ -175,9 +157,6 @@ body {
     border-top-color: rgba(255, 255, 255, 0.1);
 }
 
-/* =========================================
-   6. COMPONENTS: TABLES & CARDS
-   ========================================= */
 .table-glass {
     --bs-table-bg: transparent;
     --bs-table-color: #fff;
@@ -224,9 +203,6 @@ body {
     transition: all 0.3s;
 }
 
-/* =========================================
-   7. ANIMATIONS
-   ========================================= */
 @keyframes blob {
     0% {
         transform: translate(0px, 0px) scale(1);
@@ -276,9 +252,6 @@ body {
     animation-delay: 4s;
 }
 
-/* =========================================
-   8. DESKTOP SPECIFICS (HOVER EFFECTS)
-   ========================================= */
 @media (hover: hover) and (pointer: fine) {
     .occupied-bar:hover {
         opacity: 1;
@@ -317,9 +290,6 @@ body {
     }
 }
 
-/* =========================================
-   9. MOBILE OPTIMIZATIONS
-   ========================================= */
 @media (max-width: 991.98px) {
     .blob {
         width: 200px;

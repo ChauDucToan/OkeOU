@@ -177,34 +177,29 @@
     }
 
     @media print {
-        /* 1. Ẩn tất cả mọi thứ trên trang web */
         body * {
             visibility: hidden;
         }
 
-        /* 2. Chỉ hiện vùng hóa đơn (invoice-area) và nội dung bên trong nó */
         #invoice-area,
         #invoice-area * {
             visibility: visible;
         }
 
-        /* 3. Định vị vùng hóa đơn về góc trên cùng bên trái của khổ giấy */
         #invoice-area {
             position: absolute;
             left: 0;
             top: 0;
-            width: 100%; /* In full khổ giấy */
+            width: 100%;
             margin: 0;
             padding: 0;
-            border: none !important; /* Bỏ viền khi in */
+            border: none !important;
         }
 
-        /* 4. Tinh chỉnh giao diện in */
         .bg-light {
-            background-color: white !important; /* Bỏ nền xám */
+            background-color: white !important;
         }
 
-        /* Bootstrap class hỗ trợ in: Hiện cái cần hiện, Ẩn cái cần ẩn */
         .d-print-none {
             display: none !important;
         }
@@ -213,14 +208,10 @@
             display: block !important;
         }
 
-        /* Ẩn các nút bấm hoặc thanh cuộn nếu còn sót */
         button,
         .btn {
             display: none !important;
         }
-
-        /* Nếu in máy in nhiệt (Bill nhỏ), có thể set width cố định */
-        /* #invoice-area { width: 80mm; } */
     }
 </style>
 

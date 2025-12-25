@@ -260,12 +260,10 @@ if __name__ == '__main__':
                     start_time = datetime.combine(base_date, datetime.min.time()) + timedelta(hours=start_hour,
                                                                                               minutes=start_minute)
 
-                    # Thời lượng từ 1-5 giờ để có doanh thu đa dạng
                     duration_hours = random.randint(1, 5)
                     end_time = start_time + timedelta(hours=duration_hours)
 
                     if end_time < datetime.now():
-                        # 80% hoàn thành, 15% hủy, 5% pending cho dữ liệu trong quá khứ
                         status = random.choices(
                             [BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.PENDING],
                             weights=[80, 15, 5]
@@ -330,7 +328,7 @@ if __name__ == '__main__':
                     session_id=session.id,
                     staff_id=staff_user.id,
                     status=PaymentStatus.COMPLETED,
-                    created_date=session.end_time  # Sử dụng end_time của session
+                    created_date=session.end_time
                 )
                 receipts.append(receipt)
             else:
@@ -339,7 +337,7 @@ if __name__ == '__main__':
                     session_id=session.id,
                     staff_id=None,
                     status=PaymentStatus.COMPLETED,
-                    created_date=session.end_time  # Sử dụng end_time của session
+                    created_date=session.end_time
                 )
                 receipts.append(receipt)
 
@@ -360,7 +358,6 @@ if __name__ == '__main__':
 
         prod_ord = []
         for order in orders:
-            # Tăng số lượng đơn hàng dịch vụ để có doanh thu đa dạng
             num_orders = random.randint(2, 7)
             ordered_products = random.sample(products, k=min(num_orders, len(products)))
             for prod in ordered_products:
@@ -385,7 +382,6 @@ if __name__ == '__main__':
             room_type = RoomType.query.get(room.room_type)
             total_room_fee = room_type.hourly_price * duration
 
-            # Tính tổng phí dịch vụ cho session cụ thể này
             session_service_fee = 0.0
             for order in Order.query.filter_by(session_id=session.id).all():
                 for po in ProductOrder.query.filter_by(order_id=order.id).all():

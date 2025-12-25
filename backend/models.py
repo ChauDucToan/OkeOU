@@ -13,9 +13,6 @@ class BaseModel(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
 
-# ===========================================================
-#   User
-# ===========================================================
 class UserRole(GenericEnum):
     USER = 1
     ADMIN = 2
@@ -72,9 +69,6 @@ class StaffWorkingHour(BaseModel):
     bonus = Column(Float, default=0.0)
 
 
-# ===========================================================
-#   Application
-# ===========================================================
 class ApplicationStatus(GenericEnum):
     REJECTED = 1
     PENDING = 2
@@ -113,9 +107,6 @@ class Application(BaseModel):
         return self.full_name
 
 
-# ===========================================================
-#   Room & Device
-# ===========================================================
 class RoomStatus(GenericEnum):
     AVAILABLE = 1
     BOOKED = 2
@@ -140,9 +131,6 @@ class Room(BaseModel):
         return self.name
 
 
-# ===========================================================
-#   Booking
-# ===========================================================
 class SessionStatus(GenericEnum):
     ACTIVE = 1
     BOOKED = 2
@@ -170,11 +158,6 @@ class Booking(BaseModel):
     user = relationship('User', backref='bookings', lazy=True)
 
 
-# If the user want to transfer room then set the SessionStatus.FINISHED
-# and create new session
-#
-# To be extendable, session can be use in order table in case the customer
-# want to eat some food
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
@@ -186,9 +169,6 @@ class Session(BaseModel):
     user = relationship('User', backref='sessions', lazy=True)
 
 
-# ===========================================================
-#   Other Services (Food)
-# ===========================================================
 class OrderStatus(GenericEnum):
     PENDING = 1
     SERVED = 2
@@ -231,9 +211,6 @@ class Order(BaseModel):
     details = relationship('ProductOrder', backref='order', lazy=True)
 
 
-# ===========================================================
-#   Payments
-# ===========================================================
 class PaymentStatus(GenericEnum):
     PENDING = 1
     COMPLETED = 2
