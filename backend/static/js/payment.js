@@ -34,8 +34,8 @@ document.getElementById('paymentForm').addEventListener('submit', async function
 
         if (response.ok) {
             print(data)
-            if (data.order_url) {
-                window.location.href = data.order_url;
+            if (data.payUrl) {
+                window.location.href = data.payUrl;
             } else {
                 alert('Thanh toán không thành công, vui lòng thử lại');
                 window.location.href = `/booking/${formData.get('booking_id')}`;

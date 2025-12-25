@@ -127,7 +127,7 @@ Trang chủ
             {% endif %}
         </div>
         <div class="col-8">
-            <form method="get" action="/products" class="d-flex align-items-center gap-2 mt-3 mb-4">
+            <form method="get" action="/staffs/{{ ss.id }}/order" class="d-flex align-items-center gap-2 mt-3 mb-4">
                 <input class="form-control me-2 w-50" type="text" placeholder="Từ khóa" name="kw">
                 <button class="btn btn-success" type="submit">Tìm</button>
                 <div class="dropdown">
@@ -135,7 +135,7 @@ Trang chủ
                         Filter
                     </button>
                     <ul class="dropdown-menu" data-bs-theme="dark">
-                        <li><a class="dropdown-item" href="/staffs/{{ session.id }}/order">Tất cả</a></li>
+                        <li><a class="dropdown-item" href="/staffs/{{ ss.id }}/order">Tất cả</a></li>
                         {% for c in categories %}
                         <li><a class="dropdown-item" href="?category_id={{ c.id }}">{{ c }}</a></li>
                         {% endfor %}

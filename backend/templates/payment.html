@@ -91,6 +91,7 @@
                                     oninput="validateNumberOnly(this)"
                                     class="form-control form-control-lg text-end"
                                     id="paidAmount"
+                                    value="0"
                             />
                         </div>
 
@@ -215,7 +216,7 @@
     }
 </style>
 
-<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 <script>
 
@@ -227,12 +228,7 @@
         const btnPrices = document.querySelectorAll('.btn-price');
         const btnPayments = document.querySelectorAll('.btn-payment');
         const paidAmountInput = document.getElementById('paidAmount');
-        const totalAmount = {
-        {
-            bill_detail.final_total
-        }
-    }
-        ;
+        const totalAmount = {{bill_detail.final_total}};
 
         const changeMoney = document.querySelector('.change-money');
 

@@ -278,7 +278,8 @@ class ZaloPayPaymentStrategy(PaymentStrategy):
 
             response = requests.post(self.endpoint + "/create", json=inputData)
             if response.status_code == 200:
-                return response.json()
+                payUrl = response.json().get("order_url")
+                return {"payUrl": payUrl}
             else:
                 return {'payUrl': None, 'err_msg': response.text}
         except Exception as e:
