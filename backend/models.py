@@ -64,9 +64,13 @@ class Staff(User):
 
 class StaffWorkingHour(BaseModel):
     login_date = Column(DateTime, default=datetime.now)
-    logout_date = Column(DateTime, CheckConstraint('logout_date > login_date'))
+    logout_date = Column(DateTime)
     staff_id = Column(Integer, ForeignKey(Staff.id), nullable=False)
     bonus = Column(Float, default=0.0)
+
+    __table_args__ = (
+        CheckConstraint('logout_date > login_date', name='chk_logout_date'),
+    )
 
 
 class ApplicationStatus(GenericEnum):
@@ -147,8 +151,8 @@ class BookingStatus(GenericEnum):
 class Booking(BaseModel):
     booking_date = Column(DateTime, default=datetime.now)
     scheduled_start_time = Column(DateTime, nullable=False)
-    scheduled_end_time = Column(DateTime, CheckConstraint('scheduled_end_time > scheduled_start_time'), nullable=False)
-    head_count = Column(Integer, CheckConstraint('head_count > 0 and head_count <= 15'), default=1, nullable=False)
+    scheduled_end_time = Column(DateTime, nullable=False)
+    head_count = Column(Integer, default=1, nullable=False)
     status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
     deposit_amount = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
@@ -157,16 +161,34 @@ class Booking(BaseModel):
     room = relationship('Room', backref='bookings', lazy=True)
     user = relationship('User', backref='bookings', lazy=True)
 
+    __table_args__ = (
+        CheckConstraint(
+            'scheduled_end_time > scheduled_start_time',
+            name='chk_booking_time_order'
+        ),
+        CheckConstraint(
+            'head_count > 0 AND head_count <= 15',
+            name='chk_booking_head_count'
+        ),
+    )
+
 
 class Session(BaseModel):
     start_time = Column(DateTime, default=datetime.now)
-    end_time = Column(DateTime, CheckConstraint('end_time > start_time'))
+    end_time = Column(DateTime)
     status = Column(Enum(SessionStatus), default=SessionStatus.ACTIVE)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
     room = relationship('Room', backref='sessions', lazy=True)
     user = relationship('User', backref='sessions', lazy=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            'end_time > start_time',
+            name='chk_session_time_order'
+        ),
+    )
 
 
 class OrderStatus(GenericEnum):
