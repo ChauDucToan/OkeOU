@@ -1,11 +1,12 @@
+from datetime import datetime, timedelta
 from flask import redirect, request
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 
 from backend import app, db
-from backend.daos.revenue_daos import revenue_by_product, revenue_by_room_name, revenue_by_room_type, revenue_by_time
-from backend.models import Order, OrderStatus, Room, Product, Staff
+from backend.daos.revenue_daos import get_staffs_working_hours, get_top_customers, revenue_by_product, revenue_by_room_name, revenue_by_room_type, revenue_by_time
+from backend.models import Order, OrderStatus, Room, Product, Session, Staff, StaffWorkingHour
 
 
 class AdminView(ModelView):
@@ -85,14 +86,20 @@ class MyAdminIndexView(AdminIndexView):
     @expose('/')
     def index(self):
         pending_count = Order.query.filter(Order.status == OrderStatus.PENDING).count()
-        return self.render('admin/index.html', pending_count=pending_count)
 
+        active_session = Session.query.filter(Session.status == 'ACTIVE').count()
 
-class StatsView(BaseView):
-    @expose('/')
-    def index(self):
-        return self.render('admin/stats.html')
+        today = datetime.now().date()
+        tomorrow = today + timedelta(days=1)
+        staff_today = Staff.query.filter(StaffWorkingHour.logout_date < tomorrow,
+                                        StaffWorkingHour.login_date >= today).join(StaffWorkingHour).count()
 
+        top_employees = get_staffs_working_hours()
+        top_customers = get_top_customers()
+
+        return self.render('admin/index.html', pending_count=pending_count, active_session=active_session, 
+                           staff_today=staff_today, top_employees=top_employees, top_customers=top_customers)
+    
     @expose('/time')
     def time_stats(self):
         period = request.args.get('period')
@@ -100,10 +107,6 @@ class StatsView(BaseView):
                            revenue_by_room_type=revenue_by_room_type(period),
                            revenue_by_product=revenue_by_product(period),
                            revenue_by_time=revenue_by_time(period))
-
-    def is_accessible(self) -> bool:
-        return current_user.is_authenticated and current_user.is_admin
-
 
 class ReturnHomeView(BaseView):
     @expose('/')
@@ -119,6 +122,5 @@ admin = Admin(app=app, name='OkeOU', index_view=MyAdminIndexView())
 admin.add_view(StaffView(Staff, db.session))
 admin.add_view(RoomView(Room, db.session))
 admin.add_view(ProductView(Product, db.session))
-admin.add_view(StatsView(name="Thống kê"))
 admin.add_view(LogoutView(name='Logout'))
 admin.add_view(ReturnHomeView(name='Return to Home'))

@@ -4,7 +4,7 @@ import uuid
 
 from backend import app, db
 from backend.models import Booking, BookingStatus, Category, Order, OrderStatus, PaymentStatus, Product, ProductOrder, \
-    Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, User, UserRole, Staff, Session
+    Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, StaffWorkingHour, User, UserRole, Staff, Session
 from backend.utils.general_utils import hash_password
 
 if __name__ == '__main__':
@@ -33,7 +33,7 @@ if __name__ == '__main__':
             role=UserRole.ADMIN
         )
 
-        dummy_users = []
+        dummy_staffs = []
         for k in range(10):
             staff_user = Staff(
                 name='staff',
@@ -44,8 +44,9 @@ if __name__ == '__main__':
                 identity_card=str(random.randint(100000000, 999999999)),
                 role=UserRole.STAFF
             )
-            dummy_users.append(staff_user)
+            dummy_staffs.append(staff_user)
 
+        dummy_users = []
         for k in range(30):
             u_name = f'khachhang{k}'
             u = User(
@@ -59,7 +60,27 @@ if __name__ == '__main__':
             dummy_users.append(u)
 
         all_customers = [default_user] + dummy_users
-        db.session.add_all(all_customers + [admin_user])
+        db.session.add_all(all_customers + [admin_user] + dummy_staffs)
+        db.session.commit()
+
+        staff_working_hours = []
+        for staff_user in dummy_staffs:
+            for day_offset in range(-30, 1):
+                work_date = current_time.date() + timedelta(days=day_offset)
+                start_hour = random.randint(8, 10)
+                end_hour = random.randint(17, 20)
+
+                start_time = datetime.combine(work_date, datetime.min.time()) + timedelta(hours=start_hour)
+                end_time = datetime.combine(work_date, datetime.min.time()) + timedelta(hours=end_hour)
+
+                working_hour = StaffWorkingHour(
+                    staff_id=staff_user.id,
+                    login_date=start_time,
+                    logout_date=end_time
+                )
+                staff_working_hours.append(working_hour)
+
+        db.session.add_all(staff_working_hours)
         db.session.commit()
 
         rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)
@@ -327,8 +348,8 @@ if __name__ == '__main__':
             if session.status == SessionStatus.FINISHED:
                 receipt = Receipt(
                     id=id,
+                    staff_id=random.choice(dummy_staffs).id,
                     session_id=session.id,
-                    staff_id=staff_user.id,
                     status=PaymentStatus.COMPLETED,
                     created_date=session.end_time
                 )

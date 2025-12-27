@@ -1,7 +1,7 @@
 from flask_login import current_user
 from backend.daos.session_daos import get_sessions
 from backend.models import Receipt, ReceiptDetails, Session, TransactionStatus
-from backend import db, app
+from backend import db
 from backend.daos.user_daos import get_users
 from backend.models import LoyalCustomer, CustomerCardUsage, OrderStatus, Order, Transaction
 from sqlalchemy.exc import IntegrityError
@@ -15,12 +15,13 @@ from backend.utils.session_utils import get_session_price
 
 def create_receipt(session_id, staff_id, payment_method):
     receipt = Receipt.query.filter(Receipt.session_id == session_id).first()
+    receipt.staff_id = staff_id
 
     if not receipt:
         raise Exception("Không tìm thấy hóa đơn cho phiên hát này.")
     
     if receipt.detail:
-        return receipt, receipt.detail.total_room_fee + receipt.detail.total_service_fee
+        return receipt
 
     order = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).first()
     session = Session.query.get(session_id)

@@ -257,7 +257,7 @@ class PaymentMethod(GenericEnum):
 class Receipt(BaseModel):
     id = Column(String(100), primary_key=True)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
-    staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
+    staff_id = Column(Integer, ForeignKey(Staff.id), default=2)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
 
     created_date = Column(DateTime, default=datetime.now)

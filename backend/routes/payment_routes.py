@@ -1,6 +1,6 @@
 from backend import app
 from flask import render_template, request, jsonify, session, redirect
-from flask_login import current_user, login_required
+from flask_login import current_user
 from backend.daos.room_daos import load_rooms
 from backend.daos.session_daos import get_sessions
 from backend.daos.payment_daos import count_payments
@@ -42,7 +42,9 @@ def calculate_payment():
         return jsonify({'err_msg': 'Không tìm thấy phiên hát đang hoạt động'}), 404
 
     bill = create_receipt(session_id=session_id, staff_id=current_user.id, payment_method=PaymentMethod.CASH)
+    print(bill.__dict__)
     bill_detail = get_bill_before_pay(bill.session_id)
+    print(bill_detail)
     finish_session(curr_session.id)
 
     session['bill_detail'] = bill_detail
