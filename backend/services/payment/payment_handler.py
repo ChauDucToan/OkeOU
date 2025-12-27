@@ -6,6 +6,7 @@ from backend.models import PaymentStatus, Receipt, Transaction, TransactionStatu
 
 from backend.utils import payment_utils
 from backend.daos import session_daos
+from backend.utils.session_utils import finish_session
 
 
 class PaymentHandler(ABC):
@@ -64,6 +65,7 @@ class CheckoutHandler(PaymentHandler):
         receipt_id = Receipt.query.filter(Receipt.session_id == session_id).first().id
         payment_utils.update_transaction_ref(id=receipt_id, ref=ref, amount = bill_detail['final_total'])
         amount = bill_detail['final_total']
+        finish_session(session_id)
         return amount
 
     def get_payment_status(self, status):

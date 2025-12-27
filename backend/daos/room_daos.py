@@ -1,5 +1,6 @@
-from backend.models import Room
-from backend import app
+from sqlalchemy import select
+from backend.models import Room, RoomType
+from backend import app, db
 
 
 def get_rooms(room_id=None, status=None, kw=None):
@@ -31,4 +32,5 @@ def count_rooms(status=None, kw=None):
 
 
 def get_room_price(room_id):
-    return Room.query.get(room_id).type.hourly_price
+    price = select(RoomType.hourly_price).select_from(Room).join(RoomType).where(Room.id == room_id)
+    return db.session.execute(price).scalar() or 0

@@ -1,15 +1,15 @@
+from sqlalchemy import func, select
 from backend.models import Order, OrderStatus, Session, SessionStatus, ProductOrder, Product
-from backend import db
+from backend import db, app
 
 
 def get_order_price(order_id):
-    order = Order.query.get(order_id)
-    if order:
-        total_price = 0
-        for detail in order.details:
-            total_price += detail.amount * detail.price_at_time
-        return total_price
-    return 0
+    total_price = db.session.query(
+        func.sum(ProductOrder.amount * ProductOrder.price_at_time)
+    ).filter(
+        ProductOrder.order_id == order_id
+    ).scalar()
+    return total_price or 0
 
 
 def get_verify_session(user_id):
@@ -60,16 +60,29 @@ def stats_order(order):
 
 
 def get_order_details(session_id):
-    orders = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).all()
+    orders = select(
+        Product.name,
+        ProductOrder.amount,
+        ProductOrder.price_at_time,
+        (ProductOrder.amount * ProductOrder.price_at_time).label('total')
+    ).select_from(ProductOrder
+    ).join(Order, Order.id == ProductOrder.order_id
+    ).join(Product, ProductOrder.product_id == Product.id
+    ).where(Order.session_id == session_id, Order.status == OrderStatus.SERVED)
+
+    total = db.session.execute(orders).all()
+
     order_details = []
-    for order in orders:
-        for detail in order.details:
-            total_price = detail.amount * detail.price_at_time
-            order_details.append({
-                "name": detail.product.name,
-                "amount": detail.amount,
-                "price": detail.price_at_time,
-                "total": total_price
-            })
+    for detail in total:
+        order_details.append({
+            "name": detail.name,
+            "amount": detail.amount,
+            "price": detail.price_at_time,
+            "total": detail.total
+        })
 
     return order_details
+
+if __name__ == "__main__":
+    with app.app_context():
+        print(get_order_details(1321))

@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
+from sqlalchemy.orm import backref
 from enum import Enum as GenericEnum
 from datetime import datetime
 from sqlalchemy.orm import relationship
@@ -158,8 +159,8 @@ class Booking(BaseModel):
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
-    room = relationship('Room', backref='bookings', lazy=True)
-    user = relationship('User', backref='bookings', lazy=True)
+    room = relationship('Room', backref=backref('bookings', uselist=False), uselist=False, lazy=True)
+    user = relationship('User', backref=backref('bookings', uselist=False), uselist=False, lazy=True)
 
     __table_args__ = (
         CheckConstraint(
@@ -180,8 +181,8 @@ class Session(BaseModel):
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
 
-    room = relationship('Room', backref='sessions', lazy=True)
-    user = relationship('User', backref='sessions', lazy=True)
+    room = relationship('Room', backref=backref('sessions', uselist=False), uselist=False, lazy=True)
+    user = relationship('User', backref=backref('sessions', uselist=False), uselist=False, lazy=True)
 
     __table_args__ = (
         CheckConstraint(
@@ -231,6 +232,7 @@ class Order(BaseModel):
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
     details = relationship('ProductOrder', backref='order', lazy=True)
+    session = relationship('Session', backref='orders', lazy=True, uselist=False)
 
 
 class PaymentStatus(GenericEnum):
@@ -259,7 +261,8 @@ class Receipt(BaseModel):
     status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
 
     created_date = Column(DateTime, default=datetime.now)
-    details = relationship('ReceiptDetails', backref='receipt', lazy=True)
+    detail = relationship('ReceiptDetails', uselist=False, backref='receipt', lazy=True)
+    session = relationship('Session', backref=backref('receipt', uselist= False), lazy=True, uselist=False)
     transactions = relationship('Transaction', backref='receipt', lazy=True)
 
 

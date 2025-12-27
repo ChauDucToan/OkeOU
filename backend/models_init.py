@@ -17,7 +17,7 @@ if __name__ == '__main__':
         print(def_name, def_password)
 
         default_user = User(
-            name=def_name,
+            name="Vãng lai",
             username=def_name,
             password=hash_password(def_password),
             phone='0123456789',
@@ -33,18 +33,20 @@ if __name__ == '__main__':
             role=UserRole.ADMIN
         )
 
-        staff_user = Staff(
-            name='staff',
-            username='staff',
-            password=hash_password('okeou'),
-            phone='4545454545',
-            email='staff@ou.edu.vn',
-            identity_card='0123456789123',
-            role=UserRole.STAFF
-        )
-
         dummy_users = []
-        for k in range(5):
+        for k in range(10):
+            staff_user = Staff(
+                name='staff',
+                username=f'staff{k}',
+                password=hash_password('okeou'),
+                phone=f'09123456{random.randint(10,99)}',
+                email=f'staff{k}@ou.edu.vn',
+                identity_card=str(random.randint(100000000, 999999999)),
+                role=UserRole.STAFF
+            )
+            dummy_users.append(staff_user)
+
+        for k in range(30):
             u_name = f'khachhang{k}'
             u = User(
                 name=f'Khách Hàng {k}',
@@ -57,7 +59,7 @@ if __name__ == '__main__':
             dummy_users.append(u)
 
         all_customers = [default_user] + dummy_users
-        db.session.add_all(all_customers + [admin_user, staff_user])
+        db.session.add_all(all_customers + [admin_user])
         db.session.commit()
 
         rt_standard = RoomType(name="Phòng Thường", hourly_price=125000)

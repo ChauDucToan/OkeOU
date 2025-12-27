@@ -1,16 +1,16 @@
 from flask_login import current_user
-from backend.daos.payment_daos import get_payments
 from backend.daos.session_daos import get_sessions
 from backend.models import Receipt, ReceiptDetails, Session, TransactionStatus
-from backend import db
+from backend import db, app
 from backend.daos.user_daos import get_users
 from backend.models import LoyalCustomer, CustomerCardUsage, OrderStatus, Order, Transaction
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 from backend.utils.order_utils import get_order_details, get_order_price
 from backend.utils.room_utils import reset_room_status
-from backend.utils.session_utils import finish_session, get_session_price
+from backend.utils.session_utils import get_session_price
 
 
 def create_receipt(session_id, staff_id, payment_method):
@@ -19,8 +19,8 @@ def create_receipt(session_id, staff_id, payment_method):
     if not receipt:
         raise Exception("Không tìm thấy hóa đơn cho phiên hát này.")
     
-    if receipt.details:
-        return receipt, receipt.details[0].total_room_fee + receipt.details[0].total_service_fee
+    if receipt.detail:
+        return receipt, receipt.detail.total_room_fee + receipt.detail.total_service_fee
 
     order = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).first()
     session = Session.query.get(session_id)
@@ -50,7 +50,7 @@ def create_receipt(session_id, staff_id, payment_method):
     db.session.add(receipt_details)
     try:
         db.session.commit()
-        return receipt, total_room_fee + total_order_price
+        return receipt
     except IntegrityError as ie:
         db.session.rollback()
         raise Exception(str(ie.orig))
@@ -84,25 +84,35 @@ def update_transaction_ref(id, ref, amount):
 
 
 def get_bill_before_pay(session_id):
-    session = get_sessions(session_id=session_id).first()
-    finish_session(session_id)
-
-    receipt = get_payments(session_id=session_id).first()
-    receipt_detail = receipt.details[0]
-    order_details = get_order_details(session_id=session_id)
-
+    session = Session.query.options(
+        joinedload(Session.user),
+        joinedload(Session.room),
+        joinedload(Session.receipt).joinedload(Receipt.detail),
+        joinedload(Session.receipt).subqueryload(Receipt.transactions)
+    ).filter(
+        Session.id == session_id
+    ).first()
+    
+    receipt = session.receipt
+    receipt_detail = receipt.detail
+    user = session.user
     total_room_fee = get_session_price(session_id, session.end_time)
-    deposit_amount = receipt.transactions[0].amount if receipt.transactions else 0.0
+
+    deposit_amount = 0.0
+    if receipt.transactions:
+        deposit_amount = sum(t.amount for t in receipt.transactions if t.status == TransactionStatus.COMPLETED)
+
     if deposit_amount > total_room_fee:
         total_room_fee = deposit_amount
+
     total_order_price = receipt_detail.total_service_fee
     sub_total = total_room_fee + total_order_price
 
-    user = get_users(user_id=session.user_id).first()
     discount = round(receipt_detail.discount_rate * sub_total)
     vat = round(receipt_detail.vat_rate * (sub_total - discount))
-    total_amout = sub_total - discount - deposit_amount + vat        
+    total_amount = sub_total - discount - deposit_amount + vat
 
+    order_details = get_order_details(session_id)
     return {
         "session_id": session_id,
         "customer_name": user.name,
@@ -115,7 +125,7 @@ def get_bill_before_pay(session_id):
         "service_details": order_details,
         "discount": discount,
         "vat": vat,
-        "final_total": round(total_amout, 0)
+        "final_total": round(total_amount, 0)
     }
 
 
