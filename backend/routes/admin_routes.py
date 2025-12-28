@@ -3,6 +3,8 @@ from backend.utils.general_utils import user_role_required
 from backend import app, db
 from flask import jsonify, redirect, send_from_directory
 
+from backend.utils.jobs_utils import update_job_application_count
+
 
 @app.route('/api/admin/serve_all')
 @user_role_required([UserRole.ADMIN])
@@ -39,7 +41,8 @@ def update_application_status(app_id, action):
         msg = f'Đã từ chối hồ sơ của {application.full_name}'
     else:
         msg = 'Hành động không hợp lệ'
-        
+    
+    update_job_application_count(application.job_id)
     db.session.commit()
     
     return redirect('/admin/applications')
