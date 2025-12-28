@@ -4,7 +4,7 @@ import uuid
 
 from backend import app, db
 from backend.models import Application, ApplicationStatus, Booking, BookingStatus, Category, Job, Order, OrderStatus, PaymentStatus, Product, ProductOrder, \
-    Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, StaffWorkingHour, User, UserRole, Staff, Session
+    Receipt, ReceiptDetails, Room, RoomStatus, RoomType, SessionStatus, StaffApplication, StaffWorkingHour, User, UserRole, Staff, Session
 from backend.utils.general_utils import hash_password
 
 if __name__ == '__main__':
@@ -33,14 +33,199 @@ if __name__ == '__main__':
             role=UserRole.ADMIN
         )
 
+        job_waiter = Job(
+            title="Nhân viên Phục vụ phòng hát",
+            description="Order đồ uống, trái cây, hướng dẫn khách sử dụng thiết bị, dọn dẹp phòng sau khi khách về. Có thể làm xoay ca.",
+            target_quantity=10,
+            hired_quantity=2,
+            min_salary=5000000.0,
+            max_salary=7000000.0,
+            is_active=True,
+            deadline=datetime.now() + timedelta(days=30)
+        )
+
+        job_tech = Job(
+            title="Kỹ thuật viên Âm thanh & IT",
+            description="Bảo trì hệ thống loa, mic, cập nhật bài hát mới vào đầu máy. Xử lý sự cố kỹ thuật khi khách đang hát.",
+            target_quantity=2,
+            hired_quantity=0,
+            min_salary=8000000.0,
+            max_salary=12000000.0,
+            is_active=True,
+            deadline=datetime.now() + timedelta(days=15)
+        )
+
+        job_reception = Job(
+            title="Nhân viên Lễ tân & Thu ngân",
+            description="Tiếp đón khách, sắp xếp phòng (booking), in hóa đơn và thanh toán tiền giờ/dịch vụ.",
+            target_quantity=3,
+            hired_quantity=1,
+            min_salary=6000000.0,
+            max_salary=9000000.0,
+            is_active=True,
+            deadline=datetime.now() + timedelta(days=20)
+        )
+
+        job_security = Job(
+            title="Nhân viên Bảo vệ & Giữ xe",
+            description="Trông giữ xe máy/ô tô cho khách, đảm bảo an ninh quán.",
+            target_quantity=2,
+            hired_quantity=2,
+            min_salary=5000000.0,
+            max_salary=6000000.0,
+            is_active=False,
+            deadline=datetime.now() - timedelta(days=5)
+        )
+
+        db.session.add(job_waiter)
+        db.session.add(job_tech)
+        db.session.add(job_reception)
+        db.session.add(job_security)
+        db.session.commit()
+
+        apps = [
+            Application(
+                job_id=job_waiter.id,
+                full_name="Nguyễn Văn An",
+                email="nguyenvanan@gmail.com",
+                phone="0909123456",
+                cv_file="cv_nguyenvanan.pdf",
+                status=ApplicationStatus.PENDING,
+                submit_date=datetime.now() - timedelta(days=1)
+            ),
+            Application(
+                job_id=job_tech.id,
+                full_name="Trần Công Nghệ",
+                email="tech.tran@gmail.com",
+                phone="0988776655",
+                cv_file="portfolio_trancong.pdf",
+                status=ApplicationStatus.PENDING,
+                submit_date=datetime.now() - timedelta(hours=4)
+            ),
+            Application(
+                job_id=job_reception.id,
+                full_name="Phạm Thị Chảnh",
+                email="phamchanh@outlook.com",
+                phone="0999888777",
+                cv_file="cv_phamthi.pdf",
+                status=ApplicationStatus.REJECTED,
+                submit_date=datetime.now() - timedelta(days=10)
+            )
+        ]
+
+        approved_apps = [
+            Application(
+                job_id=job_waiter.id,
+                full_name="Lê Thị Bưởi",
+                email="lethibuoi@yahoo.com",
+                phone="0912345678",
+                cv_file="cv_lethibuoi.docx",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=5)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Nguyễn Văn Hòa",
+                email="nguyenvanhoa@gmail.com",
+                phone="0903123456",
+                cv_file="cv_nguyenvanhoa.pdf",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=4)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Trần Thị Mai",
+                email="tranthimai@gmail.com",
+                phone="0911222333",
+                cv_file="cv_tranthimai.pdf",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=6)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Phạm Quốc Bảo",
+                email="phamquocbao@gmail.com",
+                phone="0988777666",
+                cv_file="cv_phamquocbao.docx",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=3)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Lý Thanh Tâm",
+                email="lythanhtam@yahoo.com",
+                phone="0934556677",
+                cv_file="cv_lythanhtam.pdf",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=7)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Võ Minh Trí",
+                email="vominhtri@gmail.com",
+                phone="0978111222",
+                cv_file="cv_vominhtri.docx",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=2)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Đặng Thị Hồng",
+                email="dangthihong@gmail.com",
+                phone="0945667788",
+                cv_file="cv_dangthihong.pdf",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=8)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Bùi Gia Khánh",
+                email="buigiakhanh@gmail.com",
+                phone="0967001122",
+                cv_file="cv_buigiakhanh.docx",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=1)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Hoàng Thị Ngọc",
+                email="hoangthingoc@yahoo.com",
+                phone="0922334455",
+                cv_file="cv_hoangthingoc.pdf",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=9)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Ngô Tuấn Anh",
+                email="ngotuananh@gmail.com",
+                phone="0909888777",
+                cv_file="cv_ngotuananh.docx",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=10)
+            ),
+            Application(
+                job_id=job_waiter.id,
+                full_name="Phan Thị Lan",
+                email="phanthilan@gmail.com",
+                phone="0915666777",
+                cv_file="cv_phanthilan.pdf",
+                status=ApplicationStatus.APPROVED,
+                submit_date=datetime.now() - timedelta(days=5)
+            )
+        ]
+
+        db.session.add_all(apps + approved_apps)
+        db.session.commit()
+
         dummy_staffs = []
-        for k in range(10):
+        for idx, app in enumerate(approved_apps):
             staff_user = Staff(
-                name='staff',
-                username=f'staff{k}',
+                name=app.full_name,
+                username=f'staff{idx}',
                 password=hash_password('okeou'),
-                phone=f'09123456{random.randint(10,99)}',
-                email=f'staff{k}@ou.edu.vn',
+                phone=app.phone,
+                email=app.email,
                 identity_card=str(random.randint(100000000, 999999999)),
                 role=UserRole.STAFF
             )
@@ -62,6 +247,16 @@ if __name__ == '__main__':
         all_customers = [default_user] + dummy_users
         db.session.add_all(all_customers + [admin_user] + dummy_staffs)
         db.session.commit()
+
+        for staff in dummy_staffs:
+            staff_app = next((a for a in approved_apps if a.email == staff.email), None)
+            if staff_app:
+                staff_application = StaffApplication(
+                    id=staff.id,
+                    application_id=staff_app.id,
+                    hire_date=current_time - timedelta(days=random.randint(1, 3))
+                )
+                db.session.add(staff_application)
 
         staff_working_hours = []
         for staff_user in dummy_staffs:
@@ -418,96 +613,4 @@ if __name__ == '__main__':
             receipt_details_list.append(receipt_details)
 
         db.session.add_all(receipt_details_list)
-        db.session.commit()
-        
-        job_waiter = Job(
-            title="Nhân viên Phục vụ phòng hát",
-            description="Order đồ uống, trái cây, hướng dẫn khách sử dụng thiết bị, dọn dẹp phòng sau khi khách về. Có thể làm xoay ca.",
-            target_quantity=10,
-            hired_quantity=2,
-            min_salary=5000000.0,
-            max_salary=7000000.0,
-            is_active=True,
-            deadline=datetime.now() + timedelta(days=30)
-        )
-
-        job_tech = Job(
-            title="Kỹ thuật viên Âm thanh & IT",
-            description="Bảo trì hệ thống loa, mic, cập nhật bài hát mới vào đầu máy. Xử lý sự cố kỹ thuật khi khách đang hát.",
-            target_quantity=2,
-            hired_quantity=0,
-            min_salary=8000000.0,
-            max_salary=12000000.0,
-            is_active=True,
-            deadline=datetime.now() + timedelta(days=15)
-        )
-
-        job_reception = Job(
-            title="Nhân viên Lễ tân & Thu ngân",
-            description="Tiếp đón khách, sắp xếp phòng (booking), in hóa đơn và thanh toán tiền giờ/dịch vụ.",
-            target_quantity=3,
-            hired_quantity=1,
-            min_salary=6000000.0,
-            max_salary=9000000.0,
-            is_active=True,
-            deadline=datetime.now() + timedelta(days=20)
-        )
-
-        job_security = Job(
-            title="Nhân viên Bảo vệ & Giữ xe",
-            description="Trông giữ xe máy/ô tô cho khách, đảm bảo an ninh quán.",
-            target_quantity=2,
-            hired_quantity=2,
-            min_salary=5000000.0,
-            max_salary=6000000.0,
-            is_active=False,
-            deadline=datetime.now() - timedelta(days=5)
-        )
-
-        db.session.add(job_waiter)
-        db.session.add(job_tech)
-        db.session.add(job_reception)
-        db.session.add(job_security)
-        db.session.commit()
-
-        apps = [
-            Application(
-                job_id=job_waiter.id,
-                full_name="Nguyễn Văn An",
-                email="nguyenvanan@gmail.com",
-                phone="0909123456",
-                cv_file="cv_nguyenvanan.pdf",
-                status=ApplicationStatus.PENDING,
-                submit_date=datetime.now() - timedelta(days=1)
-            ),
-            Application(
-                job_id=job_waiter.id,
-                full_name="Lê Thị Bưởi",
-                email="lethibuoi@yahoo.com",
-                phone="0912345678",
-                cv_file="cv_lethibuoi.docx",
-                status=ApplicationStatus.APPROVED,
-                submit_date=datetime.now() - timedelta(days=5)
-            ),
-            Application(
-                job_id=job_tech.id,
-                full_name="Trần Công Nghệ",
-                email="tech.tran@gmail.com",
-                phone="0988776655",
-                cv_file="portfolio_trancong.pdf",
-                status=ApplicationStatus.PENDING,
-                submit_date=datetime.now() - timedelta(hours=4)
-            ),
-            Application(
-                job_id=job_reception.id,
-                full_name="Phạm Thị Chảnh",
-                email="phamchanh@outlook.com",
-                phone="0999888777",
-                cv_file="cv_phamthi.pdf",
-                status=ApplicationStatus.REJECTED,
-                submit_date=datetime.now() - timedelta(days=10)
-            )
-        ]
-
-        db.session.add_all(apps)
         db.session.commit()

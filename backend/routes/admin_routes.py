@@ -1,5 +1,7 @@
-from backend.models import Application, ApplicationStatus, Order, OrderStatus, UserRole
-from backend.utils.general_utils import user_role_required
+import random
+from datetime import datetime
+from backend.models import Application, ApplicationStatus, Order, OrderStatus, Staff, StaffApplication, UserRole
+from backend.utils.general_utils import hash_password, user_role_required
 from backend import app, db
 from flask import jsonify, redirect, send_from_directory
 
@@ -18,6 +20,48 @@ def serve_all_orders():
         return jsonify({
             'status': 200,
             'message': "All pending orders have been marked as served.",
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 500, 'message': str(e)}), 500
+    
+
+@app.route('/api/admin/serve_application_all')
+@user_role_required([UserRole.ADMIN])
+def serve_all_applications():
+    try:
+        approved_applications = Application.query.filter(
+                                                Application.status == ApplicationStatus.APPROVED,
+                                                ~Application.staff.has() 
+                                            ).all()
+        
+        for app in approved_applications:
+            staff_user = Staff(
+                name=app.full_name,
+                username=f'staff{random.randint(30, 1000)}',
+                password=hash_password('okeou'),
+                phone=app.phone,
+                email=app.email,
+                identity_card=str(random.randint(100000000, 999999999)),
+                role=UserRole.STAFF
+            )
+            db.session.add(staff_user)
+        db.session.flush()
+
+        for app in approved_applications:
+            staff_user = Staff.query.filter(Staff.email == app.email).first()
+            if staff_user:
+                staff_application = StaffApplication(
+                    id=staff_user.id,
+                    application_id=app.id,
+                    hire_date=datetime.now()
+                )
+                db.session.add(staff_application)
+        db.session.commit()
+
+        return jsonify({
+            'status': 200,
+            'message': "All applications have been processed.",
         }), 200
     except Exception as e:
         db.session.rollback()

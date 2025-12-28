@@ -98,10 +98,15 @@ class MyAdminIndexView(AdminIndexView):
         top_customers = get_top_customers()
 
         application_count = Application.query.filter(Application.status == ApplicationStatus.PENDING).count()
+        pending_approved_application_count = Application.query.filter(
+                                                Application.status == ApplicationStatus.APPROVED,
+                                                ~Application.staff.has() 
+                                            ).count()
 
         return self.render('admin/index.html', pending_count=pending_count, active_session=active_session, 
                            staff_today=staff_today, top_employees=top_employees, top_customers=top_customers,
-                           application_count=application_count)
+                           application_count=application_count,
+                           pending_approved_application_count=pending_approved_application_count)
     
     @expose('/time')
     def time_stats(self):

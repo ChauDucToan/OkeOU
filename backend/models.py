@@ -1,3 +1,4 @@
+from email.mime import application
 from flask_login import UserMixin
 from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
 from sqlalchemy.orm import backref
@@ -61,6 +62,7 @@ class Staff(User):
     id = Column(Integer, ForeignKey(User.id), primary_key=True)
     identity_card = Column(String(50), nullable=False)
     working_history = relationship('StaffWorkingHour', backref='staff', lazy=True)
+    applications = relationship('StaffApplication', backref='staff', lazy=True)
 
 
 class StaffWorkingHour(BaseModel):
@@ -72,6 +74,12 @@ class StaffWorkingHour(BaseModel):
     __table_args__ = (
         CheckConstraint('logout_date > login_date', name='chk_logout_date'),
     )
+
+
+class StaffApplication(BaseModel):
+    id = Column(Integer, ForeignKey(Staff.id), primary_key=True)
+    application_id = Column(Integer, ForeignKey('application.id'), primary_key=True)
+    hire_date = Column(DateTime, default=datetime.now)
 
 
 class ApplicationStatus(GenericEnum):
@@ -118,6 +126,7 @@ class Application(BaseModel):
 
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING)
     submit_date = Column(DateTime, default=datetime.now)
+    staff = relationship('StaffApplication', backref='application', lazy=True, uselist=False)
 
     def __str__(self):
         return self.full_name

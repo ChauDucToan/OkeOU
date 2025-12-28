@@ -5,8 +5,8 @@
 {% if current_user.is_authenticated and current_user.is_admin %}
 <h1 class="text-center text-success">Kiểm tra hệ thống</h1>
 <div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card text-white bg-info mb-3 h-100">
+    <div class="col mb-4">
+        <div class="card text-white bg-primary mb-3 h-100">
             <div class="card-header">Đơn hàng đang chờ xử lý</div>
             <div class="card-body">
                 <h5 class="card-title">{{ pending_count }}</h5>
@@ -15,7 +15,21 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-4">
+    <div class="col mb-4">
+        <div class="card text-white bg-primary mb-3 h-100">
+            <div class="card-header">Đơn ứng tuyển chưa có nhân viên</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ pending_approved_application_count }}</h5>
+                <p class="card-text">Số đơn ứng tuyển đang chờ chuyển thành nhân viên trong hệ thống.</p>
+                <button onclick="servedApplicationAll()" class="btn btn-light">Chuyển thành nhân viên</button>
+            </div>
+        </div>
+    </div>
+</div>
+<hr/>
+<h1 class="text-center text-success">Tổng quan</h1>
+<div class="row">
+    <div class="col-md-4 mb-4">
         <div class="card text-white bg-info mb-3 h-100">
             <div class="card-header">Các phiên hát đang hoạt động</div>
             <div class="card-body">
@@ -25,7 +39,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-4">
+    <div class="col-md-4 mb-4">
         <div class="card text-white bg-info mb-3 h-100">
             <div class="card-header">Số lượng nhân viên</div>
             <div class="card-body">
@@ -35,7 +49,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-4">
+    <div class="col-md-4 mb-4">
         <div class="card text-white bg-info mb-3 h-100">
             <div class="card-header">Số lượng đơn ứng tuyển</div>
             <div class="card-body">
