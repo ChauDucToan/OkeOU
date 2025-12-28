@@ -10,4 +10,5 @@ def update_job_application_count(job_id):
             status=ApplicationStatus.APPROVED
         ).count()
         job.hired_quantity = application_count
+        job.target_quantity = max(job.target_quantity - application_count, 0)
         db.session.commit()

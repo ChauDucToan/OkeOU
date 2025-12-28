@@ -80,8 +80,7 @@ def update_application_status(app_id, action):
         application.status = ApplicationStatus.APPROVED
     elif action == 'reject':
         application.status = ApplicationStatus.REJECTED
-    
-    update_job_application_count(application.job_id)
     db.session.commit()
-    
+
+    update_job_application_count(application.job_id)
     return redirect('/admin/applications')
