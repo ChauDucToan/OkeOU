@@ -11,6 +11,7 @@ from sqlalchemy.orm import joinedload
 from backend.utils.order_utils import get_order_details, get_order_price
 from backend.utils.room_utils import reset_room_status
 from backend.utils.session_utils import get_session_price
+from backend.utils.user_utils import add_loyal_customer
 
 
 def create_receipt(session_id, staff_id, payment_method):
@@ -39,6 +40,8 @@ def create_receipt(session_id, staff_id, payment_method):
         )
 
         db.session.add(card_usage)
+    else:
+        add_loyal_customer(user.id)
 
     receipt_details = ReceiptDetails(
         id=receipt.id,

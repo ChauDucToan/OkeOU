@@ -6,7 +6,7 @@ from flask_login import current_user, logout_user
 
 from backend import app, db
 from backend.daos.revenue_daos import get_staffs_working_hours, get_top_customers, revenue_by_product, revenue_by_room_name, revenue_by_room_type, revenue_by_time
-from backend.models import Order, OrderStatus, Room, Product, Session, Staff, StaffWorkingHour
+from backend.models import Application, ApplicationStatus, Job, Order, OrderStatus, Room, Product, Session, Staff, StaffWorkingHour
 
 
 class AdminView(ModelView):
@@ -97,8 +97,11 @@ class MyAdminIndexView(AdminIndexView):
         top_employees = get_staffs_working_hours()
         top_customers = get_top_customers()
 
+        application_count = Application.query.filter(Application.status == ApplicationStatus.PENDING).count()
+
         return self.render('admin/index.html', pending_count=pending_count, active_session=active_session, 
-                           staff_today=staff_today, top_employees=top_employees, top_customers=top_customers)
+                           staff_today=staff_today, top_employees=top_employees, top_customers=top_customers,
+                           application_count=application_count)
     
     @expose('/time')
     def time_stats(self):
@@ -107,6 +110,45 @@ class MyAdminIndexView(AdminIndexView):
                            revenue_by_room_type=revenue_by_room_type(period),
                            revenue_by_product=revenue_by_product(period),
                            revenue_by_time=revenue_by_time(period))
+    
+    @expose('/applications')
+    def applications(self):
+        apps = Application.query.order_by(Application.submit_date.desc()).all()
+        return self.render('admin/applications.html', apps=apps)
+    
+
+    @expose('/applications/<int:app_id>')
+    def cv_details(self, app_id):
+        application = Application.query.get(app_id)
+        print(application.__dict__)
+        return self.render('admin/cv_details.html', app=application)
+    
+
+class JobModelView(ModelView):
+    can_view_details = True
+    column_searchable_list = [
+        'title',
+        'description'
+    ]
+
+    column_filters = [
+        'is_active',
+        'min_salary',
+        'max_salary'
+    ]
+
+    column_labels = {
+        'title': 'Tiêu đề',
+        'min_salary': 'Lương từ',
+        'max_salary': 'Lương đến',
+        'hired_quantity': 'Đã tuyển',
+        'target_quantity': 'Mục tiêu',
+        'deadline': 'Hạn nộp',
+        'is_active':'Đang hiển thị',
+        'applications': 'CV Ứng tuyển'
+    }
+
+    column_list = ('title', 'min_salary', 'max_salary', 'hired_quantity', 'deadline', 'is_active')
 
 class ReturnHomeView(BaseView):
     @expose('/')
@@ -122,5 +164,6 @@ admin = Admin(app=app, name='OkeOU', index_view=MyAdminIndexView())
 admin.add_view(StaffView(Staff, db.session))
 admin.add_view(RoomView(Room, db.session))
 admin.add_view(ProductView(Product, db.session))
+admin.add_view(JobModelView(Job, db.session))
 admin.add_view(LogoutView(name='Logout'))
 admin.add_view(ReturnHomeView(name='Return to Home'))

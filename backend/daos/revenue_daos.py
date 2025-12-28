@@ -1,4 +1,3 @@
-from re import U
 from sqlalchemy import desc, func
 
 from backend.models import Product, Room, Session, SessionStatus, Order, \

@@ -5,7 +5,7 @@
 {% if current_user.is_authenticated and current_user.is_admin %}
 <h1 class="text-center text-success">Kiểm tra hệ thống</h1>
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 mb-4">
         <div class="card text-white bg-info mb-3 h-100">
             <div class="card-header">Đơn hàng đang chờ xử lý</div>
             <div class="card-body">
@@ -15,7 +15,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6 mb-4">
         <div class="card text-white bg-info mb-3 h-100">
             <div class="card-header">Các phiên hát đang hoạt động</div>
             <div class="card-body">
@@ -25,13 +25,23 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6 mb-4">
         <div class="card text-white bg-info mb-3 h-100">
             <div class="card-header">Số lượng nhân viên</div>
             <div class="card-body">
                 <h5 class="card-title">{{ staff_today }}</h5>
                 <p class="card-text">Số lượng nhân viên làm trong ngày.</p>
                 <a href="/admin/staff/" class="btn btn-light">Kiểm tra chi tiết</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card text-white bg-info mb-3 h-100">
+            <div class="card-header">Số lượng đơn ứng tuyển</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ application_count }}</h5>
+                <p class="card-text">Số lượng đơn ứng tuyển trong hệ thống.</p>
+                <a href="/admin/applications" class="btn btn-light">Kiểm tra chi tiết</a>
             </div>
         </div>
     </div>
@@ -65,8 +75,8 @@
 <div class="container-fluid mb-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="panel shadow-sm mb-3">
-                <div class="panel-heading bg-secondary text-white p-1 rounded-top">
+            <div class="panel panel-primary shadow-sm mb-3">
+                <div class="panel-heading bg-primary text-white p-1 rounded-top">
                     <h3 class="panel-title text-center">Top 20 Nhân Viên Xuất Sắc Nhất</h3>
                 </div>
                 <div class="panel-body" style="max-height: 500px; overflow-y: scroll;">
@@ -97,8 +107,8 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="panel shadow-sm mb-3">
-                <div class="panel-heading bg-secondary text-white p-1 rounded-top">
+            <div class="panel panel-primary shadow-sm mb-3">
+                <div class="panel-heading bg-primary text-white p-1 rounded-top">
                     <h3 class="panel-title text-center">Top 10 Khách Hàng</h3>
                 </div>
                 <div class="panel-body" style="max-height: 500px; overflow-y: scroll;">

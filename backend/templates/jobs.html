@@ -1,0 +1,54 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+Danh sách việc làm - Tuyển dụng
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4 glass-effect p-3 rounded-3 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-primary border-start border-4 border-primary ps-3 mb-0">Tất cả vị trí đang mở</h2>
+            <p class="text-white mt-2 ms-3">Tìm kiếm cơ hội nghề nghiệp phù hợp với bạn</p>
+        </div>
+        <div class="col-md-4 text-end">
+        </div>
+    </div>
+
+    <div class="row">
+        {% for job in jobs %}
+        <div class="col-md-4 mb-4">
+            <div class="card transition-card glass-effect rounded-4 text-white h-100 shadow-sm border-0 {{ 'border border-warning' if job.is_active == False else '' }}">
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="card-title fw-bold text-white mb-3">{{ job.title }}</h5>
+                    <div class="mb-3">
+                        <span class="badge bg-light text-primary border border-primary-subtle me-2">
+                            <i class="fas fa-money-bill-wave me-1"></i> {{ job.salary_range }}
+                        </span>
+                        <span class="badge bg-light text-secondary border">
+                            <i class="fas fa-users me-1"></i> {{ job.target_quantity }} người
+                        </span>
+                    </div>
+                    <p class="card-text text-white mb-4">{{ job.description[:90] }}{% if job.description|length > 90 %}...{% endif %}</p>
+                    
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-info">
+                            <i class="far fa-clock me-1"></i> {{ job.deadline.strftime('%d/%m/%Y') }}
+                        </small>
+                        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-outline-primary btn-sm stretched-link {{ 'disabled' if job.is_active == False else '' }}">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="py-5 glass-effect rounded-3">
+                <i class="fas fa-briefcase fa-3x text-white mb-3"></i>
+                <p class="h5 text-white">Hiện tại chưa có vị trí nào đang tuyển dụng.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

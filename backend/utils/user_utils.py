@@ -12,7 +12,7 @@ def add_loyal_customer(user_id):
         now = datetime.now()
         start_date = datetime(now.year, now.month, 1)
         counter = get_sessions(user_id=user_id,
-                               status=SessionStatus.COMPLETED,
+                               status=[SessionStatus.FINISHED],
                                start_date=start_date).count()
         if counter >= 10:
             loyal = LoyalCustomer(id=user_id)

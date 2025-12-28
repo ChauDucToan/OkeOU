@@ -85,16 +85,27 @@ class Job(BaseModel):
     description = Column(String(500), nullable=True)
     target_quantity = Column(Integer, default=1)
     hired_quantity = Column(Integer, default=0)
-    salary_range = Column(String(100))
+    min_salary = Column(Float, nullable=True)
+    max_salary = Column(Float, nullable=True)
 
     is_active = Column(Boolean, default=True)
     created_date = Column(DateTime, default=datetime.now)
     deadline = Column(DateTime)
 
-    applications = relationship('Application', backref='jobs', lazy=True)
+    applications = relationship('Application', backref='job', lazy=True)
+
+    @property
+    def salary_range(self):
+        min = '{:,.0f}'.format(self.min_salary)
+        max = '{:,.0f}'.format(self.max_salary)
+        return f"{min} - {max}"
 
     def __str__(self):
         return self.title
+    
+    __table_args__ = (
+        CheckConstraint('min_salary <= max_salary', name='chk_salary_range'),
+    )
 
 
 class Application(BaseModel):
@@ -257,7 +268,7 @@ class PaymentMethod(GenericEnum):
 class Receipt(BaseModel):
     id = Column(String(100), primary_key=True)
     session_id = Column(Integer, ForeignKey(Session.id), nullable=False, unique=True)
-    staff_id = Column(Integer, ForeignKey(Staff.id), default=2)
+    staff_id = Column(Integer, ForeignKey(Staff.id), nullable=True)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
 
     created_date = Column(DateTime, default=datetime.now)

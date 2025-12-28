@@ -1,0 +1,89 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+Trang tuyển dụng cá nhân
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-3 rounded glass-effect mb-4">
+                <li class="breadcrumb-item text-decoration-none"><a href="/jobs">Trang chủ</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ job.title }}</li>
+                </ol>
+            </nav>
+
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
+        
+            <div class="card glass-effect shadow mb-4">
+                <div class="card-body p-5">
+                    <h2 class="fw-bold text-primary mb-3">{{ job.title }}</h2>
+                    <div class="mb-4 text-white">
+                        <span class="me-3"><i class="fas fa-money-bill-wave me-1"></i> {{ job.salary_range }}</span>
+                        <span class="me-3"><i class="fas fa-users me-1"></i> Số lượng: {{ job.target_quantity }}</span>
+                        <span><i class="far fa-calendar-alt me-1"></i> Hạn: {{ job.deadline.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    <hr>
+                    <h5 class="fw-bold mt-4">Mô tả công việc</h5>
+                    <p>{{ job.description }}</p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i> Bạn đã sẵn sàng cho thử thách này? Hãy điền thông tin bên dưới.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card glass-effect shadow mb-4" id="apply-form">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Ứng Tuyển Ngay</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" action="/jobs/{{ job.id }}">
+                        <div class="mb-3">
+                            <label class="form-label">Họ và Tên</label>
+                            <input type="text" name="full_name" class="form-control" required placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" required placeholder="email@example.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" name="phone" class="form-control" required placeholder="0909 xxx xxx">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Upload CV (PDF/DOC)</label>
+                            <input type="file" class="form-control bg-transparent text-white file-upload-blue" name="cv_file">
+                            <div class="form-text text-white">Đây là demo, file sẽ không được upload thật.</div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Gửi Hồ Sơ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .file-upload-blue::file-selector-button {
+        background-color: #0d6efd; /* Màu xanh Primary của Bootstrap */
+        color: white;
+        border: none;
+        border-right: 1px solid #0a58ca;
+        transition: all 0.2s;
+    }
+
+    .file-upload-blue:hover::file-selector-button {
+        background-color: #0b5ed7;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
