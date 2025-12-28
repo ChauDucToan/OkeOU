@@ -9,6 +9,7 @@ def get_order_price(order_id):
     ).filter(
         ProductOrder.order_id == order_id
     ).scalar()
+
     return total_price or 0
 
 
@@ -85,4 +86,9 @@ def get_order_details(session_id):
 
 if __name__ == "__main__":
     with app.app_context():
-        print(get_order_details(1321))
+        total_price = db.session.query(
+            func.sum(ProductOrder.amount * ProductOrder.price_at_time)
+        ).filter(
+            ProductOrder.order_id == 1391
+        ).scalar()
+        print(total_price)

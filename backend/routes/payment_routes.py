@@ -42,10 +42,8 @@ def calculate_payment():
         return jsonify({'err_msg': 'Không tìm thấy phiên hát đang hoạt động'}), 404
 
     bill = create_receipt(session_id=session_id, staff_id=current_user.id, payment_method=PaymentMethod.CASH)
-    print(bill.__dict__)
-    bill_detail = get_bill_before_pay(bill.session_id)
-    print(bill_detail)
     finish_session(curr_session.id)
+    bill_detail = get_bill_before_pay(bill.session_id)
 
     session['bill_detail'] = bill_detail
     return jsonify(bill_detail)

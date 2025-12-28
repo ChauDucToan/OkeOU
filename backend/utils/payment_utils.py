@@ -25,6 +25,7 @@ def create_receipt(session_id, staff_id, payment_method):
         return receipt
 
     order = Order.query.filter(Order.session_id == session_id, Order.status == OrderStatus.SERVED).first()
+    print(order)
     session = Session.query.get(session_id)
     total_room_fee = get_session_price(session_id, datetime.now())
     total_order_price = get_order_price(order.id) if order else 0.0
@@ -110,6 +111,7 @@ def get_bill_before_pay(session_id):
         total_room_fee = deposit_amount
 
     total_order_price = receipt_detail.total_service_fee
+    print(total_room_fee, total_order_price)
     sub_total = total_room_fee + total_order_price
 
     discount = round(receipt_detail.discount_rate * sub_total)
