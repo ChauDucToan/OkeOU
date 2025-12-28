@@ -24,13 +24,14 @@ if __name__ == '__main__':
             email='user@example.com',
         )
 
-        admin_user = User(
+        admin_user = Staff(
             name='admin',
             username='admin',
             password=hash_password('okeou'),
             phone='3636363636',
             email='admin@ou.edu.vn',
-            role=UserRole.ADMIN
+            role=UserRole.ADMIN,
+            identity_card='123456789'
         )
 
         job_waiter = Job(
