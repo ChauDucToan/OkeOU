@@ -34,7 +34,7 @@ def job_detail(job_id):
             file_ext = cv_file.filename.rsplit('.', 1)[1].lower()
             unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
             
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            file_path = os.path.join('static/uploads/cvs', unique_filename)
             
             cv_file.save(file_path)
 
