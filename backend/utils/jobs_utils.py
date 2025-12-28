@@ -11,4 +11,7 @@ def update_job_application_count(job_id):
         ).count()
         job.hired_quantity = application_count
         job.target_quantity = max(job.target_quantity - application_count, 0)
+
+        if job.target_quantity == 0:
+            job.is_active = False
         db.session.commit()
