@@ -340,28 +340,6 @@ if __name__ == '__main__':
         db.session.add_all([cat_food, cat_drink, cat_fruit])
         db.session.flush()
 
-        start = datetime.now()
-        end = start + timedelta(hours=12)
-        ses = Session(
-            user_id=2,
-            room_id=5,
-            start_time=start,
-            end_time=end,
-        )
-        db.session.add(ses)
-        db.session.commit()
-
-        start = datetime.now()
-        end = start + timedelta(hours=12)
-        ses = Session(
-            user_id=3,
-            room_id=6,
-            start_time=start,
-            end_time=end,
-        )
-        db.session.add(ses)
-        db.session.commit()
-
         products_data = [
             {
                 "name": "Khoai tây chiên",

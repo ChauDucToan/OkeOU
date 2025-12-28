@@ -1,5 +1,5 @@
 from backend import app, login
-from flask import render_template, redirect, session
+from flask import render_template, redirect, request, session
 from flask_login import current_user
 from backend.daos.product_daos import load_products
 from backend.daos.room_daos import load_rooms
@@ -9,12 +9,13 @@ from backend.utils.general_utils import redirect_to_error
 
 @app.route('/error')
 def error_view():
+    next_url = request.args.get('next', '/')
     error_payload = session.pop('error_payload', None)
-
+    print(f"Error payload: {error_payload}")
     if error_payload:
         code = error_payload.get('code')
         msg = error_payload.get('msg')
-        return render_template('error.html', status_code=code, err_msg=msg)
+        return render_template('error.html', status_code=code, err_msg=msg, next=next_url)
     else:
         return redirect_to_error(200, "No error information available.")
 

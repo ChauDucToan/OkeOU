@@ -11,12 +11,13 @@ def hash_password(password: str) -> str:
     return str(hashlib.sha256(password.encode('utf-8')).hexdigest())
 
 
-def redirect_to_error(status_code: int, err_msg: str):
+def redirect_to_error(status_code: int, err_msg: str, redirect_url: str = '/'):
     session['error_payload'] = {
         'code': status_code,
         'msg': err_msg
     }
-    return redirect('/error')
+    print(f"Redirecting to error: {status_code} - {err_msg}")
+    return redirect(f'/error?next={redirect_url}')
 
 
 def user_role_required(roles):
