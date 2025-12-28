@@ -1,4 +1,3 @@
-from email.mime import application
 from flask_login import UserMixin
 from sqlalchemy import Enum, Column, String, Integer, DateTime, ForeignKey, Float, Boolean, CheckConstraint
 from sqlalchemy.orm import backref
