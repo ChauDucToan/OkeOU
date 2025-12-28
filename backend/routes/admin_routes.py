@@ -32,15 +32,10 @@ def serve_cv(filename):
 @app.route('/admin/applications/<int:app_id>/status/<string:action>', methods=['POST'])
 def update_application_status(app_id, action):
     application = Application.query.get(app_id)
-    msg = ''
     if action == 'approve':
         application.status = ApplicationStatus.APPROVED
-        msg = f'Đã duyệt hồ sơ của {application.full_name}'
     elif action == 'reject':
         application.status = ApplicationStatus.REJECTED
-        msg = f'Đã từ chối hồ sơ của {application.full_name}'
-    else:
-        msg = 'Hành động không hợp lệ'
     
     update_job_application_count(application.job_id)
     db.session.commit()
